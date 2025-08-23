@@ -1,4 +1,4 @@
-name: Build APK
+name: Build Release APK
 
 on:
   workflow_dispatch:
@@ -27,14 +27,19 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Build APK (Debug)
+      - name: Build APK (Release)
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleRelease
+
+      - name: Rename APK
+        run: |
+          mv android/app/build/outputs/apk/release/app-release.apk payment_app.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: react-native-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: payment_app
+          path: payment_app.apk
+          if-no-files-found: error
