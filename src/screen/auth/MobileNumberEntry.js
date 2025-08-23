@@ -46,6 +46,7 @@ export const MobileNumberEntry = () => {
 
         {/* Input Field */}
         <Input
+          label="Mobile Number"
           value={mobile}
           onChange={setMobile}
           placeholder="Enter 10 digit mobile number"

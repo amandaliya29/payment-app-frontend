@@ -11,6 +11,7 @@ import scaleUtils from '../utils/Responsive';
 import { Colors } from '../themes/Colors';
 
 const Input = ({
+  label,
   value,
   secureTextEntry = false,
   multiline = false,
@@ -30,7 +31,10 @@ const Input = ({
   const isPhoneInput = keyboardType === 'phone-pad';
 
   return (
-    <View>
+    <View style={{ marginBottom: scaleUtils.scaleHeight(16) }}>
+      {/* Label on top */}
+      {label ? <Text style={styles.label}>{label}</Text> : null}
+
       {/* Normal Input */}
       {!secureTextEntry && (
         <>
@@ -124,6 +128,13 @@ const Input = ({
 export default Input;
 
 const styles = StyleSheet.create({
+  label: {
+    fontSize: scaleUtils.scaleFont(14),
+    color: Colors.white,
+    fontFamily: 'Poppins-Medium',
+    marginLeft: scaleUtils.scaleWidth(4),
+    marginBottom: scaleUtils.scaleHeight(4),
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -162,7 +173,7 @@ const styles = StyleSheet.create({
     borderRadius: scaleUtils.scaleWidth(12),
     alignSelf: 'center',
     paddingHorizontal: scaleUtils.scaleWidth(12),
-    marginVertical: scaleUtils.scaleHeight(8),
+    marginBottom: scaleUtils.scaleHeight(8),
   },
   divider: {
     width: 1,
@@ -206,7 +217,7 @@ const styles = StyleSheet.create({
     borderRadius: scaleUtils.scaleWidth(12),
     fontSize: scaleUtils.scaleFont(14),
     color: Colors.white,
-    marginVertical: scaleUtils.scaleHeight(8),
+    marginBottom: scaleUtils.scaleHeight(8),
     textAlignVertical: 'center',
     includeFontPadding: false,
   },
