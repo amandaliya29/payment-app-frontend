@@ -33,13 +33,23 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease
 
-      - name: Rename APK
+      - name: Rename APK with timestamp
         run: |
-          mv android/app/build/outputs/apk/release/app-release.apk payment_app.apk
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          NEW_APK_NAME="payment_app_$TIMESTAMP.apk"
+          mv android/app/build/outputs/apk/release/app-release.apk $NEW_APK_NAME
+          echo "APK_NAME=$NEW_APK_NAME" >> $GITHUB_ENV
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: payment_app
-          path: payment_app.apk
+          name: ${{ env.APK_NAME }}
+          path: ${{ env.APK_NAME }}
           if-no-files-found: error
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.APK_NAME }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
