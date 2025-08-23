@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: scaleUtils.width * 0.9,
+    width: '100%',
     height: scaleUtils.scaleHeight(55),
     backgroundColor: Colors.secondaryBg,
     borderColor: Colors.bg,
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
   phoneContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: scaleUtils.width * 0.9,
+    width: '100%',
     height: scaleUtils.scaleHeight(45),
     backgroundColor: Colors.secondaryBg,
     borderColor: Colors.bg,
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
     width: 1,
     height: '60%',
     backgroundColor: Colors.grey,
-    marginHorizontal: scaleUtils.scaleWidth(10),
+    marginHorizontal: scaleUtils.scaleWidth(15),
   },
   replaceStyle: {
     width: scaleUtils.scaleWidth(40),
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   textInput: {
     paddingHorizontal: scaleUtils.scaleWidth(12),
     paddingVertical: 0,
-    width: scaleUtils.width * 0.9,
+    width: '100%',
     height: scaleUtils.scaleHeight(45),
     alignSelf: 'center',
     backgroundColor: Colors.secondaryBg,

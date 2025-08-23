@@ -36,10 +36,10 @@ export default Button;
 
 const styles = StyleSheet.create({
   button: {
-    width: scaleUtils.width * 0.9,
+    width: '100%',
     height: scaleUtils.scaleHeight(40),
     backgroundColor: Colors.primary,
-    borderRadius: scaleUtils.scaleWidth(8),
+    borderRadius: scaleUtils.scaleWidth(10),
     alignSelf: 'center',
     justifyContent: 'center',
     alignItems: 'center',

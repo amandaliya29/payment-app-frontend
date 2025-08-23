@@ -23,8 +23,13 @@ export const MobileNumberEntry = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={{
+          padding: scaleUtils.scaleWidth(20),
+        }}
+      >
         {/* Phone Icon */}
         <View style={styles.imagesWarperStyle}>
           <Image
@@ -104,7 +109,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.bg,
-    padding: scaleUtils.scaleWidth(20),
+    // padding: scaleUtils.scaleWidth(20),
   },
   imageStyle: {
     width: '100%',
@@ -158,6 +163,7 @@ const styles = StyleSheet.create({
     padding: scaleUtils.scaleWidth(15),
     borderRadius: scaleUtils.scaleWidth(10),
     marginTop: scaleUtils.scaleHeight(30),
+    marginBottom: scaleUtils.scaleHeight(30),
     width: '100%',
   },
   infoRow: {
