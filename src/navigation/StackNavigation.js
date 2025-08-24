@@ -2,6 +2,8 @@ import { StyleSheet, StatusBar } from 'react-native';
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 import MobileNumberEntry from '../screen/auth/MobileNumberEntry';
+import OtpVerification from '../screen/auth/OtpVerification';
+import BankLinkScreen from '../screen/bankLinking/BankLinkScreen';
 import { Colors } from '../themes/Colors';
 
 const Stack = createStackNavigator();
@@ -21,6 +23,8 @@ const StackNavigation = () => {
         }}
       >
         <Stack.Screen name="MobileNumberEntry" component={MobileNumberEntry} />
+        <Stack.Screen name="OtpVerification" component={OtpVerification} />
+        <Stack.Screen name="BankLinkScreen" component={BankLinkScreen} />
       </Stack.Navigator>
     </>
   );
