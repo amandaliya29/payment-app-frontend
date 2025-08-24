@@ -1,5 +1,5 @@
-import { useNavigation } from '@react-navigation/native';
-import React, { useState } from 'react';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import { Colors } from '../../themes/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,13 +10,23 @@ import Checkbox from '../../component/Checkbox';
 
 export const MobileNumberEntry = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+
   const [mobile, setMobile] = useState('');
   const [agree, setAgree] = useState(true);
   const [isChecked, setIsChecked] = useState(false);
 
+  // 👇 pre-fill if mobile passed in route params
+  useEffect(() => {
+    if (route.params?.mobile) {
+      setMobile(route.params.mobile);
+    }
+  }, [route.params?.mobile]);
+
   const handleProceed = () => {
     if (mobile.length === 10 && agree) {
       console.log('Proceed with mobile:', mobile);
+      navigation.navigate('OtpVerification', { mobile });
     } else {
       alert('Please enter a valid 10-digit mobile number');
     }
@@ -46,6 +56,7 @@ export const MobileNumberEntry = () => {
 
         {/* Input Field */}
         <Input
+          label="Mobile Number"
           value={mobile}
           onChange={setMobile}
           placeholder="Enter 10 digit mobile number"
@@ -79,24 +90,8 @@ export const MobileNumberEntry = () => {
             </Text>
           }
         />
-
-        <Button title="Proceed" onPress={handleProceed} loading={false} />
-
-        <View style={styles.infoBox}>
-          <View style={styles.infoRow}>
-            <Image
-              source={require('../../assets/image/appIcon/security.png')}
-              style={styles.infoIcon}
-              resizeMode="contain"
-            />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.infoTitle}>Secure & Private</Text>
-            </View>
-          </View>
-          <Text style={styles.infoText}>
-            Your mobile number is encrypted and stored securely. We never share
-            your personal information with third parties.
-          </Text>
+        <View style={{ marginBottom: scaleUtils.scaleHeight(20) }}>
+          <Button title="Proceed" onPress={handleProceed} loading={false} />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -136,7 +131,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     marginVertical: scaleUtils.scaleHeight(10),
     alignSelf: 'center',
-    marginBottom: scaleUtils.scaleHeight(30),
+    marginBottom: scaleUtils.scaleHeight(40),
   },
   validationText: {
     color: Colors.grey,

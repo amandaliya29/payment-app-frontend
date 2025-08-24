@@ -11,6 +11,7 @@ import scaleUtils from '../utils/Responsive';
 import { Colors } from '../themes/Colors';
 
 const Input = ({
+  label,
   value,
   secureTextEntry = false,
   multiline = false,
@@ -26,10 +27,47 @@ const Input = ({
   setIsSecure,
   errorText,
   style,
+  isSearch = false, // 👈 added prop for search input
+  onSearchPress,
 }) => {
   const isPhoneInput = keyboardType === 'phone-pad';
 
   return (
+    <View style={{ marginBottom: scaleUtils.scaleHeight(16) }}>
+      {/* Label on top */}
+      {label ? <Text style={styles.label}>{label}</Text> : null}
+
+      {/* Search Input */}
+      {isSearch && (
+        <View style={styles.inputContainer}>
+          <TouchableOpacity onPress={onSearchPress} style={styles.eyeWrapper}>
+            <Image
+              source={require('../assets/image/appIcon/search.png')}
+              style={{
+                width: scaleUtils.scaleWidth(16),
+                height: scaleUtils.scaleWidth(16),
+                tintColor: Colors.grey,
+              }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+          <TextInput
+            value={value}
+            onChangeText={onChange}
+            onFocus={onFocus}
+            style={[styles.insideText, style]}
+            keyboardType="default"
+            returnKeyType="search"
+            placeholder={placeholder || 'Search...'}
+            editable={editable}
+            maxLength={maxLength}
+            placeholderTextColor={placeholderTextColor || Colors.white}
+          />
+        </View>
+      )}
+
+      {/* Normal Input */}
+      {!secureTextEntry && !isSearch && (
     <View>
       {/* Normal Input */}
       {!secureTextEntry && (
@@ -82,6 +120,7 @@ const Input = ({
       )}
 
       {/* Secure Input (Password field) */}
+      {secureTextEntry && !isSearch && (
       {secureTextEntry && (
         <View style={styles.inputContainer}>
           <TextInput
@@ -124,11 +163,18 @@ const Input = ({
 export default Input;
 
 const styles = StyleSheet.create({
+  label: {
+    fontSize: scaleUtils.scaleFont(14),
+    color: Colors.white,
+    fontFamily: 'Poppins-Medium',
+    marginLeft: scaleUtils.scaleWidth(4),
+    marginBottom: scaleUtils.scaleHeight(4),
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    height: scaleUtils.scaleHeight(55),
+    height: scaleUtils.scaleHeight(45),
     backgroundColor: Colors.secondaryBg,
     borderColor: Colors.bg,
     borderWidth: 1,
@@ -162,7 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: scaleUtils.scaleWidth(12),
     alignSelf: 'center',
     paddingHorizontal: scaleUtils.scaleWidth(12),
-    marginVertical: scaleUtils.scaleHeight(8),
+    marginBottom: scaleUtils.scaleHeight(8),
   },
   divider: {
     width: 1,
@@ -206,7 +252,7 @@ const styles = StyleSheet.create({
     borderRadius: scaleUtils.scaleWidth(12),
     fontSize: scaleUtils.scaleFont(14),
     color: Colors.white,
-    marginVertical: scaleUtils.scaleHeight(8),
+    marginBottom: scaleUtils.scaleHeight(8),
     textAlignVertical: 'center',
     includeFontPadding: false,
   },
