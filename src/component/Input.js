@@ -68,9 +68,6 @@ const Input = ({
 
       {/* Normal Input */}
       {!secureTextEntry && !isSearch && (
-    <View>
-      {/* Normal Input */}
-      {!secureTextEntry && (
         <>
           {isPhoneInput ? (
             <View style={styles.phoneContainer}>
@@ -121,7 +118,6 @@ const Input = ({
 
       {/* Secure Input (Password field) */}
       {secureTextEntry && !isSearch && (
-      {secureTextEntry && (
         <View style={styles.inputContainer}>
           <TextInput
             value={value}
