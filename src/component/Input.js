@@ -27,6 +27,8 @@ const Input = ({
   setIsSecure,
   errorText,
   style,
+  isSearch = false, // 👈 added prop for search input
+  onSearchPress,
 }) => {
   const isPhoneInput = keyboardType === 'phone-pad';
 
@@ -35,8 +37,37 @@ const Input = ({
       {/* Label on top */}
       {label ? <Text style={styles.label}>{label}</Text> : null}
 
+      {/* Search Input */}
+      {isSearch && (
+        <View style={styles.inputContainer}>
+          <TouchableOpacity onPress={onSearchPress} style={styles.eyeWrapper}>
+            <Image
+              source={require('../assets/image/appIcon/search.png')}
+              style={{
+                width: scaleUtils.scaleWidth(16),
+                height: scaleUtils.scaleWidth(16),
+                tintColor: Colors.grey,
+              }}
+              resizeMode="contain"
+            />
+          </TouchableOpacity>
+          <TextInput
+            value={value}
+            onChangeText={onChange}
+            onFocus={onFocus}
+            style={[styles.insideText, style]}
+            keyboardType="default"
+            returnKeyType="search"
+            placeholder={placeholder || 'Search...'}
+            editable={editable}
+            maxLength={maxLength}
+            placeholderTextColor={placeholderTextColor || Colors.white}
+          />
+        </View>
+      )}
+
       {/* Normal Input */}
-      {!secureTextEntry && (
+      {!secureTextEntry && !isSearch && (
         <>
           {isPhoneInput ? (
             <View style={styles.phoneContainer}>
@@ -86,7 +117,7 @@ const Input = ({
       )}
 
       {/* Secure Input (Password field) */}
-      {secureTextEntry && (
+      {secureTextEntry && !isSearch && (
         <View style={styles.inputContainer}>
           <TextInput
             value={value}
@@ -139,7 +170,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    height: scaleUtils.scaleHeight(55),
+    height: scaleUtils.scaleHeight(45),
     backgroundColor: Colors.secondaryBg,
     borderColor: Colors.bg,
     borderWidth: 1,
