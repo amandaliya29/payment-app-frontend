@@ -28,6 +28,7 @@ const BankLinkScreen = () => {
       style={styles.bankItem}
       onPress={() => {
         console.log('Selected:', item.name);
+        navigation.navigate('AadhaarVerification');
       }}
     >
       <Image source={item.logo} style={styles.bankLogo} />
