@@ -53,6 +53,6 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
   disabledButton: {
-    backgroundColor: Colors.gray,
+    backgroundColor: Colors.grey,
   },
 });

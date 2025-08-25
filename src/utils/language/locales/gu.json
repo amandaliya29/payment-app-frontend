@@ -1,0 +1,38 @@
+{
+  "enter_mobile_number": "મોબાઈલ નંબર દાખલ કરો",
+  "verification_message": "અમે તમારા મોબાઈલ નંબરની પુષ્ટિ કરવા માટે ચકાસણી કોડ મોકલીશું",
+  "mobile_number_label": "મોબાઈલ નંબર",
+  "mobile_number_placeholder": "10 અંકનો મોબાઈલ નંબર દાખલ કરો",
+  "invalid_mobile_number": "અમાન્ય મોબાઈલ નંબર",
+  "validation_message": "કૃપા કરીને માન્ય 10 અંકનો મોબાઈલ નંબર દાખલ કરો",
+  "agree_terms": "હું સંમત છું",
+  "terms_conditions": "નિયમો અને શરતો",
+  "and": "અને",
+  "privacy_policy": "ગોપનીયતા નીતિ",
+  "proceed": "આગળ વધો",
+  "alert_invalid_number": "કૃપા કરીને માન્ય 10 અંકનો મોબાઈલ નંબર દાખલ કરો",
+
+  "otp_verification": "ઓટીપી ચકાસણી",
+  "verify_mobile_number": "તમારો મોબાઇલ નંબર ચકાસો",
+  "otp_sent_message": "અમે તમારા મોબાઇલ નંબર પર 6 અંકનો ચકાસણી કોડ મોકલ્યો છે",
+  "tap_edit_number": "નંબર સંપાદિત કરવા માટે ટેપ કરો",
+  "enter_otp": "ઓટીપી દાખલ કરો",
+  "verify_continue": "ચકાસો અને આગળ વધો",
+  "didnt_receive_otp": "ઓટીપી મળ્યો નથી?",
+  "resend": "ફરીથી મોકલો",
+  "alert_invalid_otp": "કૃપા કરીને માન્ય 6 અંકનો ઓટીપી દાખલ કરો",
+
+  "skip": "છોડો",
+  "link_bank_title": "તમારું બેંક એકાઉન્ટ લિંક કરો",
+  "link_bank_subtitle": "સહજ ટ્રાન્ઝેક્શન અને એકાઉન્ટ મેનેજમેન્ટ માટે તમારા બેંક એકાઉન્ટને સુરક્ષિત રીતે કનેક્ટ કરો.",
+  "search_placeholder": "અહીં શોધો...",
+  "popular_banks": "લોકપ્રિય બેંકો",
+
+  "identity_verification": "ઓળખ ચકાસણી",
+  "aadhaar_verification": "આધાર ચકાસણી",
+  "aadhaar_subtitle": "તમારી ઓળખ ચકાસવા માટે 12 અંકનો આધાર નંબર દાખલ કરો. અમે તમારી માહિતીની સુરક્ષા માટે બેંક-સ્તરની સુરક્ષા વાપરીએ છીએ.",
+  "aadhaar_label": "આધાર નંબર",
+  "aadhaar_placeholder": "XXXX XXXX XXXX",
+  "send_otp": "OTP મોકલો",
+  "aadhaar_invalid": "કૃપા કરીને માન્ય 12 અંકનો આધાર નંબર દાખલ કરો"
+}

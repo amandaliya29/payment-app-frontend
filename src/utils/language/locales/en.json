@@ -1,0 +1,38 @@
+{
+  "enter_mobile_number": "Enter Mobile Number",
+  "verification_message": "We'll send you a verification code to confirm your mobile number",
+  "mobile_number_label": "Mobile Number",
+  "mobile_number_placeholder": "Enter 10 digit mobile number",
+  "invalid_mobile_number": "Invalid mobile number",
+  "validation_message": "Please enter a valid 10-digit mobile number",
+  "agree_terms": "I agree to the",
+  "terms_conditions": "Terms & Conditions",
+  "and": "and",
+  "privacy_policy": "Privacy Policy",
+  "proceed": "Proceed",
+  "alert_invalid_number": "Please enter a valid 10-digit mobile number",
+
+  "otp_verification": "OTP Verification",
+  "verify_mobile_number": "Verify Your Mobile Number",
+  "otp_sent_message": "We've sent a 6-digit verification code to your mobile number",
+  "tap_edit_number": "Tap to edit number",
+  "enter_otp": "Enter OTP",
+  "verify_continue": "Verify & Continue",
+  "didnt_receive_otp": "Didn't receive the OTP?",
+  "resend": "Resend",
+  "alert_invalid_otp": "Please enter a valid 6-digit OTP",
+
+  "skip": "Skip",
+  "link_bank_title": "Link Your Bank Account",
+  "link_bank_subtitle": "Connect your bank account securely to enable seamless transactions and account management.",
+  "search_placeholder": "Search here...",
+  "popular_banks": "Popular Banks",
+
+  "identity_verification": "Identity Verification",
+  "aadhaar_verification": "Aadhaar Verification",
+  "aadhaar_subtitle": "Enter your 12-digit Aadhaar number to verify your identity. We use bank-level security to protect your information.",
+  "aadhaar_label": "Aadhaar Number",
+  "aadhaar_placeholder": "XXXX XXXX XXXX",
+  "send_otp": "Send OTP",
+  "aadhaar_invalid": "Please enter a valid 12-digit Aadhaar number"
+}

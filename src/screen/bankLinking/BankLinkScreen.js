@@ -14,6 +14,7 @@ import { useNavigation } from '@react-navigation/native';
 import { banks } from '../../utils/BankList';
 import Input from '../../component/Input';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import I18n from '../../utils/language/i18n';
 
 const BankLinkScreen = () => {
   const navigation = useNavigation();
@@ -48,32 +49,28 @@ const BankLinkScreen = () => {
       {/* Header */}
       <View style={styles.headerRow}>
         <TouchableOpacity>
-          <Text style={styles.skip}>Skip</Text>
+          <Text style={styles.skip}>{I18n.t('skip')}</Text>
         </TouchableOpacity>
       </View>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={{
-          padding: scaleUtils.scaleWidth(20),
-        }}
+        style={{ padding: scaleUtils.scaleWidth(20) }}
       >
-        {/* Subtitle */}
-        <Text style={styles.title}>Link Your Bank Account</Text>
-        <Text style={styles.subtitle}>
-          Connect your bank account securely to enable seamless transactions and
-          account management.
-        </Text>
+        {/* Title */}
+        <Text style={styles.title}>{I18n.t('link_bank_title')}</Text>
+        <Text style={styles.subtitle}>{I18n.t('link_bank_subtitle')}</Text>
 
+        {/* Search */}
         <Input
           isSearch
           value={search}
           onChange={setSearch}
-          placeholder="Search here..."
-          onSearchPress={() => console.log('Search Pressed:', searchText)}
+          placeholder={I18n.t('search_placeholder')}
+          onSearchPress={() => console.log('Search Pressed:', search)}
         />
 
         {/* Popular Banks */}
-        <Text style={styles.sectionTitle}>Popular Banks</Text>
+        <Text style={styles.sectionTitle}>{I18n.t('popular_banks')}</Text>
         <FlatList
           data={filteredBanks}
           scrollEnabled={false}
@@ -95,7 +92,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.bg,
-    // padding: scaleUtils.scaleWidth(16),
   },
   headerRow: {
     flexDirection: 'row',
@@ -121,32 +117,8 @@ const styles = StyleSheet.create({
     fontSize: scaleUtils.scaleFont(13),
     fontFamily: 'Poppins-Regular',
     color: Colors.grey,
-    alignItems: 'center',
     textAlign: 'center',
     lineHeight: scaleUtils.scaleHeight(16),
-  },
-  searchWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: scaleUtils.scaleHeight(20),
-    backgroundColor: Colors.secondaryBg,
-    borderRadius: scaleUtils.scaleWidth(12),
-    paddingHorizontal: scaleUtils.scaleWidth(10),
-    height: scaleUtils.scaleHeight(45),
-  },
-  searchIcon: {
-    width: scaleUtils.scaleWidth(16),
-    height: scaleUtils.scaleWidth(16),
-    tintColor: Colors.grey,
-    resizeMode: 'contain',
-    marginRight: scaleUtils.scaleWidth(8),
-  },
-  searchInput: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    borderWidth: 0,
-    marginBottom: 0,
-    paddingHorizontal: 0,
   },
   sectionTitle: {
     marginTop: scaleUtils.scaleHeight(10),

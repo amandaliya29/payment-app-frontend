@@ -27,14 +27,22 @@ const Input = ({
   setIsSecure,
   errorText,
   style,
-  isSearch = false, // 👈 added prop for search input
+  isSearch = false,
   onSearchPress,
 }) => {
   const isPhoneInput = keyboardType === 'phone-pad';
 
+  // Aadhaar formatter
+  const handleAadhaarChange = text => {
+    let cleaned = text.replace(/\D/g, ''); // digits only
+    cleaned = cleaned.slice(0, 12); // max 12 digits
+    let formatted = cleaned.replace(/(\d{4})(?=\d)/g, '$1 '); // insert space
+    onChange(formatted);
+  };
+
   return (
     <View style={{ marginBottom: scaleUtils.scaleHeight(16) }}>
-      {/* Label on top */}
+      {/* Label */}
       {label ? <Text style={styles.label}>{label}</Text> : null}
 
       {/* Search Input */}
@@ -95,7 +103,14 @@ const Input = ({
             <>
               <TextInput
                 value={value}
-                onChangeText={onChange}
+                onChangeText={text => {
+                  // Aadhaar formatting
+                  if (keyboardType === 'numeric' && maxLength === 12) {
+                    handleAadhaarChange(text);
+                  } else {
+                    onChange(text);
+                  }
+                }}
                 onFocus={onFocus}
                 style={[styles.textInput, style]}
                 keyboardType={keyboardType || 'default'}
@@ -104,7 +119,11 @@ const Input = ({
                 multiline={multiline}
                 editable={editable}
                 numberOfLines={multiline ? 5 : 1}
-                maxLength={maxLength}
+                maxLength={
+                  keyboardType === 'numeric' && maxLength === 12
+                    ? 14
+                    : maxLength
+                } // Aadhaar needs 14 (12 digits + 2 spaces)
                 textAlignVertical={multiline ? 'top' : 'center'}
                 placeholderTextColor={placeholderTextColor || Colors.white}
               />
@@ -116,7 +135,7 @@ const Input = ({
         </>
       )}
 
-      {/* Secure Input (Password field) */}
+      {/* Secure Input (Password) */}
       {secureTextEntry && !isSearch && (
         <View style={styles.inputContainer}>
           <TextInput

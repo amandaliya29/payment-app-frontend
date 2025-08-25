@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 import Header from '../../component/Header';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
@@ -7,31 +7,31 @@ import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../component/Button';
 import Input from '../../component/Input';
+import I18n from '../../utils/language/i18n';
 
 const AadhaarVerification = () => {
   const navigation = useNavigation();
   const [aadhaar, setAadhaar] = useState('');
 
   const handleSendOtp = () => {
-    if (aadhaar.length === 12) {
+    if (aadhaar.length === 14) {
       navigation.navigate('OtpVerification', { aadhaar });
     } else {
-      alert('Please enter a valid 12-digit Aadhaar number');
+      Alert.alert(I18n.t('aadhaar_invalid'));
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <Header
-        title="Identity Verification"
+        title={I18n.t('identity_verification')}
         onBack={() => navigation.goBack()}
       />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          padding: scaleUtils.scaleWidth(20),
-        }}
+        contentContainerStyle={{ padding: scaleUtils.scaleWidth(20) }}
       >
         {/* Shield Icon */}
         <View style={styles.iconWrapper}>
@@ -44,38 +44,27 @@ const AadhaarVerification = () => {
         </View>
 
         {/* Title */}
-        <Text style={styles.title}>Aadhaar Verification</Text>
-        <Text style={styles.subtitle}>
-          Enter your 12-digit Aadhaar number to verify your identity. We use
-          bank-level security to protect your information.
-        </Text>
+        <Text style={styles.title}>{I18n.t('aadhaar_verification')}</Text>
+        <Text style={styles.subtitle}>{I18n.t('aadhaar_subtitle')}</Text>
 
         {/* Aadhaar Input */}
         <Input
-          label="Aadhaar Number"
+          label={I18n.t('aadhaar_label')}
           value={aadhaar}
           onChange={setAadhaar}
           keyboardType="numeric"
           maxLength={12}
-          placeholder="XXXX XXXX XXXX"
+          placeholder={I18n.t('aadhaar_placeholder')}
           placeholderTextColor={Colors.grey}
         />
 
-        {/* Security Note
-        <View style={styles.securityBox}>
-          <Image
-            source={require('../../assets/image/appIcon/security.png')}
-            style={styles.lockIcon}
-          />
-          <Text style={styles.securityText}>
-            Secure & Confidential: Your Aadhaar data is encrypted and never
-            stored
-          </Text>
-        </View> */}
-
         {/* Send OTP Button */}
         <View style={{ marginVertical: scaleUtils.scaleHeight(8) }}>
-          <Button title="Send OTP" onPress={handleSendOtp} />
+          <Button
+            title={I18n.t('send_otp')}
+            onPress={handleSendOtp}
+            disabled={aadhaar.length !== 14}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -118,45 +107,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     textAlign: 'center',
     paddingHorizontal: scaleUtils.scaleWidth(10),
-  },
-  securityBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.secondary,
-    borderRadius: scaleUtils.scaleWidth(10),
-    padding: scaleUtils.scaleWidth(12),
-    marginTop: scaleUtils.scaleHeight(20),
-    borderWidth: 1,
-    borderColor: Colors.primary,
-  },
-  lockIcon: {
-    width: scaleUtils.scaleWidth(20),
-    height: scaleUtils.scaleWidth(20),
-    tintColor: Colors.white,
-    marginRight: scaleUtils.scaleWidth(10),
-    resizeMode: 'contain',
-  },
-  securityText: {
-    color: Colors.white,
-    fontSize: scaleUtils.scaleFont(12),
-    fontFamily: 'Poppins-Regular',
-    flex: 1,
-    flexWrap: 'wrap',
-  },
-  footer: {
-    marginTop: scaleUtils.scaleHeight(30),
-  },
-  footerTitle: {
-    color: Colors.white,
-    fontSize: scaleUtils.scaleFont(14),
-    fontFamily: 'Poppins-SemiBold',
-    marginBottom: scaleUtils.scaleHeight(10),
-  },
-  bullet: {
-    color: Colors.grey,
-    fontSize: scaleUtils.scaleFont(13),
-    fontFamily: 'Poppins-Regular',
-    marginBottom: scaleUtils.scaleHeight(6),
   },
 });
 
