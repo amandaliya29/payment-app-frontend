@@ -14,6 +14,8 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../component/Button';
 import OTPInput from '../../component/OTPInput';
+import { useTranslation } from 'react-i18next'; // 👈 added
+import i18n from '../../utils/language/i18n'; // 👈 added
 
 const OtpVerification = () => {
   const navigation = useNavigation();
@@ -22,12 +24,13 @@ const OtpVerification = () => {
   const [code, setCode] = useState('');
   const [timer, setTimer] = useState(30);
 
+  const { t } = useTranslation(); // 👈 translation hook
+
   useEffect(() => {
     if (timer > 0) {
       const interval = setInterval(() => {
         setTimer(prev => prev - 1);
       }, 1000);
-
       return () => clearInterval(interval);
     }
   }, [timer]);
@@ -37,7 +40,7 @@ const OtpVerification = () => {
       console.log('Entered OTP:', code);
       navigation.navigate('BankLinkScreen');
     } else {
-      alert('Please enter a valid 6-digit OTP');
+      alert(t('alert_invalid_otp')); // 👈 translated
     }
   };
 
@@ -50,7 +53,10 @@ const OtpVerification = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title="OTP Verification" onBack={() => navigation.goBack()} />
+      <Header
+        title={t('otp_verification')}
+        onBack={() => navigation.goBack()}
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -58,17 +64,14 @@ const OtpVerification = () => {
           padding: scaleUtils.scaleWidth(20),
         }}
       >
-        <Text style={styles.title}>Verify Your Mobile Number</Text>
-        <Text style={styles.subtitle}>
-          We've sent a 6-digit verification code to your mobile number
-        </Text>
+        <Text style={styles.title}>{t('verify_mobile_number')}</Text>
+        <Text style={styles.subtitle}>{t('otp_sent_message')}</Text>
 
-        <Text style={styles.edit}>Tap to edit number</Text>
+        <Text style={styles.edit}>{t('tap_edit_number')}</Text>
         <View style={styles.numberEditTextStyle}>
           <Text style={styles.phone}>+91 {mobile}</Text>
           <TouchableOpacity
             onPress={() => navigation.replace('MobileNumberEntry', { mobile })}
-            // style={styles.imageStyleWarper}
           >
             <Image
               style={styles.editIcon}
@@ -77,17 +80,21 @@ const OtpVerification = () => {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.enterOtp}>Enter OTP</Text>
+        <Text style={styles.enterOtp}>{t('enter_otp')}</Text>
         <View style={{ alignSelf: 'center' }}>
           <OTPInput code={code} setCode={setCode} length={6} />
         </View>
 
         <View style={{ marginVertical: scaleUtils.scaleHeight(16) }}>
-          <Button title="Verify & Continue" onPress={handleVerify} />
+          <Button
+            title={t('verify_continue')}
+            onPress={handleVerify}
+            disabled={code.length !== 6}
+          />
         </View>
 
         <Text style={styles.resend}>
-          Didn't receive the OTP?{' '}
+          {t('didnt_receive_otp')}{' '}
           <Text
             style={[
               styles.link,
@@ -95,7 +102,7 @@ const OtpVerification = () => {
             ]}
             onPress={handleResend}
           >
-            Resend
+            {t('resend')}
           </Text>
         </Text>
 
@@ -112,7 +119,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.bg,
-    // paddingHorizontal: scaleUtils.scaleWidth(20),
   },
   title: {
     fontSize: scaleUtils.scaleFont(20),
@@ -140,7 +146,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     color: Colors.grey,
     marginTop: scaleUtils.scaleHeight(20),
-    // marginBottom: scaleUtils.scaleHeight(20),
     alignSelf: 'center',
   },
   resend: {
@@ -169,14 +174,6 @@ const styles = StyleSheet.create({
     marginBottom: scaleUtils.scaleHeight(8),
     columnGap: scaleUtils.scaleWidth(10),
   },
-  imageStyleWarper: {
-    width: scaleUtils.scaleWidth(30),
-    height: scaleUtils.scaleWidth(30),
-    borderRadius: scaleUtils.scaleWidth(30),
-    backgroundColor: Colors.secondary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   editIcon: {
     width: scaleUtils.scaleWidth(13),
     height: scaleUtils.scaleWidth(13),
@@ -189,7 +186,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     fontFamily: 'Poppins-SemiBold',
     marginTop: scaleUtils.scaleHeight(26),
-    // marginBottom: scaleUtils.scaleHeight(6),
   },
 });
 

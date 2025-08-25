@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+    marginVertical: scaleUtils.scaleHeight(4),
   },
   backButton: {
     position: 'absolute',
