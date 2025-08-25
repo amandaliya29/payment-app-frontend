@@ -1,0 +1,38 @@
+{
+  "enter_mobile_number": "मोबाइल नंबर दर्ज करें",
+  "verification_message": "हम आपके मोबाइल नंबर की पुष्टि करने के लिए एक सत्यापन कोड भेजेंगे",
+  "mobile_number_label": "मोबाइल नंबर",
+  "mobile_number_placeholder": "10 अंकों का मोबाइल नंबर दर्ज करें",
+  "invalid_mobile_number": "अमान्य मोबाइल नंबर",
+  "validation_message": "कृपया एक मान्य 10 अंकों का मोबाइल नंबर दर्ज करें",
+  "agree_terms": "मैं सहमत हूँ",
+  "terms_conditions": "नियम और शर्तें",
+  "and": "और",
+  "privacy_policy": "गोपनीयता नीति",
+  "proceed": "आगे बढ़ें",
+  "alert_invalid_number": "कृपया एक मान्य 10 अंकों का मोबाइल नंबर दर्ज करें",
+
+  "otp_verification": "ओटीपी सत्यापन",
+  "verify_mobile_number": "अपने मोबाइल नंबर की पुष्टि करें",
+  "otp_sent_message": "हमने आपके मोबाइल नंबर पर 6 अंकों का सत्यापन कोड भेजा है",
+  "tap_edit_number": "नंबर संपादित करने के लिए टैप करें",
+  "enter_otp": "ओटीपी दर्ज करें",
+  "verify_continue": "सत्यापित करें और जारी रखें",
+  "didnt_receive_otp": "ओटीपी प्राप्त नहीं हुआ?",
+  "resend": "पुनः भेजें",
+  "alert_invalid_otp": "कृपया एक मान्य 6 अंकों का ओटीपी दर्ज करें",
+
+  "skip": "छोड़ें",
+  "link_bank_title": "अपना बैंक खाता लिंक करें",
+  "link_bank_subtitle": "निर्बाध लेन-देन और खाता प्रबंधन सक्षम करने के लिए अपने बैंक खाते को सुरक्षित रूप से कनेक्ट करें।",
+  "search_placeholder": "यहां खोजें...",
+  "popular_banks": "लोकप्रिय बैंक",
+
+  "identity_verification": "पहचान सत्यापन",
+  "aadhaar_verification": "आधार सत्यापन",
+  "aadhaar_subtitle": "अपनी पहचान सत्यापित करने के लिए 12 अंकों का आधार नंबर दर्ज करें। हम आपकी जानकारी की सुरक्षा के लिए बैंक-स्तरीय सुरक्षा का उपयोग करते हैं।",
+  "aadhaar_label": "आधार नंबर",
+  "aadhaar_placeholder": "XXXX XXXX XXXX",
+  "send_otp": "ओटीपी भेजें",
+  "aadhaar_invalid": "कृपया 12 अंकों का मान्य आधार नंबर दर्ज करें"
+}
