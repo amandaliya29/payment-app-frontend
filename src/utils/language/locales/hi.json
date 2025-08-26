@@ -1,4 +1,5 @@
 {
+  "select_language": "भाषा चुनें",
   "enter_mobile_number": "मोबाइल नंबर दर्ज करें",
   "verification_message": "हम आपके मोबाइल नंबर की पुष्टि करने के लिए एक सत्यापन कोड भेजेंगे",
   "mobile_number_label": "मोबाइल नंबर",
@@ -34,5 +35,15 @@
   "aadhaar_label": "आधार नंबर",
   "aadhaar_placeholder": "XXXX XXXX XXXX",
   "send_otp": "ओटीपी भेजें",
-  "aadhaar_invalid": "कृपया 12 अंकों का मान्य आधार नंबर दर्ज करें"
+  "aadhaar_invalid": "कृपया 12 अंकों का मान्य आधार नंबर दर्ज करें",
+
+  "verify_aadhaar": "आधार सत्यापित करें",
+  "otp_sent_message": "हमने आपके आधार से जुड़े मोबाइल नंबर पर 6-अंकों का ओटीपी भेजा है",
+  "aadhaar_number": "आधार नंबर",
+  "enter_otp": "6-अंकों का ओटीपी दर्ज करें",
+  "didnt_receive_otp": "ओटीपी प्राप्त नहीं हुआ?",
+  "resend_in": "पुनः भेजें",
+  "verify_otp": "ओटीपी सत्यापित करें",
+  "otp_verified": "ओटीपी सफलतापूर्वक सत्यापित हुआ",
+  "enter_valid_otp": "कृपया मान्य 6-अंकों का ओटीपी दर्ज करें"
 }

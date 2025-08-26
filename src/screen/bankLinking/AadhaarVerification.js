@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 import Header from '../../component/Header';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../component/Button';
 import Input from '../../component/Input';
@@ -11,15 +11,22 @@ import I18n from '../../utils/language/i18n';
 
 const AadhaarVerification = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const [aadhaar, setAadhaar] = useState('');
 
   const handleSendOtp = () => {
     if (aadhaar.length === 14) {
-      navigation.navigate('OtpVerification', { aadhaar });
+      navigation.navigate('AadhaarOTPVerification', { aadhaar });
     } else {
       Alert.alert(I18n.t('aadhaar_invalid'));
     }
   };
+
+  useEffect(() => {
+    if (route.params?.aadhaar) {
+      setAadhaar(route.params.aadhaar); // pre-fill Aadhaar
+    }
+  }, [route.params?.aadhaar]);
 
   return (
     <SafeAreaView style={styles.container}>
