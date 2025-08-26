@@ -1,4 +1,5 @@
 {
+  "select_language": "ભાષા પસંદ કરો",
   "enter_mobile_number": "મોબાઈલ નંબર દાખલ કરો",
   "verification_message": "અમે તમારા મોબાઈલ નંબરની પુષ્ટિ કરવા માટે ચકાસણી કોડ મોકલીશું",
   "mobile_number_label": "મોબાઈલ નંબર",
@@ -34,5 +35,15 @@
   "aadhaar_label": "આધાર નંબર",
   "aadhaar_placeholder": "XXXX XXXX XXXX",
   "send_otp": "OTP મોકલો",
-  "aadhaar_invalid": "કૃપા કરીને માન્ય 12 અંકનો આધાર નંબર દાખલ કરો"
+  "aadhaar_invalid": "કૃપા કરીને માન્ય 12 અંકનો આધાર નંબર દાખલ કરો",
+
+  "verify_aadhaar": "આધાર ચકાસો",
+  "otp_sent_message": "અમે તમારા આધાર સાથે જોડાયેલ મોબાઇલ નંબર પર 6 અંકનો OTP મોકલ્યો છે",
+  "aadhaar_number": "આધાર નંબર",
+  "enter_otp": "6 અંકનો OTP દાખલ કરો",
+  "didnt_receive_otp": "OTP મળ્યો નથી?",
+  "resend_in": "ફરી મોકલો",
+  "verify_otp": "OTP ચકાસો",
+  "otp_verified": "OTP સફળતાપૂર્વક ચકાસાયો",
+  "enter_valid_otp": "કૃપા કરીને માન્ય 6 અંકનો OTP દાખલ કરો"
 }
