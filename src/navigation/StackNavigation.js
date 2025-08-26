@@ -5,6 +5,7 @@ import MobileNumberEntry from '../screen/auth/MobileNumberEntry';
 import OtpVerification from '../screen/auth/OtpVerification';
 import BankLinkScreen from '../screen/bankLinking/BankLinkScreen';
 import AadhaarVerification from '../screen/bankLinking/AadhaarVerification';
+import AadhaarOTPVerification from '../screen/bankLinking/AadhaarOTPVerification';
 import { Colors } from '../themes/Colors';
 
 const Stack = createStackNavigator();
@@ -29,6 +30,10 @@ const StackNavigation = () => {
         <Stack.Screen
           name="AadhaarVerification"
           component={AadhaarVerification}
+        />
+        <Stack.Screen
+          name="AadhaarOTPVerification"
+          component={AadhaarOTPVerification}
         />
       </Stack.Navigator>
     </>

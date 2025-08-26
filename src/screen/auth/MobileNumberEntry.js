@@ -24,7 +24,6 @@ export const MobileNumberEntry = () => {
   const { t } = useTranslation();
 
   const [mobile, setMobile] = useState('');
-  const [agree, setAgree] = useState(true);
   const [isChecked, setIsChecked] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -35,17 +34,15 @@ export const MobileNumberEntry = () => {
     { code: 'gu', label: 'ગુજરાતી' },
   ];
 
-  // 🔹 Show modal when screen renders
+  // Pre-fill mobile if passed from route
   useEffect(() => {
-    setModalVisible(true);
-
     if (route.params?.mobile) {
       setMobile(route.params.mobile);
     }
   }, [route.params?.mobile]);
 
   const handleProceed = () => {
-    if (mobile.length === 10 && agree) {
+    if (mobile.length === 10) {
       navigation.navigate('OtpVerification', { mobile });
     } else {
       alert(t('alert_invalid_number'));
@@ -59,6 +56,19 @@ export const MobileNumberEntry = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* 🔹 Top bar with language icon */}
+      <View style={styles.topBar}>
+        <TouchableOpacity
+          style={styles.BtnWarperStyle}
+          onPress={() => setModalVisible(true)}
+        >
+          <Image
+            source={require('../../assets/image/appIcon/Language.png')} // 🌐 globe icon
+            style={styles.languageIcon}
+          />
+        </TouchableOpacity>
+      </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{ padding: scaleUtils.scaleWidth(20) }}
@@ -162,6 +172,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.bg,
+  },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    paddingHorizontal: scaleUtils.scaleWidth(15),
+    paddingVertical: scaleUtils.scaleHeight(10),
+  },
+  languageIcon: {
+    width: scaleUtils.scaleWidth(20),
+    height: scaleUtils.scaleWidth(20),
+    tintColor: Colors.white,
+  },
+  BtnWarperStyle: {
+    width: scaleUtils.scaleWidth(35),
+    height: scaleUtils.scaleWidth(35),
+    borderRadius: scaleUtils.scaleWidth(35),
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   modalOverlay: {
     flex: 1,
