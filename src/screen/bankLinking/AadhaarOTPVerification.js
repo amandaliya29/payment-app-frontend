@@ -39,8 +39,8 @@ const AadhaarOTPVerification = ({ route }) => {
 
   const handleVerify = () => {
     if (code.length === 6) {
-      Alert.alert(I18n.t('otp_verified'), `${code}`);
-      // navigation.navigate('NextScreen');
+      // Alert.alert(I18n.t('otp_verified'), `${code}`);
+      navigation.navigate('PanVerification');
     } else {
       Alert.alert(I18n.t('enter_valid_otp'));
     }
