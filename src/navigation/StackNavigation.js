@@ -6,6 +6,8 @@ import OtpVerification from '../screen/auth/OtpVerification';
 import BankLinkScreen from '../screen/bankLinking/BankLinkScreen';
 import AadhaarVerification from '../screen/bankLinking/AadhaarVerification';
 import AadhaarOTPVerification from '../screen/bankLinking/AadhaarOTPVerification';
+import PanVerification from '../screen/bankLinking/PanVerification';
+import VideoKYCVerification from '../screen/bankLinking/VideoKYCVerification';
 import { Colors } from '../themes/Colors';
 
 const Stack = createStackNavigator();
@@ -34,6 +36,11 @@ const StackNavigation = () => {
         <Stack.Screen
           name="AadhaarOTPVerification"
           component={AadhaarOTPVerification}
+        />
+        <Stack.Screen name="PanVerification" component={PanVerification} />
+        <Stack.Screen
+          name="VideoKYCVerification"
+          component={VideoKYCVerification}
         />
       </Stack.Navigator>
     </>
