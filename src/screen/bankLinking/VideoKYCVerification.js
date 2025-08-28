@@ -74,7 +74,10 @@ const VideoKYCVerification = () => {
           ))}
         </View>
         <View style={{ marginVertical: scaleUtils.scaleHeight(20) }}>
-          <Button title={I18n.t('start_video_kyc')} />
+          <Button
+            title={I18n.t('start_video_kyc')}
+            onPress={() => navigation.navigate('FaceIDVerification')}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>

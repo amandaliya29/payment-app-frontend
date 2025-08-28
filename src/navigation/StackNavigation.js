@@ -8,6 +8,8 @@ import AadhaarVerification from '../screen/bankLinking/AadhaarVerification';
 import AadhaarOTPVerification from '../screen/bankLinking/AadhaarOTPVerification';
 import PanVerification from '../screen/bankLinking/PanVerification';
 import VideoKYCVerification from '../screen/bankLinking/VideoKYCVerification';
+import UPIPinSetup from '../screen/bankLinking/UPIPinSetup';
+import FaceIDVerification from '../screen/bankLinking/FaceIDVerification';
 import { Colors } from '../themes/Colors';
 
 const Stack = createStackNavigator();
@@ -42,6 +44,11 @@ const StackNavigation = () => {
           name="VideoKYCVerification"
           component={VideoKYCVerification}
         />
+        <Stack.Screen
+          name="FaceIDVerification"
+          component={FaceIDVerification}
+        />
+        <Stack.Screen name="UPIPinSetup" component={UPIPinSetup} />
       </Stack.Navigator>
     </>
   );
