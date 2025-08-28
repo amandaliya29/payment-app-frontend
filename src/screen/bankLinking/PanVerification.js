@@ -58,21 +58,27 @@ const PanVerification = () => {
           placeholderTextColor={Colors.grey}
         />
 
-        {/* PAN Number Input */}
         <Input
           label={I18n.t('pan_number')}
           value={panNumber}
-          onChange={setPanNumber}
+          onChange={text => {
+            // Convert to uppercase and allow only A-Z & 0-9
+            const formatted = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            setPanNumber(formatted.slice(0, 10));
+          }}
           placeholder={I18n.t('pan_placeholder')}
           placeholderTextColor={Colors.grey}
           autoCapitalize="characters"
           maxLength={10}
+          keyboardType="default"
         />
+
         {/* Continue Button */}
         <Button
           title={I18n.t('continue')}
           onPress={handleContinue}
-          disabled={!name.trim() || panNumber.length !== 10}
+          // Disable button unless name is entered AND PAN format is valid
+          disabled={!name.trim() || !validatePan(panNumber)}
         />
       </ScrollView>
     </SafeAreaView>
