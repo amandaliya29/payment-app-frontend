@@ -30,7 +30,6 @@ const PanVerification = () => {
       return;
     }
 
-    // Navigate or API call
     navigation.navigate('VideoKYCVerification');
   };
 
@@ -68,7 +67,6 @@ const PanVerification = () => {
           }}
           placeholder={I18n.t('pan_placeholder')}
           placeholderTextColor={Colors.grey}
-          autoCapitalize="characters"
           maxLength={10}
           keyboardType="default"
         />
