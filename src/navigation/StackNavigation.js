@@ -10,6 +10,7 @@ import PanVerification from '../screen/bankLinking/PanVerification';
 import VideoKYCVerification from '../screen/bankLinking/VideoKYCVerification';
 import UPIPinSetup from '../screen/bankLinking/UPIPinSetup';
 import FaceIDVerification from '../screen/bankLinking/FaceIDVerification';
+import SetPinPage from '../screen/bankLinking/SetPinPage';
 import { Colors } from '../themes/Colors';
 
 const Stack = createStackNavigator();
@@ -49,6 +50,7 @@ const StackNavigation = () => {
           component={FaceIDVerification}
         />
         <Stack.Screen name="UPIPinSetup" component={UPIPinSetup} />
+        <Stack.Screen name="SetPinPage" component={SetPinPage} />
       </Stack.Navigator>
     </>
   );
