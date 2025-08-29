@@ -29,6 +29,7 @@ const Input = ({
   style,
   isSearch = false,
   onSearchPress,
+  uppercaseOnly = false,
 }) => {
   const isPhoneInput = keyboardType === 'phone-pad';
 
@@ -38,6 +39,20 @@ const Input = ({
     cleaned = cleaned.slice(0, 12); // max 12 digits
     let formatted = cleaned.replace(/(\d{4})(?=\d)/g, '$1 '); // insert space
     onChange(formatted);
+  };
+
+  // Universal handler with uppercase support
+  const handleChange = text => {
+    if (uppercaseOnly) {
+      // convert to uppercase and allow only A-Z0-9
+      const formatted = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
+      onChange(formatted);
+    } else if (keyboardType === 'numeric' && maxLength === 12) {
+      // Aadhaar case
+      handleAadhaarChange(text);
+    } else {
+      onChange(text);
+    }
   };
 
   return (
@@ -61,7 +76,7 @@ const Input = ({
           </TouchableOpacity>
           <TextInput
             value={value}
-            onChangeText={onChange}
+            onChangeText={handleChange}
             onFocus={onFocus}
             style={[styles.insideText, style]}
             keyboardType="default"
@@ -70,6 +85,7 @@ const Input = ({
             editable={editable}
             maxLength={maxLength}
             placeholderTextColor={placeholderTextColor || Colors.white}
+            autoCapitalize={uppercaseOnly ? 'characters' : 'none'} // 👈
           />
         </View>
       )}
@@ -85,9 +101,7 @@ const Input = ({
               <View style={styles.divider} />
               <TextInput
                 value={value}
-                onChangeText={text => {
-                  onChange(text.replace(/^(\+91)/, ''));
-                }}
+                onChangeText={text => onChange(text.replace(/^(\+91)/, ''))}
                 onFocus={onFocus}
                 style={[styles.phoneTextInput, style]}
                 keyboardType={'phone-pad'}
@@ -103,14 +117,7 @@ const Input = ({
             <>
               <TextInput
                 value={value}
-                onChangeText={text => {
-                  // Aadhaar formatting
-                  if (keyboardType === 'numeric' && maxLength === 12) {
-                    handleAadhaarChange(text);
-                  } else {
-                    onChange(text);
-                  }
-                }}
+                onChangeText={handleChange}
                 onFocus={onFocus}
                 style={[styles.textInput, style]}
                 keyboardType={keyboardType || 'default'}
@@ -123,9 +130,10 @@ const Input = ({
                   keyboardType === 'numeric' && maxLength === 12
                     ? 14
                     : maxLength
-                } // Aadhaar needs 14 (12 digits + 2 spaces)
+                }
                 textAlignVertical={multiline ? 'top' : 'center'}
                 placeholderTextColor={placeholderTextColor || Colors.white}
+                autoCapitalize={uppercaseOnly ? 'characters' : 'none'} // 👈
               />
               {errorText ? (
                 <Text style={styles.errorTextStyle}>{errorText}</Text>
@@ -140,7 +148,7 @@ const Input = ({
         <View style={styles.inputContainer}>
           <TextInput
             value={value}
-            onChangeText={onChange}
+            onChangeText={handleChange}
             onFocus={onFocus}
             style={[styles.insideText, style]}
             keyboardType={keyboardType || 'default'}
@@ -153,6 +161,7 @@ const Input = ({
             maxLength={maxLength}
             textAlignVertical={multiline ? 'top' : 'center'}
             placeholderTextColor={placeholderTextColor || Colors.white}
+            autoCapitalize={uppercaseOnly ? 'characters' : 'none'} // 👈
           />
           <TouchableOpacity onPress={setIsSecure} style={styles.eyeWrapper}>
             <Image

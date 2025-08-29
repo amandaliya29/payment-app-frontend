@@ -30,6 +30,7 @@ const PanVerification = () => {
       return;
     }
 
+    // Navigate or API call
     navigation.navigate('VideoKYCVerification');
   };
 
@@ -60,15 +61,12 @@ const PanVerification = () => {
         <Input
           label={I18n.t('pan_number')}
           value={panNumber}
-          onChange={text => {
-            // Convert to uppercase and allow only A-Z & 0-9
-            const formatted = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
-            setPanNumber(formatted.slice(0, 10));
-          }}
+          onChange={setPanNumber}
           placeholder={I18n.t('pan_placeholder')}
           placeholderTextColor={Colors.grey}
           maxLength={10}
           keyboardType="default"
+          uppercaseOnly // 👈 will auto-force uppercase
         />
 
         {/* Continue Button */}
