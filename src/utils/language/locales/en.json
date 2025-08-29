@@ -97,5 +97,19 @@
   "additional_features": "Additional Features",
   "biometric_auth": "Biometric authentication available",
   "sms_alerts": "SMS alerts for all transactions",
-  "auto_lock": "Auto-lock after failed attempts"
+  "auto_lock": "Auto-lock after failed attempts",
+
+  "upi_setup": "UPI Setup",
+  "setup_upi_pin": "Setup UPI PIN",
+  "create_secure_pin": "Create a secure {{pinLength}}-digit PIN to authorize your UPI transactions",
+  "enter_pin": "Enter {{pinLength}}-digit UPI PIN",
+  "confirm_pin": "Confirm UPI PIN",
+  "security_tips": "Security Tips",
+  "tip_1": "•  Never share your UPI PIN with anyone",
+  "tip_2": "•  Use a unique PIN that's easy to remember",
+  "tip_3": "•  Avoid using sequential numbers like 1234",
+  "setup_button": "Setup UPI PIN",
+  "error_invalid_length": "Please enter {{pinLength}}-digit PIN",
+  "error_mismatch": "PIN does not match",
+  "success_message": "UPI PIN set successfully!"
 }
