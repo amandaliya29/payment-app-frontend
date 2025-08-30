@@ -123,5 +123,26 @@
   "setup_button": "યુપીઆઈ પિન સેટ કરો",
   "error_invalid_length": "કૃપા કરીને {{pinLength}} અંકનો પિન દાખલ કરો",
   "error_mismatch": "પિન મેળ ખાતો નથી",
-  "success_message": "યુપીઆઈ પિન સફળતાપૂર્વક સેટ થઈ ગયો!"
+  "success_message": "યુપીઆઈ પિન સફળતાપૂર્વક સેટ થઈ ગયો!",
+
+  "search": "શોધો",
+  "credit_upi_banner": "કાર્ડ નથી, ચિંતા નહીં\n ક્રેડિટ યુપીઆઈથી મેળવો ક્રેડિટ",
+  "quick_actions": "ઝડપી ક્રિયાઓ",
+  "scan_pay": "સ્કેન કરો અને ચૂકવણી કરો",
+  "to_mobile": "મોબાઇલમાં",
+  "to_bank": "બેંકમાં",
+  "receive": "પ્રાપ્ત કરો",
+  "self_transfer": "સ્વ-ટ્રાન્સફર",
+  "transaction_history": "ટ્રાન્ઝેક્શન ઈતિહાસ",
+  "recharge_bills": "રીચાર્જ અને બિલ",
+  "mobile_recharge": "મોબાઇલ રીચાર્જ",
+  "electricity_bill": "વીજળી બિલ",
+  "fastag_recharge": "FASTag રીચાર્જ",
+  "credit_loans": "ક્રેડિટ અને લોન",
+  "credit_upi": "યુપીઆઈ પર ક્રેડિટ",
+  "credit_upi_subtitle": "યુપીઆઈ પર તમારા ક્રેડિટ કાર્ડથી ચૂકવણી કરો",
+  "add_credit_card": "ક્રેડિટ કાર્ડ ઉમેરો",
+  "loan_offers": "લોન ઓફર્સ",
+  "check_balance": "બેલેન્સ તપાસો",
+  "linked_account": "લિંક કરેલ એકાઉન્ટ"
 }
