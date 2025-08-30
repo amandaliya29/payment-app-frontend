@@ -111,5 +111,26 @@
   "setup_button": "यूपीआई पिन सेट करें",
   "error_invalid_length": "कृपया {{pinLength}} अंकों का पिन दर्ज करें",
   "error_mismatch": "पिन मेल नहीं खाता",
-  "success_message": "यूपीआई पिन सफलतापूर्वक सेट हो गया!"
+  "success_message": "यूपीआई पिन सफलतापूर्वक सेट हो गया!",
+
+  "search": "खोजें",
+  "credit_upi_banner": "नो कार्ड, कोई चिंता नहीं\nक् रेडिट यूपीआई से पाएं क्रेडिट",
+  "quick_actions": "त्वरित कार्य",
+  "scan_pay": "स्कैन करें और भुगतान करें",
+  "to_mobile": "मोबाइल पर",
+  "to_bank": "बैंक में",
+  "receive": "प्राप्त करें",
+  "self_transfer": "स्वयं ट्रांसफर",
+  "transaction_history": "लेन-देन इतिहास",
+  "recharge_bills": "रीचार्ज और बिल",
+  "mobile_recharge": "मोबाइल रीचार्ज",
+  "electricity_bill": "बिजली का बिल",
+  "fastag_recharge": "FASTag रीचार्ज",
+  "credit_loans": "क्रेडिट और लोन",
+  "credit_upi": "UPI पर क्रेडिट",
+  "credit_upi_subtitle": "UPI पर अपने क्रेडिट कार्ड से भुगतान करें",
+  "add_credit_card": "क्रेडिट कार्ड जोड़ें",
+  "loan_offers": "लोन ऑफर",
+  "check_balance": "बैलेंस जांचें",
+  "linked_account": "लिंक्ड अकाउंट"
 }

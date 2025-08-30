@@ -111,5 +111,26 @@
   "setup_button": "Setup UPI PIN",
   "error_invalid_length": "Please enter {{pinLength}}-digit PIN",
   "error_mismatch": "PIN does not match",
-  "success_message": "UPI PIN set successfully!"
+  "success_message": "UPI PIN set successfully!",
+
+  "search": "Search",
+  "credit_upi_banner": "No CARD, No Worries\n GET CREDIT THROUGH CREDIT UPI",
+  "quick_actions": "Quick Actions",
+  "scan_pay": "Scan & Pay",
+  "to_mobile": "To Mobile",
+  "to_bank": "To Bank",
+  "receive": "Receive",
+  "self_transfer": "Self Transfer",
+  "transaction_history": "Transaction History",
+  "recharge_bills": "Recharge & Bills",
+  "mobile_recharge": "Mobile Recharge",
+  "electricity_bill": "Electricity Bill",
+  "fastag_recharge": "FASTag Recharge",
+  "credit_loans": "Credit & Loans",
+  "credit_upi": "Credit on UPI",
+  "credit_upi_subtitle": "Pay using your Credit Card on UPI",
+  "add_credit_card": "Add Credit Card",
+  "loan_offers": "Loan Offers",
+  "check_balance": "Check Balance",
+  "linked_account": "Linked Account"
 }

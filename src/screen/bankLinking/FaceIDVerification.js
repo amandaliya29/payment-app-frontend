@@ -44,19 +44,27 @@ const FaceIDVerification = () => {
         <Text style={styles.sectionTitle}>{I18n.t('kyc_instructions')}</Text>
         <View style={styles.instructionsBox}>
           <View style={styles.instructionItem}>
-            <Text style={styles.instructionNumber}>1</Text>
+            <View style={styles.instructionNumberContainer}>
+              <Text style={styles.instructionNumber}>1</Text>
+            </View>
             <Text style={styles.instructionText}>{I18n.t('kyc_step1')}</Text>
           </View>
           <View style={styles.instructionItem}>
-            <Text style={styles.instructionNumber}>2</Text>
+            <View style={styles.instructionNumberContainer}>
+              <Text style={styles.instructionNumber}>2</Text>
+            </View>
             <Text style={styles.instructionText}>{I18n.t('kyc_step2')}</Text>
           </View>
           <View style={styles.instructionItem}>
-            <Text style={styles.instructionNumber}>3</Text>
+            <View style={styles.instructionNumberContainer}>
+              <Text style={styles.instructionNumber}>3</Text>
+            </View>
             <Text style={styles.instructionText}>{I18n.t('kyc_step3')}</Text>
           </View>
           <View style={styles.instructionItem}>
-            <Text style={styles.instructionNumber}>4</Text>
+            <View style={styles.instructionNumberContainer}>
+              <Text style={styles.instructionNumber}>4</Text>
+            </View>
             <Text style={styles.instructionText}>{I18n.t('kyc_step4')}</Text>
           </View>
         </View>
@@ -145,18 +153,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     marginBottom: scaleUtils.scaleWidth(12),
+    alignItems: 'center',
   },
   instructionNumber: {
-    width: scaleUtils.scaleWidth(24),
-    height: scaleUtils.scaleWidth(24),
-    borderRadius: scaleUtils.scaleWidth(12),
-    backgroundColor: Colors.primary,
-    textAlign: 'center',
     color: Colors.white,
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Bold',
-    marginRight: scaleUtils.scaleWidth(10),
-    paddingTop: scaleUtils.scaleHeight(2),
   },
   instructionText: {
     fontSize: scaleUtils.scaleFont(13),
@@ -164,6 +166,16 @@ const styles = StyleSheet.create({
     color: Colors.white,
     flex: 1,
   },
+  instructionNumberContainer: {
+    width: scaleUtils.scaleWidth(24),
+    height: scaleUtils.scaleWidth(24),
+    borderRadius: scaleUtils.scaleWidth(12),
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: scaleUtils.scaleWidth(10),
+  },
+
   infoNote: {
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
