@@ -7,4 +7,6 @@ export const Colors = {
   secondaryBg: '#14181b',
   grey: '#808080',
   error: 'red',
+  gradientPrimary: '#4c6ef5',
+  gradientSecondary: '#7b2ff7',
 };

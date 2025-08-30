@@ -1,6 +1,7 @@
 import { StyleSheet, StatusBar } from 'react-native';
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
+import { useTheme } from '@react-navigation/native'; // 👈 get theme from NavigationContainer
 import MobileNumberEntry from '../screen/auth/MobileNumberEntry';
 import OtpVerification from '../screen/auth/OtpVerification';
 import BankLinkScreen from '../screen/bankLinking/BankLinkScreen';
@@ -11,22 +12,27 @@ import VideoKYCVerification from '../screen/bankLinking/VideoKYCVerification';
 import UPIPinSetup from '../screen/bankLinking/UPIPinSetup';
 import FaceIDVerification from '../screen/bankLinking/FaceIDVerification';
 import SetPinPage from '../screen/bankLinking/SetPinPage';
+import HomePage from '../screen/user/HomePage';
 import { Colors } from '../themes/Colors';
 
 const Stack = createStackNavigator();
 
 const StackNavigation = () => {
+  const { colors, dark } = useTheme(); // 👈 detect current theme
+
   return (
     <>
       <StatusBar
         translucent
         backgroundColor="transparent"
-        barStyle="light-content"
+        barStyle={dark ? 'light-content' : 'dark-content'} // 👈 change automatically
       />
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: Colors.bg },
+          contentStyle: {
+            backgroundColor: dark ? Colors.white : colors.background,
+          }, // 👈 use theme bg
         }}
       >
         <Stack.Screen name="MobileNumberEntry" component={MobileNumberEntry} />
@@ -51,6 +57,7 @@ const StackNavigation = () => {
         />
         <Stack.Screen name="UPIPinSetup" component={UPIPinSetup} />
         <Stack.Screen name="SetPinPage" component={SetPinPage} />
+        <Stack.Screen name="HomePage" component={HomePage} />
       </Stack.Navigator>
     </>
   );

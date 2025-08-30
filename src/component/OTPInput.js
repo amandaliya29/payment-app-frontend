@@ -4,7 +4,7 @@ import scaleUtils from '../utils/Responsive';
 import { Colors } from '../themes/Colors';
 import { isTablet } from 'react-native-device-info';
 
-const OTPInput = ({ code, setCode, length = 6 }) => {
+const OTPInput = ({ code, setCode, length = 6, isSecure = false }) => {
   const inputs = useRef([]);
 
   const handleChange = (text, index) => {
@@ -51,6 +51,7 @@ const OTPInput = ({ code, setCode, length = 6 }) => {
           keyboardType="number-pad"
           maxLength={1}
           returnKeyType="done"
+          secureTextEntry={isSecure} // 👈 this masks the text
         />
       ))}
     </View>

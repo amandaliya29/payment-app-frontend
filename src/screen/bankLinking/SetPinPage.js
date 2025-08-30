@@ -18,19 +18,7 @@ const SetPinPage = () => {
   const [confirmPin, setConfirmPin] = useState('');
 
   const handleSetup = () => {
-    if (
-      pin.length !== parseInt(pinLength) ||
-      confirmPin.length !== parseInt(pinLength)
-    ) {
-      Alert.alert(I18n.t('error_invalid_length', { pinLength }));
-      return;
-    }
-    if (pin !== confirmPin) {
-      Alert.alert(I18n.t('error_mismatch'));
-      return;
-    }
-    Alert.alert(I18n.t('success_message'));
-    navigation.goBack();
+    navigation.navigate('HomePage');
   };
 
   return (
@@ -49,7 +37,12 @@ const SetPinPage = () => {
         {/* Enter PIN */}
         <Text style={styles.label}>{I18n.t('enter_pin', { pinLength })}</Text>
         <View style={{ alignSelf: 'center' }}>
-          <OTPInput code={pin} setCode={setPin} length={parseInt(pinLength)} />
+          <OTPInput
+            code={pin}
+            setCode={setPin}
+            length={parseInt(pinLength)}
+            isSecure={true}
+          />
         </View>
 
         {/* Confirm PIN */}
@@ -59,6 +52,7 @@ const SetPinPage = () => {
             code={confirmPin}
             setCode={setConfirmPin}
             length={parseInt(pinLength)}
+            isSecure={true}
           />
         </View>
 
