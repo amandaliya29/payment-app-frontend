@@ -1,4 +1,4 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   Modal,
 } from 'react-native';
-import { Colors } from '../../themes/Colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import scaleUtils from '../../utils/Responsive';
 import Input from '../../component/Input';
@@ -17,24 +16,24 @@ import Button from '../../component/Button';
 import Checkbox from '../../component/Checkbox';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../utils/language/i18n';
+import { Colors } from '../../themes/Colors';
 
 export const MobileNumberEntry = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { t } = useTranslation();
+  const { colors, dark } = useTheme(); // theme colors from Navigation
 
   const [mobile, setMobile] = useState('');
   const [isChecked, setIsChecked] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Supported languages
   const languages = [
     { code: 'en', label: 'English' },
     { code: 'hi', label: 'हिन्दी' },
     { code: 'gu', label: 'ગુજરાતી' },
   ];
 
-  // Pre-fill mobile if passed from route
   useEffect(() => {
     if (route.params?.mobile) {
       setMobile(route.params.mobile);
@@ -51,20 +50,25 @@ export const MobileNumberEntry = () => {
 
   const selectLanguage = langCode => {
     i18n.changeLanguage(langCode);
-    setModalVisible(false); // Close modal once language is selected
+    setModalVisible(false);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* 🔹 Top bar with language icon */}
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: dark ? Colors.bg : colors.background },
+      ]}
+    >
+      {/* Top bar with Language Button */}
       <View style={styles.topBar}>
         <TouchableOpacity
-          style={styles.BtnWarperStyle}
+          style={[styles.BtnWarperStyle, { backgroundColor: Colors.primary }]}
           onPress={() => setModalVisible(true)}
         >
           <Image
-            source={require('../../assets/image/appIcon/Language.png')} // 🌐 globe icon
-            style={styles.languageIcon}
+            source={require('../../assets/image/appIcon/Language.png')}
+            style={[styles.languageIcon, { tintColor: colors.card }]}
           />
         </TouchableOpacity>
       </View>
@@ -73,17 +77,20 @@ export const MobileNumberEntry = () => {
         showsVerticalScrollIndicator={false}
         style={{ padding: scaleUtils.scaleWidth(20) }}
       >
-        {/* 🔹 Modal for Language Selection */}
+        {/* Language Modal */}
         <Modal transparent visible={modalVisible} animationType="slide">
           <View style={styles.modalOverlay}>
-            <View style={styles.modalBox}>
-              <Text style={styles.modalTitle}>{t('select_language')}</Text>
+            <View style={[styles.modalBox, { backgroundColor: colors.card }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>
+                {t('select_language')}
+              </Text>
 
               {languages.map(lang => (
                 <TouchableOpacity
                   key={lang.code}
                   style={[
                     styles.langOption,
+                    { borderColor: Colors.primary },
                     i18n.language === lang.code && {
                       backgroundColor: Colors.primary,
                     },
@@ -93,7 +100,8 @@ export const MobileNumberEntry = () => {
                   <Text
                     style={[
                       styles.langOptionText,
-                      i18n.language === lang.code && { color: Colors.white },
+                      { color: Colors.primary },
+                      i18n.language === lang.code && { color: colors.card },
                     ]}
                   >
                     {lang.label}
@@ -108,15 +116,19 @@ export const MobileNumberEntry = () => {
         <View style={styles.imagesWarperStyle}>
           <Image
             source={require('../../assets/image/appIcon/phone.png')}
-            style={styles.imageStyle}
+            style={[styles.imageStyle, { tintColor: Colors.primary }]}
           />
         </View>
 
         {/* Title */}
-        <Text style={styles.heading}>{t('enter_mobile_number')}</Text>
-        <Text style={styles.subText}>{t('verification_message')}</Text>
+        <Text style={[styles.heading, { color: colors.text }]}>
+          {t('enter_mobile_number')}
+        </Text>
+        <Text style={[styles.subText, { color: colors.text }]}>
+          {t('verification_message')}
+        </Text>
 
-        {/* Input Field */}
+        {/* Input */}
         <Input
           label={t('mobile_number_label')}
           value={mobile}
@@ -131,21 +143,23 @@ export const MobileNumberEntry = () => {
           }
         />
 
-        {/* Validation Message */}
-        <Text style={styles.validationText}>{t('validation_message')}</Text>
+        {/* Validation */}
+        <Text style={[styles.validationText, { color: colors.text }]}>
+          {t('validation_message')}
+        </Text>
 
         {/* Checkbox */}
         <Checkbox
           checked={isChecked}
           onChange={setIsChecked}
           label={
-            <Text style={styles.checkText}>
+            <Text style={[styles.checkText, { color: colors.text }]}>
               {t('agree_terms')}{' '}
-              <Text style={[styles.link, styles.underline]}>
+              <Text style={[styles.link, { color: Colors.primary }]}>
                 {t('terms_conditions')}
               </Text>{' '}
               {t('and')}{' '}
-              <Text style={[styles.link, styles.underline]}>
+              <Text style={[styles.link, { color: Colors.primary }]}>
                 {t('privacy_policy')}
               </Text>
             </Text>
@@ -171,7 +185,6 @@ export default MobileNumberEntry;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.bg,
   },
   topBar: {
     flexDirection: 'row',
@@ -182,13 +195,11 @@ const styles = StyleSheet.create({
   languageIcon: {
     width: scaleUtils.scaleWidth(20),
     height: scaleUtils.scaleWidth(20),
-    tintColor: Colors.white,
   },
   BtnWarperStyle: {
     width: scaleUtils.scaleWidth(35),
     height: scaleUtils.scaleWidth(35),
     borderRadius: scaleUtils.scaleWidth(35),
-    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -200,14 +211,12 @@ const styles = StyleSheet.create({
   },
   modalBox: {
     width: '80%',
-    backgroundColor: Colors.bg,
     borderRadius: 12,
     padding: 20,
   },
   modalTitle: {
     fontSize: scaleUtils.scaleFont(18),
     fontFamily: 'Poppins-SemiBold',
-    color: Colors.white,
     marginBottom: 15,
     textAlign: 'center',
   },
@@ -217,18 +226,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 6,
     borderWidth: 1,
-    borderColor: Colors.primary,
   },
   langOptionText: {
     fontSize: scaleUtils.scaleFont(16),
     fontFamily: 'Poppins-Regular',
-    color: Colors.primary,
     textAlign: 'center',
   },
   imageStyle: {
     width: '100%',
     height: '100%',
-    tintColor: Colors.primary,
     resizeMode: 'contain',
   },
   imagesWarperStyle: {
@@ -240,35 +246,28 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: scaleUtils.scaleFont(20),
     fontFamily: 'Poppins-SemiBold',
-    color: Colors.white,
     alignSelf: 'center',
   },
   subText: {
     fontSize: scaleUtils.scaleFont(13),
-    color: Colors.grey,
-    textAlign: 'center',
     fontFamily: 'Poppins-Regular',
+    textAlign: 'center',
     marginVertical: scaleUtils.scaleHeight(10),
     alignSelf: 'center',
     marginBottom: scaleUtils.scaleHeight(40),
   },
   validationText: {
-    color: Colors.grey,
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
     marginBottom: scaleUtils.scaleHeight(15),
     marginTop: scaleUtils.scaleHeight(-4),
   },
   link: {
-    color: Colors.primary,
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
-  },
-  underline: {
     textDecorationLine: 'underline',
   },
   checkText: {
-    color: Colors.white,
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
   },
