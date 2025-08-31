@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import Header from '../../component/Header';
-import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useTheme } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../component/Button';
 import Input from '../../component/Input';
 import I18n from '../../utils/language/i18n';
+import { Colors } from '../../themes/Colors';
 
 const PanVerification = () => {
   const navigation = useNavigation();
+  const { colors, dark } = useTheme(); // 👈 theme hook
   const [name, setName] = useState('');
   const [panNumber, setPanNumber] = useState('');
 
@@ -35,7 +36,12 @@ const PanVerification = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: dark ? Colors.bg : colors.background },
+      ]}
+    >
       <Header
         title={I18n.t('pan_verification')}
         onBack={() => navigation.goBack()}
@@ -45,9 +51,15 @@ const PanVerification = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ padding: scaleUtils.scaleWidth(20) }}
       >
-        {/* Title */}
-        {/* <Text style={styles.title}>{I18n.t('pan_verification')}</Text> */}
-        <Text style={styles.subtitle}>{I18n.t('enter_pan_details')}</Text>
+        {/* Subtitle */}
+        <Text
+          style={[
+            styles.subtitle,
+            { color: dark ? Colors.white : Colors.black },
+          ]}
+        >
+          {I18n.t('enter_pan_details')}
+        </Text>
 
         {/* Name Input */}
         <Input
@@ -55,9 +67,10 @@ const PanVerification = () => {
           value={name}
           onChange={setName}
           placeholder={I18n.t('name_pan_placeholder')}
-          placeholderTextColor={Colors.grey}
+          placeholderTextColor={Colors.grey} // 👈 theme color
         />
 
+        {/* PAN Input */}
         <Input
           label={I18n.t('pan_number')}
           value={panNumber}
@@ -66,14 +79,13 @@ const PanVerification = () => {
           placeholderTextColor={Colors.grey}
           maxLength={10}
           keyboardType="default"
-          uppercaseOnly // 👈 will auto-force uppercase
+          uppercaseOnly
         />
 
         {/* Continue Button */}
         <Button
           title={I18n.t('continue')}
           onPress={handleContinue}
-          // Disable button unless name is entered AND PAN format is valid
           disabled={!name.trim() || !validatePan(panNumber)}
         />
       </ScrollView>
@@ -84,19 +96,10 @@ const PanVerification = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.bg,
-  },
-  title: {
-    fontSize: scaleUtils.scaleFont(20),
-    fontFamily: 'Poppins-Bold',
-    color: Colors.white,
-    alignSelf: 'center',
-    marginTop: scaleUtils.scaleHeight(20),
   },
   subtitle: {
     fontSize: scaleUtils.scaleFont(15),
     fontFamily: 'Poppins-Regular',
-    color: Colors.grey,
     marginVertical: scaleUtils.scaleHeight(10),
     alignSelf: 'center',
     textAlign: 'center',

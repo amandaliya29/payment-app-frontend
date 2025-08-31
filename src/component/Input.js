@@ -77,8 +77,9 @@ const Input = ({
           style={[
             styles.inputContainer,
             {
-              backgroundColor: isDark ? Colors.secondaryBg : Colors.lightBg,
+              backgroundColor: isDark ? Colors.secondaryBg : Colors.white,
               borderColor: isDark ? Colors.bg : Colors.greyLight,
+              marginTop: 20,
             },
           ]}
         >

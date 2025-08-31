@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 import Header from '../../component/Header';
-import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../component/Button';
 import Input from '../../component/Input';
 import I18n from '../../utils/language/i18n';
+import { Colors } from '../../themes/Colors';
 
 const AadhaarVerification = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const { colors, dark } = useTheme(); // 👈 theme hook
   const [aadhaar, setAadhaar] = useState('');
 
   const handleSendOtp = () => {
@@ -29,7 +30,12 @@ const AadhaarVerification = () => {
   }, [route.params?.aadhaar]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: dark ? Colors.bg : colors.background },
+      ]}
+    >
       {/* Header */}
       <Header
         title={I18n.t('identity_verification')}
@@ -42,17 +48,26 @@ const AadhaarVerification = () => {
       >
         {/* Shield Icon */}
         <View style={styles.iconWrapper}>
-          <View style={styles.iconCircle}>
+          <View
+            style={[
+              styles.iconCircle,
+              { backgroundColor: dark ? Colors.secondary : colors.card },
+            ]}
+          >
             <Image
               source={require('../../assets/image/appIcon/identity.png')}
-              style={styles.icon}
+              style={[styles.icon, { tintColor: colors.primary }]}
             />
           </View>
         </View>
 
         {/* Title */}
-        <Text style={styles.title}>{I18n.t('aadhaar_verification')}</Text>
-        <Text style={styles.subtitle}>{I18n.t('aadhaar_subtitle')}</Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {I18n.t('aadhaar_verification')}
+        </Text>
+        <Text style={[styles.subtitle, { color: Colors.grey }]}>
+          {I18n.t('aadhaar_subtitle')}
+        </Text>
 
         {/* Aadhaar Input */}
         <Input
@@ -62,7 +77,7 @@ const AadhaarVerification = () => {
           keyboardType="numeric"
           maxLength={12}
           placeholder={I18n.t('aadhaar_placeholder')}
-          placeholderTextColor={Colors.grey}
+          placeholderTextColor={colors.grey}
         />
 
         {/* Send OTP Button */}
@@ -81,34 +96,29 @@ const AadhaarVerification = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.bg,
   },
   iconWrapper: {
     alignItems: 'center',
     marginTop: scaleUtils.scaleHeight(20),
   },
   iconCircle: {
-    backgroundColor: Colors.secondary,
     padding: scaleUtils.scaleWidth(20),
     borderRadius: scaleUtils.scaleWidth(50),
   },
   icon: {
     width: scaleUtils.scaleWidth(40),
     height: scaleUtils.scaleWidth(40),
-    tintColor: Colors.primary,
     resizeMode: 'contain',
   },
   title: {
     fontSize: scaleUtils.scaleFont(20),
     fontFamily: 'Poppins-Bold',
-    color: Colors.white,
     alignSelf: 'center',
     marginTop: scaleUtils.scaleHeight(20),
   },
   subtitle: {
     fontSize: scaleUtils.scaleFont(13),
     fontFamily: 'Poppins-Regular',
-    color: Colors.grey,
     marginVertical: scaleUtils.scaleHeight(20),
     marginBottom: scaleUtils.scaleHeight(40),
     alignSelf: 'center',

@@ -8,18 +8,19 @@ import {
   Alert,
   TouchableOpacity,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useTheme } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import OTPInput from '../../component/OTPInput';
 import Header from '../../component/Header';
-import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Button from '../../component/Button';
 import I18n from '../../utils/language/i18n';
+import { Colors } from '../../themes/Colors';
 
 const AadhaarOTPVerification = ({ route }) => {
   const navigation = useNavigation();
-  const { aadhaar } = route.params || {}; // Aadhaar passed from previous screen
+  const { colors, dark } = useTheme(); // 👈 theme hook
+  const { aadhaar } = route.params || {};
   const [code, setCode] = useState('');
   const [timer, setTimer] = useState(45);
 
@@ -39,7 +40,6 @@ const AadhaarOTPVerification = ({ route }) => {
 
   const handleVerify = () => {
     if (code.length === 6) {
-      // Alert.alert(I18n.t('otp_verified'), `${code}`);
       navigation.navigate('PanVerification');
     } else {
       Alert.alert(I18n.t('enter_valid_otp'));
@@ -47,7 +47,12 @@ const AadhaarOTPVerification = ({ route }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: dark ? Colors.bg : colors.background },
+      ]}
+    >
       {/* Header */}
       <Header
         title={I18n.t('verify_aadhaar')}
@@ -60,50 +65,75 @@ const AadhaarOTPVerification = ({ route }) => {
       >
         {/* Shield Icon */}
         <View style={styles.iconWrapper}>
-          <View style={styles.iconCircle}>
+          <View
+            style={[
+              styles.iconCircle,
+              { backgroundColor: dark ? Colors.white : colors.card },
+            ]}
+          >
             <Image
               source={require('../../assets/image/appIcon/identity.png')}
-              style={styles.icon}
+              style={[styles.icon, { tintColor: Colors.primary }]}
             />
           </View>
         </View>
 
         {/* Title */}
-        <Text style={styles.title}>{I18n.t('verify_aadhaar')}</Text>
-        <Text style={styles.subtitle}>{I18n.t('otp_sent_message')}</Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {I18n.t('verify_aadhaar')}
+        </Text>
+        <Text style={[styles.subtitle, { color: Colors.grey }]}>
+          {I18n.t('otp_sent_message')}
+        </Text>
 
         {/* Aadhaar Number Box */}
-        <View style={styles.aadhaarBox}>
+        <View
+          style={[
+            styles.aadhaarBox,
+            { backgroundColor: dark ? Colors.secondaryBg : colors.card },
+          ]}
+        >
           <View>
-            <Text style={styles.aadhaarLabel}>{I18n.t('aadhaar_number')}</Text>
-            <Text style={styles.aadhaarNumber}>
+            <Text style={[styles.aadhaarLabel, { color: Colors.grey }]}>
+              {I18n.t('aadhaar_number')}
+            </Text>
+            <Text style={[styles.aadhaarNumber, { color: colors.text }]}>
               {aadhaar ? maskAadhaar(aadhaar) : 'XXXX XXXX 4567'}
             </Text>
           </View>
 
           {/* Edit Aadhaar */}
           <TouchableOpacity
-            style={styles.imageWarperStyle}
+            style={[
+              styles.imageWarperStyle,
+              { backgroundColor: Colors.primary },
+            ]}
             onPress={() =>
               navigation.navigate('AadhaarVerification', { aadhaar })
             }
           >
             <Image
               source={require('../../assets/image/appIcon/edit.png')}
-              style={styles.editIcon}
+              style={[
+                styles.editIcon,
+                { tintColor: dark ? Colors.white : colors.background },
+              ]}
             />
           </TouchableOpacity>
         </View>
 
         {/* OTP Input */}
-        <Text style={styles.otpLabel}>{I18n.t('enter_otp')}</Text>
+        <Text style={[styles.otpLabel, { color: colors.text }]}>
+          {I18n.t('enter_otp')}
+        </Text>
         <View style={{ alignSelf: 'center' }}>
           <OTPInput code={code} setCode={setCode} length={6} />
         </View>
+
         {/* Resend OTP */}
-        <Text style={styles.resendText}>
+        <Text style={[styles.resendText, { color: Colors.grey }]}>
           {I18n.t('didnt_receive_otp')}{' '}
-          <Text style={styles.resendLink}>
+          <Text style={[styles.resendLink, { color: Colors.primary }]}>
             {I18n.t('resend_in')} 00:{timer < 10 ? `0${timer}` : timer}
           </Text>
         </Text>
@@ -126,34 +156,29 @@ export default AadhaarOTPVerification;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.bg,
   },
   iconWrapper: {
     alignItems: 'center',
     marginTop: scaleUtils.scaleHeight(20),
   },
   iconCircle: {
-    backgroundColor: Colors.white,
     padding: scaleUtils.scaleWidth(20),
     borderRadius: scaleUtils.scaleWidth(50),
   },
   icon: {
     width: scaleUtils.scaleWidth(40),
     height: scaleUtils.scaleWidth(40),
-    tintColor: Colors.primary,
     resizeMode: 'contain',
   },
   title: {
     fontSize: scaleUtils.scaleFont(20),
     fontFamily: 'Poppins-Bold',
-    color: Colors.white,
     alignSelf: 'center',
     marginTop: scaleUtils.scaleHeight(20),
   },
   subtitle: {
     fontSize: scaleUtils.scaleFont(13),
     fontFamily: 'Poppins-Regular',
-    color: Colors.grey,
     marginVertical: scaleUtils.scaleHeight(20),
     marginBottom: scaleUtils.scaleHeight(40),
     alignSelf: 'center',
@@ -164,40 +189,33 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: Colors.card,
     padding: scaleUtils.scaleHeight(10),
     borderRadius: scaleUtils.scaleHeight(10),
-    backgroundColor: Colors.secondaryBg,
   },
   aadhaarLabel: {
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Medium',
-    color: Colors.grey,
   },
   aadhaarNumber: {
     fontSize: scaleUtils.scaleFont(15),
-    color: Colors.white,
     fontFamily: 'Poppins-Medium',
   },
   editIcon: {
     width: scaleUtils.scaleHeight(10),
     height: scaleUtils.scaleHeight(10),
-    tintColor: Colors.white,
+    resizeMode: 'contain',
   },
   otpLabel: {
     fontSize: scaleUtils.scaleFont(14),
-    color: Colors.white,
     fontFamily: 'Poppins-Medium',
     marginTop: scaleUtils.scaleHeight(20),
   },
   resendText: {
-    color: Colors.grey,
     fontSize: scaleUtils.scaleFont(12),
     textAlign: 'center',
     marginTop: scaleUtils.scaleHeight(15),
   },
   resendLink: {
-    color: Colors.primary,
     fontFamily: 'Poppins-SemiBold',
   },
   buttonWrapper: {
@@ -206,7 +224,6 @@ const styles = StyleSheet.create({
   imageWarperStyle: {
     width: scaleUtils.scaleHeight(25),
     height: scaleUtils.scaleHeight(25),
-    backgroundColor: Colors.primary,
     borderRadius: scaleUtils.scaleHeight(25),
     alignItems: 'center',
     justifyContent: 'center',
