@@ -97,8 +97,9 @@ const AadhaarOTPVerification = ({ route }) => {
 
         {/* OTP Input */}
         <Text style={styles.otpLabel}>{I18n.t('enter_otp')}</Text>
-        <OTPInput code={code} setCode={setCode} length={6} />
-
+        <View style={{ alignSelf: 'center' }}>
+          <OTPInput code={code} setCode={setCode} length={6} />
+        </View>
         {/* Resend OTP */}
         <Text style={styles.resendText}>
           {I18n.t('didnt_receive_otp')}{' '}

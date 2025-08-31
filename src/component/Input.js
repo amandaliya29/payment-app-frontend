@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  useColorScheme,
 } from 'react-native';
 import scaleUtils from '../utils/Responsive';
 import { Colors } from '../themes/Colors';
@@ -31,6 +32,9 @@ const Input = ({
   onSearchPress,
   uppercaseOnly = false,
 }) => {
+  const scheme = useColorScheme(); // 👈 detects dark / light
+  const isDark = scheme === 'dark';
+
   const isPhoneInput = keyboardType === 'phone-pad';
 
   // Aadhaar formatter
@@ -44,11 +48,9 @@ const Input = ({
   // Universal handler with uppercase support
   const handleChange = text => {
     if (uppercaseOnly) {
-      // convert to uppercase and allow only A-Z0-9
       const formatted = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
       onChange(formatted);
     } else if (keyboardType === 'numeric' && maxLength === 12) {
-      // Aadhaar case
       handleAadhaarChange(text);
     } else {
       onChange(text);
@@ -58,18 +60,35 @@ const Input = ({
   return (
     <View style={{ marginBottom: scaleUtils.scaleHeight(16) }}>
       {/* Label */}
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? (
+        <Text
+          style={[
+            styles.label,
+            { color: isDark ? Colors.white : Colors.black },
+          ]}
+        >
+          {label}
+        </Text>
+      ) : null}
 
       {/* Search Input */}
       {isSearch && (
-        <View style={styles.inputContainer}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              backgroundColor: isDark ? Colors.secondaryBg : Colors.lightBg,
+              borderColor: isDark ? Colors.bg : Colors.greyLight,
+            },
+          ]}
+        >
           <TouchableOpacity onPress={onSearchPress} style={styles.eyeWrapper}>
             <Image
               source={require('../assets/image/appIcon/search.png')}
               style={{
                 width: scaleUtils.scaleWidth(16),
                 height: scaleUtils.scaleWidth(16),
-                tintColor: Colors.grey,
+                tintColor: isDark ? Colors.grey : Colors.black,
               }}
               resizeMode="contain"
             />
@@ -78,14 +97,20 @@ const Input = ({
             value={value}
             onChangeText={handleChange}
             onFocus={onFocus}
-            style={[styles.insideText, style]}
+            style={[
+              styles.insideText,
+              style,
+              { color: isDark ? Colors.white : Colors.black },
+            ]}
             keyboardType="default"
             returnKeyType="search"
             placeholder={placeholder || 'Search...'}
             editable={editable}
             maxLength={maxLength}
-            placeholderTextColor={placeholderTextColor || Colors.white}
-            autoCapitalize={uppercaseOnly ? 'characters' : 'none'} // 👈
+            placeholderTextColor={
+              placeholderTextColor || (isDark ? Colors.grey : Colors.greyDark)
+            }
+            autoCapitalize={uppercaseOnly ? 'characters' : 'none'}
           />
         </View>
       )}
@@ -94,23 +119,51 @@ const Input = ({
       {!secureTextEntry && !isSearch && (
         <>
           {isPhoneInput ? (
-            <View style={styles.phoneContainer}>
-              <View style={styles.replaceStyle}>
-                <Text style={styles.prefix}>+91</Text>
+            <View
+              style={[
+                styles.phoneContainer,
+                {
+                  backgroundColor: isDark ? Colors.secondaryBg : Colors.lightBg,
+                  borderColor: isDark ? Colors.bg : Colors.greyLight,
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.replaceStyle,
+                  {
+                    backgroundColor: isDark
+                      ? Colors.secondary
+                      : Colors.secondary,
+                  },
+                ]}
+              >
+                <Text style={[styles.prefix, { color: Colors.white }]}>
+                  +91
+                </Text>
               </View>
-              <View style={styles.divider} />
+              <View
+                style={[styles.divider, { backgroundColor: Colors.grey }]}
+              />
               <TextInput
                 value={value}
                 onChangeText={text => onChange(text.replace(/^(\+91)/, ''))}
                 onFocus={onFocus}
-                style={[styles.phoneTextInput, style]}
+                style={[
+                  styles.phoneTextInput,
+                  style,
+                  { color: isDark ? Colors.white : Colors.black },
+                ]}
                 keyboardType={'phone-pad'}
                 returnKeyType={returnKeyType || 'default'}
                 placeholder={placeholder || ''}
                 editable={editable}
                 maxLength={maxLength}
                 textAlignVertical="center"
-                placeholderTextColor={placeholderTextColor || Colors.white}
+                placeholderTextColor={
+                  placeholderTextColor ||
+                  (isDark ? Colors.grey : Colors.greyDark)
+                }
               />
             </View>
           ) : (
@@ -119,7 +172,17 @@ const Input = ({
                 value={value}
                 onChangeText={handleChange}
                 onFocus={onFocus}
-                style={[styles.textInput, style]}
+                style={[
+                  styles.textInput,
+                  style,
+                  {
+                    backgroundColor: isDark
+                      ? Colors.secondaryBg
+                      : Colors.lightBg,
+                    borderColor: isDark ? Colors.bg : Colors.greyLight,
+                    color: isDark ? Colors.white : Colors.black,
+                  },
+                ]}
                 keyboardType={keyboardType || 'default'}
                 returnKeyType={returnKeyType || 'default'}
                 placeholder={placeholder || ''}
@@ -132,8 +195,11 @@ const Input = ({
                     : maxLength
                 }
                 textAlignVertical={multiline ? 'top' : 'center'}
-                placeholderTextColor={placeholderTextColor || Colors.white}
-                autoCapitalize={uppercaseOnly ? 'characters' : 'none'} // 👈
+                placeholderTextColor={
+                  placeholderTextColor ||
+                  (isDark ? Colors.grey : Colors.greyDark)
+                }
+                autoCapitalize={uppercaseOnly ? 'characters' : 'none'}
               />
               {errorText ? (
                 <Text style={styles.errorTextStyle}>{errorText}</Text>
@@ -145,12 +211,24 @@ const Input = ({
 
       {/* Secure Input (Password) */}
       {secureTextEntry && !isSearch && (
-        <View style={styles.inputContainer}>
+        <View
+          style={[
+            styles.inputContainer,
+            {
+              backgroundColor: isDark ? Colors.secondaryBg : Colors.lightBg,
+              borderColor: isDark ? Colors.bg : Colors.greyLight,
+            },
+          ]}
+        >
           <TextInput
             value={value}
             onChangeText={handleChange}
             onFocus={onFocus}
-            style={[styles.insideText, style]}
+            style={[
+              styles.insideText,
+              style,
+              { color: isDark ? Colors.white : Colors.black },
+            ]}
             keyboardType={keyboardType || 'default'}
             returnKeyType={returnKeyType || 'default'}
             placeholder={placeholder || ''}
@@ -160,8 +238,10 @@ const Input = ({
             numberOfLines={multiline ? 5 : 1}
             maxLength={maxLength}
             textAlignVertical={multiline ? 'top' : 'center'}
-            placeholderTextColor={placeholderTextColor || Colors.white}
-            autoCapitalize={uppercaseOnly ? 'characters' : 'none'} // 👈
+            placeholderTextColor={
+              placeholderTextColor || (isDark ? Colors.grey : Colors.greyDark)
+            }
+            autoCapitalize={uppercaseOnly ? 'characters' : 'none'}
           />
           <TouchableOpacity onPress={setIsSecure} style={styles.eyeWrapper}>
             <Image
@@ -173,7 +253,7 @@ const Input = ({
               style={{
                 width: scaleUtils.scaleWidth(20),
                 height: scaleUtils.scaleWidth(20),
-                tintColor: Colors.gray,
+                tintColor: isDark ? Colors.grey : Colors.black,
               }}
               resizeMode="contain"
             />
@@ -189,7 +269,6 @@ export default Input;
 const styles = StyleSheet.create({
   label: {
     fontSize: scaleUtils.scaleFont(14),
-    color: Colors.white,
     fontFamily: 'Poppins-Medium',
     marginLeft: scaleUtils.scaleWidth(4),
     marginBottom: scaleUtils.scaleHeight(4),
@@ -199,8 +278,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     height: scaleUtils.scaleHeight(45),
-    backgroundColor: Colors.secondaryBg,
-    borderColor: Colors.bg,
     borderWidth: 1,
     borderRadius: scaleUtils.scaleWidth(12),
     alignSelf: 'center',
@@ -210,7 +287,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: 'Poppins-Regular',
     fontSize: scaleUtils.scaleFont(14),
-    color: Colors.white,
   },
   eyeWrapper: {
     padding: scaleUtils.scaleWidth(8),
@@ -226,8 +302,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     height: scaleUtils.scaleHeight(45),
-    backgroundColor: Colors.secondaryBg,
-    borderColor: Colors.bg,
     borderWidth: 1,
     borderRadius: scaleUtils.scaleWidth(12),
     alignSelf: 'center',
@@ -246,17 +320,14 @@ const styles = StyleSheet.create({
     borderRadius: scaleUtils.scaleHeight(8),
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.secondary,
   },
   prefix: {
     fontSize: scaleUtils.scaleFont(14),
-    color: Colors.white,
     textAlign: 'center',
   },
   phoneTextInput: {
     flex: 1,
     fontSize: scaleUtils.scaleFont(14),
-    color: Colors.white,
     textAlignVertical: 'center',
     textAlign: 'left',
     paddingVertical: 0,
@@ -269,13 +340,10 @@ const styles = StyleSheet.create({
     width: '100%',
     height: scaleUtils.scaleHeight(45),
     alignSelf: 'center',
-    backgroundColor: Colors.secondaryBg,
-    borderColor: Colors.bg,
-    fontFamily: 'Poppins-Regular',
     borderWidth: 1,
     borderRadius: scaleUtils.scaleWidth(12),
+    fontFamily: 'Poppins-Regular',
     fontSize: scaleUtils.scaleFont(14),
-    color: Colors.white,
     marginBottom: scaleUtils.scaleHeight(8),
     textAlignVertical: 'center',
     includeFontPadding: false,
