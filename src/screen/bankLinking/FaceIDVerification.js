@@ -1,5 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Image,
+  useColorScheme,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Header from '../../component/Header';
@@ -10,9 +17,21 @@ import I18n from '../../utils/language/i18n';
 
 const FaceIDVerification = () => {
   const navigation = useNavigation();
+  const scheme = useColorScheme(); // 👈 detect dark / light theme
+
+  // Pick theme colors dynamically
+  const isDark = scheme === 'dark';
+  const themeColors = {
+    background: isDark ? Colors.bg : Colors.lightBg,
+    text: isDark ? Colors.white : Colors.black,
+    subText: isDark ? Colors.grey : Colors.grey,
+    card: isDark ? Colors.secondaryBg : Colors.cardGrey,
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: themeColors.background }]}
+    >
       <Header
         title={I18n.t('video_verification')}
         onBack={() => navigation.goBack()}
@@ -23,8 +42,10 @@ const FaceIDVerification = () => {
         contentContainerStyle={styles.scrollContent}
       >
         {/* Title */}
-        <Text style={styles.title}>{I18n.t('complete_video_kyc')}</Text>
-        <Text style={styles.subtitle}>
+        <Text style={[styles.title, { color: themeColors.text }]}>
+          {I18n.t('complete_video_kyc')}
+        </Text>
+        <Text style={[styles.subtitle, { color: themeColors.subText }]}>
           {I18n.t('video_kyc_instruction_text')}
         </Text>
 
@@ -36,53 +57,51 @@ const FaceIDVerification = () => {
               style={styles.faceImage}
               resizeMode="contain"
             />
-            <Text style={styles.circleText}>{I18n.t('position_face')}</Text>
+            <Text style={[styles.circleText, { color: themeColors.text }]}>
+              {I18n.t('position_face')}
+            </Text>
           </View>
         </View>
 
         {/* KYC Instructions */}
-        <Text style={styles.sectionTitle}>{I18n.t('kyc_instructions')}</Text>
-        <View style={styles.instructionsBox}>
-          <View style={styles.instructionItem}>
-            <View style={styles.instructionNumberContainer}>
-              <Text style={styles.instructionNumber}>1</Text>
+        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
+          {I18n.t('kyc_instructions')}
+        </Text>
+        <View
+          style={[
+            styles.instructionsBox,
+            { backgroundColor: themeColors.card },
+          ]}
+        >
+          {[1, 2, 3, 4].map(step => (
+            <View style={styles.instructionItem} key={step}>
+              <View style={styles.instructionNumberContainer}>
+                <Text style={styles.instructionNumber}>{step}</Text>
+              </View>
+              <Text
+                style={[styles.instructionText, { color: themeColors.text }]}
+              >
+                {I18n.t(`kyc_step${step}`)}
+              </Text>
             </View>
-            <Text style={styles.instructionText}>{I18n.t('kyc_step1')}</Text>
-          </View>
-          <View style={styles.instructionItem}>
-            <View style={styles.instructionNumberContainer}>
-              <Text style={styles.instructionNumber}>2</Text>
-            </View>
-            <Text style={styles.instructionText}>{I18n.t('kyc_step2')}</Text>
-          </View>
-          <View style={styles.instructionItem}>
-            <View style={styles.instructionNumberContainer}>
-              <Text style={styles.instructionNumber}>3</Text>
-            </View>
-            <Text style={styles.instructionText}>{I18n.t('kyc_step3')}</Text>
-          </View>
-          <View style={styles.instructionItem}>
-            <View style={styles.instructionNumberContainer}>
-              <Text style={styles.instructionNumber}>4</Text>
-            </View>
-            <Text style={styles.instructionText}>{I18n.t('kyc_step4')}</Text>
-          </View>
+          ))}
         </View>
 
         {/* Info Note */}
-        <Text style={styles.infoNote}>{I18n.t('kyc_info_note')}</Text>
+        <Text style={[styles.infoNote, { color: themeColors.subText }]}>
+          {I18n.t('kyc_info_note')}
+        </Text>
 
         {/* Button */}
         <Button
           title={I18n.t('complete_video_kyc')}
-          onPress={() => {
-            // Start KYC flow
-            navigation.navigate('UPIPinSetup');
-          }}
+          onPress={() => navigation.navigate('UPIPinSetup')}
         />
 
         {/* Footer Text */}
-        <Text style={styles.footer}>{I18n.t('kyc_terms_text')}</Text>
+        <Text style={[styles.footer, { color: themeColors.subText }]}>
+          {I18n.t('kyc_terms_text')}
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -91,7 +110,6 @@ const FaceIDVerification = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.bg,
   },
   scrollContent: {
     padding: scaleUtils.scaleWidth(20),
@@ -99,14 +117,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: scaleUtils.scaleFont(22),
     fontFamily: 'Poppins-Bold',
-    color: Colors.white,
     textAlign: 'center',
     marginTop: scaleUtils.scaleHeight(20),
   },
   subtitle: {
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Regular',
-    color: Colors.grey,
     textAlign: 'center',
     marginVertical: scaleUtils.scaleHeight(10),
   },
@@ -129,29 +145,26 @@ const styles = StyleSheet.create({
     width: scaleUtils.scaleWidth(100),
     height: scaleUtils.scaleWidth(100),
     marginBottom: scaleUtils.scaleHeight(10),
+    tintColor: Colors.black,
   },
   circleText: {
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Regular',
-    color: Colors.white,
     textAlign: 'center',
     paddingHorizontal: scaleUtils.scaleWidth(20),
   },
   sectionTitle: {
     fontSize: scaleUtils.scaleFont(16),
     fontFamily: 'Poppins-Bold',
-    color: Colors.white,
     marginBottom: scaleUtils.scaleWidth(10),
   },
   instructionsBox: {
-    backgroundColor: Colors.card,
     borderRadius: scaleUtils.scaleWidth(10),
     padding: scaleUtils.scaleWidth(15),
     marginBottom: scaleUtils.scaleWidth(20),
   },
   instructionItem: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
     marginBottom: scaleUtils.scaleWidth(12),
     alignItems: 'center',
   },
@@ -163,7 +176,6 @@ const styles = StyleSheet.create({
   instructionText: {
     fontSize: scaleUtils.scaleFont(13),
     fontFamily: 'Poppins-Regular',
-    color: Colors.white,
     flex: 1,
   },
   instructionNumberContainer: {
@@ -175,18 +187,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: scaleUtils.scaleWidth(10),
   },
-
   infoNote: {
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
-    color: Colors.grey,
     textAlign: 'center',
     marginBottom: scaleUtils.scaleWidth(20),
   },
   footer: {
     fontSize: scaleUtils.scaleFont(11),
     fontFamily: 'Poppins-Regular',
-    color: Colors.grey,
     textAlign: 'center',
     marginTop: scaleUtils.scaleHeight(15),
   },
