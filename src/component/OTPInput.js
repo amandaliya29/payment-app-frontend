@@ -3,9 +3,11 @@ import { View, TextInput, StyleSheet } from 'react-native';
 import scaleUtils from '../utils/Responsive';
 import { Colors } from '../themes/Colors';
 import { isTablet } from 'react-native-device-info';
+import { useTheme } from '@react-navigation/native';
 
 const OTPInput = ({ code, setCode, length = 6, isSecure = false }) => {
   const inputs = useRef([]);
+  const { colors, dark } = useTheme(); // 👈 theme hook
 
   const handleChange = (text, index) => {
     if (/^\d*$/.test(text)) {
@@ -24,13 +26,10 @@ const OTPInput = ({ code, setCode, length = 6, isSecure = false }) => {
     if (e.nativeEvent.key === 'Backspace') {
       const newCode = code.split('');
 
-      // If current box has value, clear it
       if (newCode[index]) {
         newCode[index] = '';
         setCode(newCode.join(''));
-      }
-      // If empty, move back & clear previous
-      else if (index > 0) {
+      } else if (index > 0) {
         inputs.current[index - 1].focus();
         newCode[index - 1] = '';
         setCode(newCode.join(''));
@@ -44,14 +43,21 @@ const OTPInput = ({ code, setCode, length = 6, isSecure = false }) => {
         <TextInput
           key={index}
           ref={ref => (inputs.current[index] = ref)}
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              color: colors.text, // 👈 text adapts
+              backgroundColor: dark ? Colors.secondaryBg : colors.card, // 👈 bg adapts
+              borderColor: Colors.bg, // 👈 border adapts
+            },
+          ]}
           value={code[index] || ''}
           onChangeText={text => handleChange(text, index)}
           onKeyPress={e => handleKeyPress(e, index)}
           keyboardType="number-pad"
           maxLength={1}
           returnKeyType="done"
-          secureTextEntry={isSecure} // 👈 this masks the text
+          secureTextEntry={isSecure}
         />
       ))}
     </View>
@@ -76,8 +82,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: scaleUtils.scaleFont(16),
     fontFamily: 'Poppins-Medium',
-    color: Colors.white,
-    backgroundColor: Colors.secondaryBg,
-    borderColor: Colors.bg,
   },
 });

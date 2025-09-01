@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useTheme } from '@react-navigation/native';
 import { banks } from '../../utils/BankList';
 import Input from '../../component/Input';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +18,7 @@ import I18n from '../../utils/language/i18n';
 
 const BankLinkScreen = () => {
   const navigation = useNavigation();
+  const { colors, dark } = useTheme(); // 👈 theme hook
   const [search, setSearch] = useState('');
 
   const filteredBanks = banks.filter(bank =>
@@ -26,7 +27,10 @@ const BankLinkScreen = () => {
 
   const renderBank = ({ item }) => (
     <TouchableOpacity
-      style={styles.bankItem}
+      style={[
+        styles.bankItem,
+        { backgroundColor: dark ? Colors.secondaryBg : Colors.cardGrey },
+      ]}
       onPress={() => {
         console.log('Selected:', item.name);
         navigation.navigate('AadhaarVerification');
@@ -34,31 +38,47 @@ const BankLinkScreen = () => {
     >
       <Image source={item.logo} style={styles.bankLogo} />
       <View style={styles.bankInfo}>
-        <Text style={styles.bankName}>{item.name}</Text>
-        <Text style={styles.bankSubtitle}>{item.subtitle}</Text>
+        <Text style={[styles.bankName, { color: colors.text }]}>
+          {item.name}
+        </Text>
+        <Text style={[styles.bankSubtitle, { color: Colors.grey }]}>
+          {item.subtitle}
+        </Text>
       </View>
       <Image
-        style={styles.rightIconStyle}
+        style={[styles.rightIconStyle, { tintColor: colors.text }]}
         source={require('../../assets/image/appIcon/right.png')}
       />
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: dark ? Colors.bg : colors.background },
+      ]}
+    >
       {/* Header */}
       <View style={styles.headerRow}>
         <TouchableOpacity>
-          <Text style={styles.skip}>{I18n.t('skip')}</Text>
+          <Text style={[styles.skip, { color: Colors.primary }]}>
+            {I18n.t('skip')}
+          </Text>
         </TouchableOpacity>
       </View>
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{ padding: scaleUtils.scaleWidth(20) }}
       >
         {/* Title */}
-        <Text style={styles.title}>{I18n.t('link_bank_title')}</Text>
-        <Text style={styles.subtitle}>{I18n.t('link_bank_subtitle')}</Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {I18n.t('link_bank_title')}
+        </Text>
+        <Text style={[styles.subtitle, { color: Colors.grey }]}>
+          {I18n.t('link_bank_subtitle')}
+        </Text>
 
         {/* Search */}
         <Input
@@ -70,7 +90,9 @@ const BankLinkScreen = () => {
         />
 
         {/* Popular Banks */}
-        <Text style={styles.sectionTitle}>{I18n.t('popular_banks')}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>
+          {I18n.t('popular_banks')}
+        </Text>
         <FlatList
           data={filteredBanks}
           scrollEnabled={false}
@@ -91,7 +113,6 @@ export default BankLinkScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.bg,
   },
   headerRow: {
     flexDirection: 'row',
@@ -103,20 +124,17 @@ const styles = StyleSheet.create({
   title: {
     fontSize: scaleUtils.scaleFont(20),
     fontFamily: 'Poppins-Bold',
-    color: Colors.white,
     alignSelf: 'center',
   },
   skip: {
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Medium',
-    color: Colors.primary,
   },
   subtitle: {
     marginTop: scaleUtils.scaleHeight(8),
     marginBottom: scaleUtils.scaleHeight(18),
     fontSize: scaleUtils.scaleFont(13),
     fontFamily: 'Poppins-Regular',
-    color: Colors.grey,
     textAlign: 'center',
     lineHeight: scaleUtils.scaleHeight(16),
   },
@@ -125,13 +143,11 @@ const styles = StyleSheet.create({
     marginBottom: scaleUtils.scaleHeight(8),
     fontSize: scaleUtils.scaleFont(15),
     fontFamily: 'Poppins-SemiBold',
-    color: Colors.white,
     alignSelf: 'center',
   },
   bankItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.secondaryBg,
     borderRadius: scaleUtils.scaleWidth(12),
     padding: scaleUtils.scaleWidth(12),
     marginTop: scaleUtils.scaleHeight(12),
@@ -149,17 +165,14 @@ const styles = StyleSheet.create({
   bankName: {
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Medium',
-    color: Colors.white,
   },
   bankSubtitle: {
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
-    color: Colors.grey,
   },
   rightIconStyle: {
     width: scaleUtils.scaleWidth(10),
     height: scaleUtils.scaleWidth(10),
-    tintColor: Colors.white,
     resizeMode: 'contain',
   },
 });
