@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,29 +7,59 @@ import {
   StyleSheet,
   ScrollView,
   Image,
+  useColorScheme,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
-import Responsive from '../../utils/Responsive';
+import Input from '../../component/Input';
 
 const HomePage = () => {
+  const scheme = useColorScheme();
+  const isDark = scheme === 'dark';
+  const [search, setSearch] = useState('');
+
+  const themeColors = {
+    background: isDark ? Colors.bg : Colors.white,
+    text: isDark ? Colors.white : Colors.black,
+    subText: isDark ? Colors.white : Colors.white,
+    secondaryBg: isDark ? Colors.secondaryBg : Colors.cardGrey,
+    card: isDark ? Colors.card : Colors.cardGrey,
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: themeColors.background }]}
+    >
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* 🔎 Top Search & Notification */}
         <View style={styles.topBar}>
-          <TextInput
+          {/* <TextInput
             placeholder={I18n.t('search')}
-            placeholderTextColor={Colors.grey}
-            style={styles.searchInput}
-          />
+            placeholderTextColor={themeColors.text}
+            style={[
+              styles.searchInput,
+              {
+                backgroundColor: themeColors.secondaryBg,
+                color: themeColors.text,
+              },
+            ]}
+          /> */}
+          <View style={{ flex: 1, marginRight: scaleUtils.scaleWidth(10) }}>
+            <Input
+              isSearch
+              value={search}
+              onChange={setSearch}
+              placeholder={I18n.t('search')}
+              onSearchPress={() => console.log('Search Pressed:', search)}
+            />
+          </View>
           <TouchableOpacity style={styles.notifyButton}>
             <Image
-              source={require('../../assets/image/homeIcon/bell.png')}
-              style={styles.notifyIcon}
+              source={require('../../assets/image/homeIcon/user.png')}
+              style={[styles.notifyIcon]}
             />
           </TouchableOpacity>
         </View>
@@ -39,40 +69,52 @@ const HomePage = () => {
           colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
           style={styles.banner}
         >
-          <Text style={styles.bannerText}>{I18n.t('credit_upi_banner')}</Text>
+          <Text style={[styles.bannerText, { color: Colors.white }]}>
+            {I18n.t('credit_upi_banner')}
+          </Text>
         </LinearGradient>
 
         {/* ⚡ Quick Actions (3 per row) */}
-        <Text style={styles.sectionTitle}>{I18n.t('quick_actions')}</Text>
+        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
+          {I18n.t('quick_actions')}
+        </Text>
         <View style={styles.grid}>
           <ActionButton3
             title={I18n.t('scan_pay')}
             image={require('../../assets/image/homeIcon/scan.png')}
+            themeColors={themeColors}
           />
           <ActionButton3
             title={I18n.t('to_mobile')}
             image={require('../../assets/image/homeIcon/mobile.png')}
+            themeColors={themeColors}
           />
           <ActionButton3
             title={I18n.t('to_bank')}
             image={require('../../assets/image/homeIcon/bank.png')}
+            themeColors={themeColors}
           />
           <ActionButton3
             title={I18n.t('receive')}
             image={require('../../assets/image/homeIcon/receive.png')}
+            themeColors={themeColors}
           />
           <ActionButton3
             title={I18n.t('self_transfer')}
             image={require('../../assets/image/homeIcon/transfer.png')}
+            themeColors={themeColors}
           />
           <ActionButton3
             title={I18n.t('transaction_history')}
             image={require('../../assets/image/homeIcon/history.png')}
+            themeColors={themeColors}
           />
         </View>
 
         {/* 💳 Credit & Loans */}
-        <Text style={styles.sectionTitle}>{I18n.t('credit_loans')}</Text>
+        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
+          {I18n.t('credit_loans')}
+        </Text>
         <View style={styles.creditRow}>
           {/* Left Big Card */}
           <TouchableOpacity
@@ -88,8 +130,10 @@ const HomePage = () => {
                 source={require('../../assets/image/homeIcon/credit.png')}
                 style={styles.creditIcon}
               />
-              <Text style={styles.creditTitle}>{I18n.t('credit_upi')}</Text>
-              <Text style={styles.creditSub}>
+              <Text style={[styles.creditTitle, { color: Colors.white }]}>
+                {I18n.t('credit_upi')}
+              </Text>
+              <Text style={[styles.creditSub, { color: themeColors.subText }]}>
                 {I18n.t('credit_upi_subtitle')}
               </Text>
             </LinearGradient>
@@ -100,40 +144,47 @@ const HomePage = () => {
             <SmallButton
               title={I18n.t('add_credit_card')}
               image={require('../../assets/image/homeIcon/card.png')}
+              themeColors={themeColors}
             />
             <SmallButton
               title={I18n.t('loan_offers')}
               image={require('../../assets/image/homeIcon/loan.png')}
+              themeColors={themeColors}
             />
           </View>
         </View>
 
-        {/* Bottom Row (2 buttons only) */}
-
-        {/* 📱 Recharge & Bills (3 per row) */}
-        <Text style={styles.sectionTitle}>{I18n.t('recharge_bills')}</Text>
+        {/* 📱 Recharge & Bills */}
+        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
+          {I18n.t('recharge_bills')}
+        </Text>
         <View style={styles.grid}>
           <ActionButton3
             title={I18n.t('mobile_recharge')}
             image={require('../../assets/image/homeIcon/mobile.png')}
+            themeColors={themeColors}
           />
           <ActionButton3
             title={I18n.t('electricity_bill')}
             image={require('../../assets/image/homeIcon/electricity.png')}
+            themeColors={themeColors}
           />
           <ActionButton3
             title={I18n.t('fastag_recharge')}
             image={require('../../assets/image/homeIcon/fastag.png')}
+            themeColors={themeColors}
           />
         </View>
         <View style={styles.bottomRow}>
           <ActionButton2
             title={I18n.t('check_balance')}
             image={require('../../assets/image/homeIcon/balance.png')}
+            themeColors={themeColors}
           />
           <ActionButton2
             title={I18n.t('linked_account')}
             image={require('../../assets/image/homeIcon/link.png')}
+            themeColors={themeColors}
           />
         </View>
       </ScrollView>
@@ -142,30 +193,48 @@ const HomePage = () => {
 };
 
 /* 🔘 Action Button for 3 per row */
-const ActionButton3 = ({ title, image }) => (
-  <TouchableOpacity activeOpacity={0.8} style={styles.actionBtn3}>
+const ActionButton3 = ({ title, image, themeColors }) => (
+  <TouchableOpacity
+    activeOpacity={0.8}
+    style={[styles.actionBtn3, { backgroundColor: themeColors.secondaryBg }]}
+  >
     <Image source={image} style={styles.actionIcon} resizeMode="contain" />
-    <Text style={styles.actionText} numberOfLines={2}>
+    <Text
+      style={[styles.actionText, { color: themeColors.text }]}
+      numberOfLines={2}
+    >
       {title}
     </Text>
   </TouchableOpacity>
 );
 
 /* 🔘 Action Button for 2 per row */
-const ActionButton2 = ({ title, image }) => (
-  <TouchableOpacity activeOpacity={0.8} style={styles.actionBtn2}>
+const ActionButton2 = ({ title, image, themeColors }) => (
+  <TouchableOpacity
+    activeOpacity={0.8}
+    style={[styles.actionBtn2, { backgroundColor: themeColors.secondaryBg }]}
+  >
     <Image source={image} style={styles.action2Icon} resizeMode="contain" />
-    <Text style={styles.actionText} numberOfLines={2}>
+    <Text
+      style={[styles.actionText, { color: themeColors.text }]}
+      numberOfLines={2}
+    >
       {title}
     </Text>
   </TouchableOpacity>
 );
 
 /* 📌 Small Button inside Credit & Loans */
-const SmallButton = ({ title, image }) => (
-  <TouchableOpacity activeOpacity={0.8} style={styles.smallBtn}>
+const SmallButton = ({ title, image, themeColors }) => (
+  <TouchableOpacity
+    activeOpacity={0.8}
+    style={[styles.smallBtn, { backgroundColor: themeColors.secondaryBg }]}
+  >
     <Image source={image} style={styles.smallIcon} />
-    <Text style={styles.smallText} numberOfLines={2}>
+    <Text
+      style={[styles.smallText, { color: themeColors.text }]}
+      numberOfLines={2}
+    >
       {title}
     </Text>
   </TouchableOpacity>
@@ -184,22 +253,13 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: scaleUtils.scaleHeight(14),
-  },
-  searchInput: {
-    flex: 1,
-    backgroundColor: Colors.secondaryBg,
-    color: Colors.white,
-    paddingVertical: scaleUtils.scaleHeight(10),
-    paddingHorizontal: scaleUtils.scaleWidth(15),
-    borderRadius: scaleUtils.scaleWidth(10),
-    marginRight: scaleUtils.scaleWidth(10),
-    fontSize: scaleUtils.scaleFont(14),
+    // backgroundColor: Colors.error,
+    // marginTop: scaleUtils.scaleHeight(4),
   },
   notifyButton: {
     backgroundColor: Colors.primary,
     padding: scaleUtils.scaleWidth(10),
-    borderRadius: 50,
+    borderRadius: scaleUtils.scaleWidth(50),
   },
   notifyIcon: {
     width: scaleUtils.scaleWidth(20),

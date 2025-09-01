@@ -10,12 +10,12 @@ import {
 import Header from '../../component/Header';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../component/Button';
 import OTPInput from '../../component/OTPInput';
-import { useTranslation } from 'react-i18next'; // 👈 added
-import i18n from '../../utils/language/i18n'; // 👈 added
+import { useTranslation } from 'react-i18next';
+import i18n from '../../utils/language/i18n';
 
 const OtpVerification = () => {
   const navigation = useNavigation();
@@ -24,7 +24,8 @@ const OtpVerification = () => {
   const [code, setCode] = useState('');
   const [timer, setTimer] = useState(30);
 
-  const { t } = useTranslation(); // 👈 translation hook
+  const { t } = useTranslation();
+  const { colors, dark } = useTheme(); // 👈 theme colors
 
   useEffect(() => {
     if (timer > 0) {
@@ -40,7 +41,7 @@ const OtpVerification = () => {
       console.log('Entered OTP:', code);
       navigation.navigate('BankLinkScreen');
     } else {
-      alert(t('alert_invalid_otp')); // 👈 translated
+      alert(t('alert_invalid_otp'));
     }
   };
 
@@ -52,7 +53,12 @@ const OtpVerification = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        { backgroundColor: dark ? Colors.bg : colors.background },
+      ]}
+    >
       <Header
         title={t('otp_verification')}
         onBack={() => navigation.goBack()}
@@ -60,27 +66,35 @@ const OtpVerification = () => {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        style={{
-          padding: scaleUtils.scaleWidth(20),
-        }}
+        style={{ padding: scaleUtils.scaleWidth(20) }}
       >
-        <Text style={styles.title}>{t('verify_mobile_number')}</Text>
-        <Text style={styles.subtitle}>{t('otp_sent_message')}</Text>
+        <Text style={[styles.title, { color: colors.text }]}>
+          {t('verify_mobile_number')}
+        </Text>
+        <Text style={[styles.subtitle, { color: colors.text }]}>
+          {t('otp_sent_message')}
+        </Text>
 
-        <Text style={styles.edit}>{t('tap_edit_number')}</Text>
+        <Text style={[styles.edit, { color: colors.text }]}>
+          {t('tap_edit_number')}
+        </Text>
         <View style={styles.numberEditTextStyle}>
-          <Text style={styles.phone}>+91 {mobile}</Text>
+          <Text style={[styles.phone, { color: colors.text }]}>
+            +91 {mobile}
+          </Text>
           <TouchableOpacity
             onPress={() => navigation.replace('MobileNumberEntry', { mobile })}
           >
             <Image
-              style={styles.editIcon}
+              style={[styles.editIcon, { tintColor: Colors.primary }]}
               source={require('../../assets/image/appIcon/edit.png')}
             />
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.enterOtp}>{t('enter_otp')}</Text>
+        <Text style={[styles.enterOtp, { color: colors.text }]}>
+          {t('enter_otp')}
+        </Text>
         <View style={{ alignSelf: 'center' }}>
           <OTPInput code={code} setCode={setCode} length={6} />
         </View>
@@ -93,7 +107,7 @@ const OtpVerification = () => {
           />
         </View>
 
-        <Text style={styles.resend}>
+        <Text style={[styles.resend, { color: colors.text }]}>
           {t('didnt_receive_otp')}{' '}
           <Text
             style={[
@@ -107,7 +121,7 @@ const OtpVerification = () => {
         </Text>
 
         {/* Timer */}
-        <Text style={styles.timer}>
+        <Text style={[styles.timer, { color: colors.text }]}>
           {`00:${timer < 10 ? `0${timer}` : timer}`}
         </Text>
       </ScrollView>
@@ -118,19 +132,16 @@ const OtpVerification = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.bg,
   },
   title: {
     fontSize: scaleUtils.scaleFont(20),
     fontFamily: 'Poppins-Bold',
-    color: Colors.white,
     alignSelf: 'center',
     marginTop: scaleUtils.scaleHeight(25),
   },
   subtitle: {
     fontSize: scaleUtils.scaleFont(13),
     fontFamily: 'Poppins-Regular',
-    color: Colors.grey,
     marginVertical: scaleUtils.scaleHeight(10),
     alignSelf: 'center',
     textAlign: 'center',
@@ -138,20 +149,17 @@ const styles = StyleSheet.create({
   phone: {
     fontSize: scaleUtils.scaleFont(18),
     fontFamily: 'Poppins-SemiBold',
-    color: Colors.white,
     alignSelf: 'center',
   },
   edit: {
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
-    color: Colors.grey,
     marginTop: scaleUtils.scaleHeight(20),
     alignSelf: 'center',
   },
   resend: {
     fontSize: scaleUtils.scaleFont(13),
     fontFamily: 'Poppins-Regular',
-    color: Colors.grey,
     textAlign: 'center',
     marginTop: scaleUtils.scaleHeight(15),
   },
@@ -164,7 +172,6 @@ const styles = StyleSheet.create({
     marginTop: scaleUtils.scaleHeight(6),
     marginBottom: scaleUtils.scaleHeight(60),
     fontSize: scaleUtils.scaleFont(13),
-    color: Colors.grey,
   },
   numberEditTextStyle: {
     flexDirection: 'row',
@@ -178,10 +185,8 @@ const styles = StyleSheet.create({
     width: scaleUtils.scaleWidth(13),
     height: scaleUtils.scaleWidth(13),
     resizeMode: 'contain',
-    tintColor: Colors.primary,
   },
   enterOtp: {
-    color: Colors.white,
     fontSize: scaleUtils.scaleFont(16),
     alignSelf: 'center',
     fontFamily: 'Poppins-SemiBold',
