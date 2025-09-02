@@ -144,5 +144,25 @@
   "add_credit_card": "ક્રેડિટ કાર્ડ ઉમેરો",
   "loan_offers": "લોન ઓફર્સ",
   "check_balance": "બેલેન્સ તપાસો",
-  "linked_account": "લિંક કરેલ એકાઉન્ટ"
+  "linked_account": "લિંક કરેલ એકાઉન્ટ",
+
+  "search": "શોધો",
+  "credit_upi_status": "ક્રેડિટ UPI સ્થિતિ",
+  "credit_upi_status_subtitle": "તમારા ક્રેડિટ UPI સક્ષમ બેંક એકાઉન્ટ્સ મેનેજ કરો અને ક્રેડિટ આધારિત પેમેન્ટ્સનો લાભ લો",
+  "one_active": "૧ સક્રિય એકાઉન્ટ",
+  "one_inactive": "૧ નિષ્ક્રિય એકાઉન્ટ",
+  "your_bank_accounts": "તમારા બેંક એકાઉન્ટ્સ",
+  "account": "એકાઉન્ટ",
+  "credit_limit": "ક્રેડિટ મર્યાદા",
+  "available_credit": "ઉપલબ્ધ ક્રેડિટ",
+  "used_credit": "વપરાયેલ ક્રેડિટ",
+  "last_used": "છેલ્લે વપરાયેલ",
+  "active": "સક્રિય",
+  "inactive": "નિષ્ક્રિય",
+  "credit_upi_not_activated": "આ એકાઉન્ટ માટે ક્રેડિટ UPI સક્રિય નથી",
+  "activate": "સક્રિય કરો",
+  "about_credit_upi": "ક્રેડિટ UPI વિશે",
+  "about_credit_upi_sub": "ક્રેડિટ UPI તમને તમારા બેંક બેલેન્સ બદલે પ્રિ-અપ્રૂવ્ડ ક્રેડિટ લાઇન વડે ચુકવણી કરવાની મંજૂરી આપે છે. UPI વડે તરત ક્રેડિટનો આનંદ લો.",
+  "add_new_bank": "નવી બેંક ઉમેરો",
+  "transaction_history": "ટ્રાન્ઝેક્શન ઇતિહાસ"
 }

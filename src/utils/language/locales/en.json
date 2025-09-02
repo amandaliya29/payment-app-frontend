@@ -132,5 +132,25 @@
   "add_credit_card": "Add Credit Card",
   "loan_offers": "Loan Offers",
   "check_balance": "Check Balance",
-  "linked_account": "Linked Account"
+  "linked_account": "Linked Account",
+
+  "search": "Search",
+  "credit_upi_status": "Credit UPI Status",
+  "credit_upi_status_subtitle": "Manage your Credit UPI enabled bank accounts and enjoy seamless credit-based payments",
+  "one_active": "1 Active Account",
+  "one_inactive": "1 Inactive Account",
+  "your_bank_accounts": "Your Bank Accounts",
+  "account": "Account",
+  "credit_limit": "Credit Limit",
+  "available_credit": "Available Credit",
+  "used_credit": "Used Credit",
+  "last_used": "Last Used",
+  "active": "Active",
+  "inactive": "In Active",
+  "credit_upi_not_activated": "Credit UPI not activated for this account",
+  "activate": "Activate",
+  "about_credit_upi": "About Credit UPI",
+  "about_credit_upi_sub": "Credit UPI allows you to make payments using your pre-approved credit line instead of your bank balance. Enjoy instant credit with seamless UPI payments.",
+  "add_new_bank": "Add New Bank",
+  "transaction_history": "Transaction History"
 }
