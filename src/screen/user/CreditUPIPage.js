@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   Image,
   useColorScheme,
+  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -14,6 +15,8 @@ import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
 import Header from '../../component/Header';
+import Button from '../../component/Button';
+import LineButton from '../../component/LineButton';
 
 const CreditUPIPage = ({ navigation }) => {
   const scheme = useColorScheme();
@@ -22,9 +25,32 @@ const CreditUPIPage = ({ navigation }) => {
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
     text: isDark ? Colors.white : Colors.black,
-    subText: isDark ? Colors.white : Colors.grey,
+    subText: isDark ? Colors.white : Colors.darkGrey,
     secondaryBg: isDark ? Colors.secondaryBg : Colors.cardGrey,
+    divider: isDark ? Colors.darkGrey : Colors.grey,
   };
+
+  // Bank Accounts Data
+  const bankAccounts = [
+    {
+      id: '1',
+      bankLogo: require('../../assets/image/bankIcon/sbi.png'),
+      bankName: 'State Bank of India',
+      account: '**** **** 2847',
+      limit: '₹50,000',
+      available: '₹47,250',
+      used: '₹2,750',
+      lastUsed: '2 days ago',
+      status: 'active',
+    },
+    {
+      id: '2',
+      bankLogo: require('../../assets/image/bankIcon/hdfc.png'),
+      bankName: 'HDFC Bank',
+      account: '**** **** 9134',
+      status: 'inactive',
+    },
+  ];
 
   return (
     <SafeAreaView
@@ -45,7 +71,9 @@ const CreditUPIPage = ({ navigation }) => {
           </Text>
           <View style={styles.statusRow}>
             <Text style={styles.activeText}>🟢 {I18n.t('one_active')}</Text>
-            <Text style={styles.inactiveText}>🔴 {I18n.t('one_inactive')}</Text>
+            {/* <Text style={styles.inactiveTextDot}>
+              🔴 {I18n.t('one_inactive')}
+            </Text> */}
           </View>
         </LinearGradient>
 
@@ -54,36 +82,38 @@ const CreditUPIPage = ({ navigation }) => {
           {I18n.t('your_bank_accounts')}
         </Text>
 
-        {/* SBI Card */}
-        <BankCard
-          bankLogo={require('../../assets/image/bankIcon/sbi.png')}
-          bankName="State Bank of India"
-          account="****2847"
-          limit="₹50,000"
-          available="₹47,250"
-          used="₹2,750"
-          lastUsed="2 days ago"
-          active
-        />
-
-        {/* HDFC Card */}
-        <BankCard
-          bankLogo={require('../../assets/image/bankIcon/hdfc.png')}
-          bankName="HDFC Bank"
-          account="****9134"
-          inactive
+        <FlatList
+          data={bankAccounts}
+          scrollEnabled={false}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <BankCard {...item} themeColors={themeColors} />
+          )}
+          contentContainerStyle={{ paddingBottom: scaleUtils.scaleHeight(20) }}
+          showsVerticalScrollIndicator={false}
         />
       </ScrollView>
+
       {/* Bottom Buttons */}
       <View style={styles.bottomRow}>
-        <TouchableOpacity style={styles.addBtn}>
-          <Text style={styles.addText}>{I18n.t('add_new_bank')}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.historyBtn}>
-          <Text style={styles.historyText}>
-            {I18n.t('transaction_history')}
-          </Text>
-        </TouchableOpacity>
+        <View style={{ flex: 1 }}>
+          <Button
+            title={I18n.t('add_new_bank')}
+            onPress={() => console.log('Add Bank')}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          {/* <Button
+            title={I18n.t('transaction_history')}
+            type="secondary"
+            onPress={() => console.log('Transaction History')}
+            style={{ marginLeft: 8 }}
+          /> */}
+          <LineButton
+            title={I18n.t('transaction_history')}
+            onPress={() => console.log('Activate Clicked')}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -98,83 +128,82 @@ const BankCard = ({
   available,
   used,
   lastUsed,
-  active,
-  inactive,
+  status,
+  themeColors,
 }) => {
-  const scheme = useColorScheme();
-  const isDark = scheme === 'dark';
-  const themeColors = {
-    background: isDark ? Colors.bg : Colors.white,
-    text: isDark ? Colors.white : Colors.black,
-    subText: isDark ? Colors.white : Colors.grey,
-    secondaryBg: isDark ? Colors.secondaryBg : Colors.cardGrey,
-  };
+  const isActive = status === 'active';
+  const isInactive = status === 'inactive';
+
   return (
     <View
       style={[
         styles.bankCard,
         {
-          borderColor: active
-            ? Colors.success
-            : inactive
-              ? Colors.error
-              : Colors.cardGrey,
-          backgroundColor: isDark ? Colors.secondaryBg : Colors.cardGrey,
+          backgroundColor: themeColors.secondaryBg,
         },
       ]}
     >
       <View style={styles.bankHeader}>
-        <Image source={bankLogo} style={styles.bankIcon} />
-        <Text style={[styles.bankName, { color: themeColors.text }]}>
-          {bankName}
-        </Text>
-        {active && (
-          <Text style={[styles.activeBadge, { color: themeColors.subText }]}>
-            {I18n.t('active')}
-          </Text>
+        <View
+          style={{ flexDirection: 'row', columnGap: scaleUtils.scaleWidth(10) }}
+        >
+          <Image source={bankLogo} style={styles.bankIcon} />
+          <View>
+            <Text style={[styles.bankName, { color: themeColors.text }]}>
+              {bankName}
+            </Text>
+            <Text style={[styles.bankSub, { color: themeColors.subText }]}>
+              {account}
+            </Text>
+          </View>
+        </View>
+        {isActive && (
+          <View
+            style={[styles.cardContainer, { backgroundColor: Colors.green }]}
+          >
+            <Text style={[styles.activeBadge, { color: Colors.white }]}>
+              {I18n.t('active')}
+            </Text>
+          </View>
         )}
-        {inactive && (
-          <Text style={styles.inactiveBadge}>{I18n.t('inactive')}</Text>
+        {isInactive && (
+          <View
+            style={[styles.cardContainer, { backgroundColor: Colors.error }]}
+          >
+            <Text style={[styles.inactiveBadge, { color: Colors.white }]}>
+              {I18n.t('inactive')}
+            </Text>
+          </View>
         )}
       </View>
-
-      <Text style={[styles.bankSub, { color: themeColors.subText }]}>
-        {I18n.t('account')}: {account}
-      </Text>
       {limit && (
-        <Text style={[styles.bankSub, { color: themeColors.subText }]}>
-          {I18n.t('credit_limit')}: {limit}
-        </Text>
-      )}
-      <View
-        style={{
-          width: '100%',
-          height: scaleUtils.scaleHeight(1),
-          backgroundColor: Colors.white,
-          marginVertical: scaleUtils.scaleHeight(8),
-        }}
-      />
-
-      {active && (
         <>
+          <View
+            style={{
+              width: '100%',
+              height: scaleUtils.scaleHeight(1),
+              backgroundColor: themeColors.divider,
+              marginVertical: scaleUtils.scaleHeight(8),
+            }}
+          />
           <View style={styles.creditRow}>
             <View>
-              <Text style={[styles.available, { color: themeColors.subText }]}>
-                {I18n.t('available_credit')}:
+              <Text style={[styles.bankSub, { color: themeColors.subText }]}>
+                {I18n.t('credit_limit')}:
               </Text>
-              <Text style={[styles.available, { color: themeColors.subText }]}>
-                {available}
+              <Text
+                style={[styles.valueTextStyle, { color: themeColors.subText }]}
+              >
+                {limit}
               </Text>
-            </View>
-            <View>
-              <Text style={styles.used}>{I18n.t('used_credit')}:</Text>
-              <Text style={styles.used}>{used}</Text>
             </View>
             <View>
               <Text style={[styles.lastUsed, { color: themeColors.subText }]}>
                 {I18n.t('last_used')}:
               </Text>
-              <Text style={[styles.lastUsed, { color: themeColors.subText }]}>
+              <Text
+                style={[styles.valueTextStyle, { color: themeColors.subText }]}
+              >
                 {lastUsed}
               </Text>
             </View>
@@ -182,14 +211,55 @@ const BankCard = ({
         </>
       )}
 
-      {inactive && (
+      {isActive && (
+        <View
+          style={[styles.creditRow, { marginTop: scaleUtils.scaleHeight(12) }]}
+        >
+          <View>
+            <Text style={[styles.available, { color: themeColors.subText }]}>
+              {I18n.t('available_credit')}:
+            </Text>
+            <Text
+              style={[styles.valueTextStyle, { color: themeColors.subText }]}
+            >
+              {available}
+            </Text>
+          </View>
+          <View>
+            <Text style={[styles.used, { color: themeColors.subText }]}>
+              {I18n.t('used_credit')}:
+            </Text>
+            <Text style={[styles.valueTextStyle, { color: Colors.error }]}>
+              {used}
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {isInactive && (
         <>
-          <Text style={styles.inactiveText}>
-            {I18n.t('credit_upi_not_activated')}
-          </Text>
-          <TouchableOpacity style={styles.activateBtn}>
-            <Text style={styles.activateText}>{I18n.t('activate')}</Text>
-          </TouchableOpacity>
+          <View
+            style={{
+              width: '100%',
+              height: scaleUtils.scaleHeight(1),
+              backgroundColor: themeColors.divider,
+              marginVertical: scaleUtils.scaleHeight(8),
+            }}
+          />
+          <View
+            style={{
+              flexDirection: 'row',
+              alignContent: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Text style={styles.inactiveText}>
+              {I18n.t('credit_upi_not_activated')}
+            </Text>
+            <TouchableOpacity style={styles.activateBtn}>
+              <Text style={styles.activateText}>{I18n.t('activate')}</Text>
+            </TouchableOpacity>
+          </View>
         </>
       )}
     </View>
@@ -217,102 +287,123 @@ const styles = StyleSheet.create({
   },
   statusSub: {
     fontSize: scaleUtils.scaleFont(12),
+    fontFamily: 'Poppins-SemiBold',
     color: Colors.white,
     opacity: 0.9,
     marginBottom: 8,
   },
-  statusRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  activeText: { color: Colors.success, fontWeight: '600' },
-  inactiveText: { color: Colors.error, fontWeight: '600' },
+  statusRow: {
+    // columnGap: scaleUtils.scaleWidth(30),
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  activeText: {
+    fontSize: scaleUtils.scaleFont(13),
+    color: Colors.white,
+    fontFamily: 'Poppins-SemiBold',
+  },
+  inactiveText: {
+    fontSize: scaleUtils.scaleFont(12),
+    color: Colors.primary,
+    fontFamily: 'Poppins-Regular',
+    flexWrap: 'wrap',
+    width: '75%',
+  },
+  inactiveTextDot: {
+    fontSize: scaleUtils.scaleFont(13),
+    color: Colors.error,
+    fontFamily: 'Poppins-SemiBold',
+  },
 
   /* Bank Card */
   bankCard: {
-    borderWidth: 1,
     borderRadius: scaleUtils.scaleWidth(12),
     marginBottom: scaleUtils.scaleHeight(14),
     padding: scaleUtils.scaleWidth(14),
   },
-  bankHeader: { flexDirection: 'row', alignItems: 'center' },
+  bankHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   bankIcon: {
-    width: scaleUtils.scaleWidth(32),
-    height: scaleUtils.scaleWidth(32),
-    marginRight: 10,
+    width: scaleUtils.scaleWidth(30),
+    height: scaleUtils.scaleWidth(30),
+    alignSelf: 'flex-start',
   },
   bankName: {
     fontSize: scaleUtils.scaleFont(15),
     fontFamily: 'Poppins-SemiBold',
-    textAlign: 'center',
-    flex: 1,
+    // textAlign: 'center',
   },
-  activeBadge: { color: Colors.success, fontWeight: '700' },
-  inactiveBadge: { color: Colors.error, fontWeight: '700' },
+  activeBadge: {
+    fontSize: scaleUtils.scaleFont(13),
+    fontFamily: 'Poppins-Medium',
+  },
+  inactiveBadge: {
+    fontSize: scaleUtils.scaleFont(13),
+    fontFamily: 'Poppins-Medium',
+  },
 
   bankSub: {
     fontSize: scaleUtils.scaleFont(12),
-    marginVertical: 2,
     fontFamily: 'Poppins-Regular',
-    textAlign: 'center',
   },
   creditRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 6,
+    marginTop: scaleUtils.scaleHeight(2),
   },
-  available: { color: Colors.success, fontWeight: '600', textAlign: 'center' },
-  used: { color: Colors.error, fontWeight: '600', textAlign: 'center' },
-  lastUsed: { fontWeight: '600', color: Colors.white, textAlign: 'center' },
+  available: {
+    fontSize: scaleUtils.scaleFont(12),
+    fontFamily: 'Poppins-Regular',
+  },
+  used: {
+    fontSize: scaleUtils.scaleFont(12),
+    fontFamily: 'Poppins-Regular',
+  },
+  lastUsed: {
+    fontSize: scaleUtils.scaleFont(12),
+    fontFamily: 'Poppins-Regular',
+  },
+  valueTextStyle: {
+    fontSize: scaleUtils.scaleFont(13),
+    fontFamily: 'Poppins-SemiBold',
+  },
 
   activateBtn: {
     borderWidth: 1,
     borderColor: Colors.primary,
     borderRadius: scaleUtils.scaleWidth(8),
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    alignSelf: 'flex-start',
-    marginTop: 8,
+    paddingVertical: scaleUtils.scaleHeight(4),
+    paddingHorizontal: scaleUtils.scaleWidth(8),
+    alignSelf: 'center',
+    // marginTop: scaleUtils.scaleHeight(4),
   },
-  activateText: { color: Colors.primary, fontWeight: '600' },
-
-  /* About Section */
-  aboutBox: {
-    borderRadius: scaleUtils.scaleWidth(12),
-    marginBottom: scaleUtils.scaleHeight(14),
-    padding: scaleUtils.scaleWidth(14),
-    backgroundColor: Colors.secondaryBg,
-  },
-  aboutTitle: {
-    fontSize: scaleUtils.scaleFont(14),
-    fontFamily: 'Poppins-Bold',
-    marginBottom: 4,
-    color: Colors.white,
-  },
-  aboutSub: {
+  activateText: {
+    color: Colors.primary,
     fontSize: scaleUtils.scaleFont(12),
-    fontFamily: 'Poppins-Regular',
-    color: Colors.white,
+    fontFamily: 'Poppins-Medium',
   },
 
   /* Bottom Buttons */
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    columnGap: scaleUtils.scaleWidth(12),
     marginBottom: scaleUtils.scaleHeight(10),
     marginHorizontal: scaleUtils.scaleWidth(14),
   },
-  addBtn: {
-    backgroundColor: Colors.primary,
-    paddingVertical: 14,
-    borderRadius: scaleUtils.scaleWidth(12),
-    flex: 1,
-    marginRight: 8,
+  cardContainer: {
+    paddingHorizontal: scaleUtils.scaleWidth(10),
+    paddingVertical: scaleUtils.scaleHeight(3),
+    borderRadius: scaleUtils.scaleWidth(8),
+    alignSelf: 'flex-start',
   },
-  addText: { color: Colors.white, fontWeight: '600', textAlign: 'center' },
-  historyBtn: {
-    backgroundColor: Colors.secondaryBg,
-    paddingVertical: 14,
-    borderRadius: scaleUtils.scaleWidth(12),
-    flex: 1,
-    marginLeft: 8,
+  sectionTitle: {
+    fontSize: scaleUtils.scaleFont(16),
+    fontFamily: 'Poppins-Bold',
+    marginBottom: scaleUtils.scaleHeight(5),
   },
-  historyText: { fontWeight: '600', textAlign: 'center', color: Colors.white },
 });
