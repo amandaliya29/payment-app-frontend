@@ -13,6 +13,7 @@ import UPIPinSetup from '../screen/bankLinking/UPIPinSetup';
 import FaceIDVerification from '../screen/bankLinking/FaceIDVerification';
 import SetPinPage from '../screen/bankLinking/SetPinPage';
 import HomePage from '../screen/user/HomePage';
+import CreditUPIPage from '../screen/user/CreditUPIPage';
 import { Colors } from '../themes/Colors';
 
 const Stack = createStackNavigator();
@@ -58,6 +59,7 @@ const StackNavigation = () => {
         <Stack.Screen name="UPIPinSetup" component={UPIPinSetup} />
         <Stack.Screen name="SetPinPage" component={SetPinPage} />
         <Stack.Screen name="HomePage" component={HomePage} />
+        <Stack.Screen name="CreditUPIPage" component={CreditUPIPage} />
       </Stack.Navigator>
     </>
   );

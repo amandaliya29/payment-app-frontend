@@ -132,5 +132,25 @@
   "add_credit_card": "क्रेडिट कार्ड जोड़ें",
   "loan_offers": "लोन ऑफर",
   "check_balance": "बैलेंस जांचें",
-  "linked_account": "लिंक्ड अकाउंट"
+  "linked_account": "लिंक्ड अकाउंट",
+
+  "search": "खोजें",
+  "credit_upi_status": "क्रेडिट UPI स्थिति",
+  "credit_upi_status_subtitle": "अपने क्रेडिट UPI सक्षम बैंक खातों का प्रबंधन करें और निर्बाध क्रेडिट-आधारित भुगतान का आनंद लें",
+  "one_active": "1 सक्रिय खाता",
+  "one_inactive": "1 निष्क्रिय खाता",
+  "your_bank_accounts": "आपके बैंक खाते",
+  "account": "खाता",
+  "credit_limit": "क्रेडिट सीमा",
+  "available_credit": "उपलब्ध क्रेडिट",
+  "used_credit": "प्रयुक्त क्रेडिट",
+  "last_used": "अंतिम उपयोग",
+  "active": "सक्रिय",
+  "inactive": "निष्क्रिय",
+  "credit_upi_not_activated": "इस खाते के लिए क्रेडिट UPI सक्रिय नहीं है",
+  "activate": "सक्रिय करें",
+  "about_credit_upi": "क्रेडिट UPI के बारे में",
+  "about_credit_upi_sub": "क्रेडिट UPI आपको बैंक बैलेंस के बजाय प्री-अप्रूव्ड क्रेडिट लाइन से भुगतान करने की सुविधा देता है। सहज UPI भुगतान के साथ तुरंत क्रेडिट का आनंद लें।",
+  "add_new_bank": "नया बैंक जोड़ें",
+  "transaction_history": "लेन-देन इतिहास"
 }

@@ -61,7 +61,7 @@ const BankLinkScreen = () => {
     >
       {/* Header */}
       <View style={styles.headerRow}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('HomePage')}>
           <Text style={[styles.skip, { color: Colors.primary }]}>
             {I18n.t('skip')}
           </Text>
