@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     borderColor: Colors.primary,
     borderRadius: scaleUtils.scaleWidth(8),
     paddingVertical: scaleUtils.scaleHeight(6),
-    paddingHorizontal: scaleUtils.scaleWidth(12),
+    // paddingHorizontal: scaleUtils.scaleWidth(0),
     alignSelf: 'center',
   },
   text: {
