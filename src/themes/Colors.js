@@ -10,4 +10,8 @@ export const Colors = {
   gradientPrimary: '#4c6ef5',
   gradientSecondary: '#7b2ff7',
   cardGrey: '#E0E0E0',
+  darkGrey: '#484848',
+  green: '#00CC00',
+  successGreen: '#00d600',
+  darkGreen: '#379037',
 };

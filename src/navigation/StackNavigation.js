@@ -13,6 +13,11 @@ import UPIPinSetup from '../screen/bankLinking/UPIPinSetup';
 import FaceIDVerification from '../screen/bankLinking/FaceIDVerification';
 import SetPinPage from '../screen/bankLinking/SetPinPage';
 import HomePage from '../screen/user/HomePage';
+import CreditUPIPage from '../screen/user/CreditUPIPage';
+import CreditUPISetup from '../screen/user/CreditUPISetup';
+import CreditOTPVerification from '../screen/user/CreditOTPVerification';
+import CreditUPIStatusScreen from '../screen/user/CreditUPIStatusScreen';
+import CreditUPILoadingScreen from '../screen/user/CreditUPILoadingScreen';
 import { Colors } from '../themes/Colors';
 
 const Stack = createStackNavigator();
@@ -58,6 +63,20 @@ const StackNavigation = () => {
         <Stack.Screen name="UPIPinSetup" component={UPIPinSetup} />
         <Stack.Screen name="SetPinPage" component={SetPinPage} />
         <Stack.Screen name="HomePage" component={HomePage} />
+        <Stack.Screen name="CreditUPIPage" component={CreditUPIPage} />
+        <Stack.Screen name="CreditUPISetup" component={CreditUPISetup} />
+        {/* <Stack.Screen
+          name="CreditUPIStatusScreen"
+          component={CreditUPIStatusScreen}
+        /> */}
+        <Stack.Screen
+          name="CreditOTPVerification"
+          component={CreditOTPVerification}
+        />
+        {/* <Stack.Screen
+          name="CreditUPILoadingScreen"
+          component={CreditUPILoadingScreen}
+        /> */}
       </Stack.Navigator>
     </>
   );

@@ -15,9 +15,11 @@ import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
 import Input from '../../component/Input';
+import { useNavigation } from '@react-navigation/native';
 
 const HomePage = () => {
   const scheme = useColorScheme();
+  const navigation = useNavigation();
   const isDark = scheme === 'dark';
   const [search, setSearch] = useState('');
 
@@ -120,7 +122,9 @@ const HomePage = () => {
           <TouchableOpacity
             activeOpacity={0.8}
             style={{ flex: 1 }}
-            onPress={() => {}}
+            onPress={() => {
+              navigation.navigate('CreditUPIPage');
+            }}
           >
             <LinearGradient
               colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
