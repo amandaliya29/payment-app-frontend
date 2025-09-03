@@ -152,5 +152,39 @@
   "about_credit_upi": "About Credit UPI",
   "about_credit_upi_sub": "Credit UPI allows you to make payments using your pre-approved credit line instead of your bank balance. Enjoy instant credit with seamless UPI payments.",
   "add_new_bank": "Add New Bank",
-  "transaction_history": "Transaction History"
+  "transaction_history": "Transaction History",
+
+  "credit_upi": "Credit UPI Setup",
+  "activate_credit_upi": "Activate Credit UPI",
+  "activate_credit_upi_desc": "Would you like to activate your Credit UPI service?",
+  "yes_activate": "YES - Activate Now",
+  "no_maybe": "NO - Maybe Later",
+  "bottom_info": "We need to collect some additional information to complete your activation",
+
+  "otp_verification": "OTP Verification",
+  "activate_credit_upi": "Activate Credit UPI",
+  "otp_instruction": "Enter the 6-digit OTP sent to your registered mobile number to activate your Credit UPI and check your CIBIL score",
+  "enter_otp": "Enter 6-Digit OTP",
+  "didnt_receive": "Didn't receive OTP?",
+  "resend_in": "Resend in",
+  "verify_activate": "Verify & Activate",
+  "terms_condition": "By proceeding, you agree to our Terms & Conditions and authorize CIBIL score check",
+  "resend_now": "Resend Now",
+
+  "credit_upi_setup": "Credit UPI Setup",
+  "credit_upi_activated": "Credit UPI Activated Successfully!",
+  "upi_success_message": "Your HDFC Bank Credit UPI is now ready to use for seamless payments",
+  "bank_details": "Bank Details",
+  "bank_name": "Bank Name",
+  "credit_limit": "Credit Limit",
+  "upi_id": "UPI ID",
+  "security_reminder": "Security Reminder",
+  "security_message": "Set up your Credit UPI PIN to start making secure payments",
+  "setup_upi_pin": "Setup Credit UPI PIN",
+
+  "upi_setup": "UPI Setup",
+  "activating_credit_upi": "Activating Credit UPI",
+  "please_wait": "Please wait while we complete the setup",
+  "important": "Important",
+  "upi_loading_message": "Do not close or refresh the app while we are setting up your Credit UPI."
 }

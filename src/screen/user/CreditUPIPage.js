@@ -17,10 +17,12 @@ import I18n from '../../utils/language/i18n';
 import Header from '../../component/Header';
 import Button from '../../component/Button';
 import LineButton from '../../component/LineButton';
+import { useNavigation } from '@react-navigation/native';
 
-const CreditUPIPage = ({ navigation }) => {
+const CreditUPIPage = () => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const navigation = useNavigation();
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -131,6 +133,7 @@ const BankCard = ({
   status,
   themeColors,
 }) => {
+  const navigation = useNavigation();
   const isActive = status === 'active';
   const isInactive = status === 'inactive';
 
@@ -256,7 +259,10 @@ const BankCard = ({
             <Text style={styles.inactiveText}>
               {I18n.t('credit_upi_not_activated')}
             </Text>
-            <TouchableOpacity style={styles.activateBtn}>
+            <TouchableOpacity
+              style={styles.activateBtn}
+              onPress={() => navigation.navigate('CreditUPISetup')}
+            >
               <Text style={styles.activateText}>{I18n.t('activate')}</Text>
             </TouchableOpacity>
           </View>
