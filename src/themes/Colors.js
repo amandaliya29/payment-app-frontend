@@ -12,4 +12,6 @@ export const Colors = {
   cardGrey: '#E0E0E0',
   darkGrey: '#484848',
   green: '#00CC00',
+  successGreen: '#00d600',
+  darkGreen: '#379037',
 };
