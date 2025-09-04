@@ -65,18 +65,18 @@ const StackNavigation = () => {
         <Stack.Screen name="HomePage" component={HomePage} />
         <Stack.Screen name="CreditUPIPage" component={CreditUPIPage} />
         <Stack.Screen name="CreditUPISetup" component={CreditUPISetup} />
-        {/* <Stack.Screen
+        <Stack.Screen
           name="CreditUPIStatusScreen"
           component={CreditUPIStatusScreen}
-        /> */}
+        />
         <Stack.Screen
           name="CreditOTPVerification"
           component={CreditOTPVerification}
         />
-        {/* <Stack.Screen
+        <Stack.Screen
           name="CreditUPILoadingScreen"
           component={CreditUPILoadingScreen}
-        /> */}
+        />
       </Stack.Navigator>
     </>
   );
