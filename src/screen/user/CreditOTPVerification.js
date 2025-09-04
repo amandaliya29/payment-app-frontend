@@ -107,7 +107,7 @@ const CreditOTPVerification = () => {
         <Button
           title={I18n.t('verify_activate')}
           disabled={otp.length !== 6}
-          // onPress={() => navigation.navigate('CreditUPILoadingScreen')}
+          onPress={() => navigation.navigate('CreditUPILoadingScreen')}
         />
 
         {/* Push Terms & Conditions to bottom */}
