@@ -96,7 +96,10 @@ const CreditUPIStatusScreen = () => {
         </View>
 
         {/* Button */}
-        <Button title={I18n.t('setup_upi_pin')} />
+        <Button
+          title={I18n.t('setup_upi_pin')}
+          onPress={() => navigation.navigate('CreditSetPinPage')}
+        />
       </ScrollView>
     </SafeAreaView>
   );

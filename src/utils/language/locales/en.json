@@ -186,5 +186,27 @@
   "activating_credit_upi": "Activating Credit UPI",
   "please_wait": "Please wait while we complete the setup",
   "important": "Important",
-  "upi_loading_message": "Do not close or refresh the app while we are setting up your Credit UPI."
+  "upi_loading_message": "Do not close or refresh the app while we are setting up your Credit UPI.",
+
+  "credit_upi_setup": "Credit UPI Setup",
+  "set_credit_upi_pin": "Set Credit UPI PIN",
+  "upi_pin_description": "Create a secure 4-digit PIN for your Credit UPI transactions. This PIN will be required for all credit-based UPI payments.",
+  "upi_pin_security": "Credit UPI PIN Security",
+  "upi_security_note": "This PIN will be used to authorize credit-based UPI payments and transactions",
+  "enter_credit_upi_pin": "Enter 4-Digit Credit UPI PIN",
+  "confirm_credit_upi_pin": "Confirm Credit UPI PIN",
+  "set_pin_continue": "Set PIN & Continue",
+
+  "credit_upi_dashboard": "Credit UPI Dashboard",
+  "active": "Active",
+  "available_limit": "Available Credit Limit",
+  "pay_now": "Pay Now",
+  "view_transactions": "View Transactions",
+  "check_rewards": "Check Rewards",
+  "manage_upi": "Manage UPI",
+  "insights_benefits": "Insights & Benefits",
+  "spend_tracker": "Spend Tracker",
+  "upcoming_bill": "Upcoming Bill Date",
+  "rewards": "Rewards",
+  "offers": "Offers"
 }

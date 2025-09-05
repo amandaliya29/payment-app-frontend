@@ -18,6 +18,8 @@ import CreditUPISetup from '../screen/user/CreditUPISetup';
 import CreditOTPVerification from '../screen/user/CreditOTPVerification';
 import CreditUPIStatusScreen from '../screen/user/CreditUPIStatusScreen';
 import CreditUPILoadingScreen from '../screen/user/CreditUPILoadingScreen';
+import CreditSetPinPage from '../screen/user/CreditSetPinPage';
+import CreditUpiBankDetail from '../screen/user/CreditUpiBankDetail';
 import { Colors } from '../themes/Colors';
 
 const Stack = createStackNavigator();
@@ -76,6 +78,11 @@ const StackNavigation = () => {
         <Stack.Screen
           name="CreditUPILoadingScreen"
           component={CreditUPILoadingScreen}
+        />
+        <Stack.Screen name="CreditSetPinPage" component={CreditSetPinPage} />
+        <Stack.Screen
+          name="CreditUpiBankDetail"
+          component={CreditUpiBankDetail}
         />
       </Stack.Navigator>
     </>
