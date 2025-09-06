@@ -39,6 +39,11 @@ jobs:
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
+      - name: Make gradlew executable
+        run: |
+          cd android
+          chmod +x gradlew
+
       - name: Clean Android Build
         run: |
           cd android
@@ -47,7 +52,6 @@ jobs:
       - name: Build APK (Release)
         run: |
           cd android
-          chmod +x gradlew
           ./gradlew assembleRelease
 
       - name: Rename APK
