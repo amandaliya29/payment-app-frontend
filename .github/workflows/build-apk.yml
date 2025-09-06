@@ -29,7 +29,7 @@ jobs:
 
       - name: Install CMake and NDK
         run: |
-          sdkmanager --install "cmake;3.22.1" "ndk;26.1.10909125"
+          sdkmanager --install "cmake;3.22.1" "ndk;27.1.12297006"
           yes | sdkmanager --licenses
 
       - name: Create google-services.json
@@ -48,6 +48,11 @@ jobs:
         run: |
           cd android
           ./gradlew clean
+
+      - name: Generate React Native Codegen
+        run: |
+          cd android
+          ./gradlew :app:generateCodegen
 
       - name: Build APK (Release)
         run: |
