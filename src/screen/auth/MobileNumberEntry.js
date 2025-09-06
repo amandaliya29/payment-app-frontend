@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Modal,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import scaleUtils from '../../utils/Responsive';
@@ -17,16 +18,18 @@ import Checkbox from '../../component/Checkbox';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../utils/language/i18n';
 import { Colors } from '../../themes/Colors';
+import auth from '@react-native-firebase/auth';
 
 export const MobileNumberEntry = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { t } = useTranslation();
-  const { colors, dark } = useTheme(); // theme colors from Navigation
+  const { colors, dark } = useTheme();
 
   const [mobile, setMobile] = useState('');
   const [isChecked, setIsChecked] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const languages = [
     { code: 'en', label: 'English' },
@@ -40,11 +43,25 @@ export const MobileNumberEntry = () => {
     }
   }, [route.params?.mobile]);
 
-  const handleProceed = () => {
-    if (mobile.length === 10) {
-      navigation.navigate('OtpVerification', { mobile });
-    } else {
-      alert(t('alert_invalid_number'));
+  // ✅ Send OTP using Firebase
+  const handleProceed = async () => {
+    if (mobile.length !== 10) {
+      Alert.alert(t('alert_invalid_number'));
+      return;
+    }
+    if (!isChecked) {
+      Alert.alert(t('alert_terms'));
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const confirmation = await auth().signInWithPhoneNumber(`+91${mobile}`);
+      setLoading(false);
+      navigation.navigate('OtpVerification', { confirm: confirmation, mobile });
+    } catch (error) {
+      setLoading(false);
+      Alert.alert('Error', error.message);
     }
   };
 
@@ -171,8 +188,8 @@ export const MobileNumberEntry = () => {
           <Button
             title={t('proceed')}
             onPress={handleProceed}
-            loading={false}
-            disabled={mobile.length !== 10}
+            loading={loading}
+            disabled={mobile.length !== 10 || !isChecked || loading}
           />
         </View>
       </ScrollView>
@@ -182,10 +199,9 @@ export const MobileNumberEntry = () => {
 
 export default MobileNumberEntry;
 
+// Keep your same styles here...
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   topBar: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -232,11 +248,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     textAlign: 'center',
   },
-  imageStyle: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain',
-  },
+  imageStyle: { width: '100%', height: '100%', resizeMode: 'contain' },
   imagesWarperStyle: {
     width: scaleUtils.scaleWidth(80),
     height: scaleUtils.scaleWidth(80),

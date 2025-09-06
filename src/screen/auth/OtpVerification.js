@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
 import Header from '../../component/Header';
 import { Colors } from '../../themes/Colors';
@@ -15,40 +16,63 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../component/Button';
 import OTPInput from '../../component/OTPInput';
 import { useTranslation } from 'react-i18next';
-import i18n from '../../utils/language/i18n';
 
 const OtpVerification = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { mobile } = route.params || {};
+  const { confirm, mobile } = route.params || {};
   const [code, setCode] = useState('');
   const [timer, setTimer] = useState(30);
-
   const { t } = useTranslation();
-  const { colors, dark } = useTheme(); // 👈 theme colors
+  const { colors, dark } = useTheme();
 
+  // Countdown timer for Resend OTP
   useEffect(() => {
     if (timer > 0) {
-      const interval = setInterval(() => {
-        setTimer(prev => prev - 1);
-      }, 1000);
+      const interval = setInterval(() => setTimer(prev => prev - 1), 1000);
       return () => clearInterval(interval);
     }
   }, [timer]);
 
-  const handleVerify = () => {
-    if (code.length === 6) {
-      console.log('Entered OTP:', code);
-      navigation.navigate('BankLinkScreen');
-    } else {
-      alert(t('alert_invalid_otp'));
+  // Handle OTP verification
+  const handleVerifyOtp = async () => {
+    if (code.length !== 6) {
+      Alert.alert(t('error'), t('alert_invalid_otp'));
+      return;
+    }
+    try {
+      // Firebase OTP verification
+      const result = await confirm.confirm(code);
+
+      // Get user object
+      const user = result.user;
+
+      // Extract required info
+      const identifier = user.phoneNumber || user.email;
+      const providers = user.providerData.map(p => p.providerId).join(', ');
+      const created = user.metadata.creationTime;
+      const signedIn = user.metadata.lastSignInTime;
+      const uid = user.uid;
+
+      // Log in console
+      console.log('Identifier:', identifier);
+      console.log('Providers:', providers);
+      console.log('Created:', created);
+      console.log('Signed In:', signedIn);
+      console.log('User UID:', uid);
+
+      Alert.alert(t('success'), t('otp_verified'));
+      navigation.replace('BankLinkScreen');
+    } catch (error) {
+      Alert.alert(t('error'), t('invalid_otp_message'));
     }
   };
 
+  // Resend OTP handler
   const handleResend = () => {
     if (timer === 0) {
       setTimer(30);
-      console.log('Resend OTP');
+      console.log('Resend OTP triggered');
     }
   };
 
@@ -102,7 +126,7 @@ const OtpVerification = () => {
         <View style={{ marginVertical: scaleUtils.scaleHeight(16) }}>
           <Button
             title={t('verify_continue')}
-            onPress={handleVerify}
+            onPress={handleVerifyOtp}
             disabled={code.length !== 6}
           />
         </View>
@@ -129,10 +153,10 @@ const OtpVerification = () => {
   );
 };
 
+export default OtpVerification;
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   title: {
     fontSize: scaleUtils.scaleFont(20),
     fontFamily: 'Poppins-Bold',
@@ -193,5 +217,3 @@ const styles = StyleSheet.create({
     marginTop: scaleUtils.scaleHeight(26),
   },
 });
-
-export default OtpVerification;
