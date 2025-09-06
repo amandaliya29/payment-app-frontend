@@ -18,7 +18,10 @@ import CreditUPISetup from '../screen/user/CreditUPISetup';
 import CreditOTPVerification from '../screen/user/CreditOTPVerification';
 import CreditUPIStatusScreen from '../screen/user/CreditUPIStatusScreen';
 import CreditUPILoadingScreen from '../screen/user/CreditUPILoadingScreen';
+import CreditSetPinPage from '../screen/user/CreditSetPinPage';
+import CreditUpiBankDetail from '../screen/user/CreditUpiBankDetail';
 import { Colors } from '../themes/Colors';
+import SplashScreen from '../screen/auth/SplashScreen';
 
 const Stack = createStackNavigator();
 
@@ -40,6 +43,7 @@ const StackNavigation = () => {
           }, // 👈 use theme bg
         }}
       >
+        <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="MobileNumberEntry" component={MobileNumberEntry} />
         <Stack.Screen name="OtpVerification" component={OtpVerification} />
         <Stack.Screen name="BankLinkScreen" component={BankLinkScreen} />
@@ -65,18 +69,23 @@ const StackNavigation = () => {
         <Stack.Screen name="HomePage" component={HomePage} />
         <Stack.Screen name="CreditUPIPage" component={CreditUPIPage} />
         <Stack.Screen name="CreditUPISetup" component={CreditUPISetup} />
-        {/* <Stack.Screen
+        <Stack.Screen
           name="CreditUPIStatusScreen"
           component={CreditUPIStatusScreen}
-        /> */}
+        />
         <Stack.Screen
           name="CreditOTPVerification"
           component={CreditOTPVerification}
         />
-        {/* <Stack.Screen
+        <Stack.Screen
           name="CreditUPILoadingScreen"
           component={CreditUPILoadingScreen}
-        /> */}
+        />
+        <Stack.Screen name="CreditSetPinPage" component={CreditSetPinPage} />
+        <Stack.Screen
+          name="CreditUpiBankDetail"
+          component={CreditUpiBankDetail}
+        />
       </Stack.Navigator>
     </>
   );

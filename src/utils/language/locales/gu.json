@@ -198,5 +198,27 @@
   "activating_credit_upi": "ક્રેડિટ યુપીઆઈ સક્રિય કરી રહ્યું છે",
   "please_wait": "સેટઅપ પૂર્ણ થાય ત્યાં સુધી કૃપા કરીને રાહ જુઓ",
   "important": "મહત્વપૂર્ણ",
-  "upi_loading_message": "જ્યારે અમે તમારું ક્રેડિટ યુપીઆઈ સેટ કરી રહ્યા છીએ ત્યારે એપ્લિકેશન બંધ અથવા રીફ્રેશ ન કરો."
+  "upi_loading_message": "જ્યારે અમે તમારું ક્રેડિટ યુપીઆઈ સેટ કરી રહ્યા છીએ ત્યારે એપ્લિકેશન બંધ અથવા રીફ્રેશ ન કરો.",
+
+  "credit_upi_setup": "ક્રેડિટ UPI સેટઅપ",
+  "set_credit_upi_pin": "ક્રેડિટ UPI PIN સેટ કરો",
+  "upi_pin_description": "તમારા ક્રેડિટ UPI વ્યવહારો માટે સુરક્ષિત 4-અંકનો PIN બનાવો. આ PIN તમામ ક્રેડિટ આધારિત UPI ચુકવણી માટે જરૂરી રહેશે.",
+  "upi_pin_security": "ક્રેડિટ UPI PIN સુરક્ષા",
+  "upi_security_note": "આ PIN ક્રેડિટ આધારિત UPI ચુકવણી અને વ્યવહારોને અધિકૃત કરવા માટે વપરાશે",
+  "enter_credit_upi_pin": "4-અંકનો ક્રેડિટ UPI PIN દાખલ કરો",
+  "confirm_credit_upi_pin": "ક્રેડિટ UPI PIN ખાતરી કરો",
+  "set_pin_continue": "PIN સેટ કરો અને ચાલુ રાખો",
+
+  "credit_upi_dashboard": "ક્રેડિટ UPI ડેશબોર્ડ",
+  "active": "સક્રિય",
+  "available_limit": "ઉપલબ્ધ ક્રેડિટ મર્યાદા",
+  "pay_now": "હવે ચૂકવો",
+  "view_transactions": "વ્યવહાર જુઓ",
+  "check_rewards": "ઇનામ તપાસો",
+  "manage_upi": "UPI મેનેજ કરો",
+  "insights_benefits": "અંતર્દૃષ્ટિ અને લાભ",
+  "spend_tracker": "ખર્ચ ટ્રેકર",
+  "upcoming_bill": "આગામી બિલ તારીખ",
+  "rewards": "ઇનામ",
+  "offers": "ઓફર્સ"
 }

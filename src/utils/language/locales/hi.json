@@ -186,5 +186,27 @@
   "activating_credit_upi": "क्रेडिट यूपीआई सक्रिय हो रहा है",
   "please_wait": "कृपया सेटअप पूरा होने तक प्रतीक्षा करें",
   "important": "महत्वपूर्ण",
-  "upi_loading_message": "जब तक हम आपका क्रेडिट यूपीआई सेट कर रहे हैं, कृपया ऐप बंद या रिफ्रेश न करें।"
+  "upi_loading_message": "जब तक हम आपका क्रेडिट यूपीआई सेट कर रहे हैं, कृपया ऐप बंद या रिफ्रेश न करें।",
+
+  "credit_upi_setup": "क्रेडिट UPI सेटअप",
+  "set_credit_upi_pin": "क्रेडिट UPI पिन सेट करें",
+  "upi_pin_description": "अपने क्रेडिट UPI लेनदेन के लिए एक सुरक्षित 4-अंकीय पिन बनाएं। यह पिन सभी क्रेडिट-आधारित UPI भुगतान के लिए आवश्यक होगा।",
+  "upi_pin_security": "क्रेडिट UPI पिन सुरक्षा",
+  "upi_security_note": "यह पिन क्रेडिट-आधारित UPI भुगतान और लेनदेन को अधिकृत करने के लिए उपयोग किया जाएगा",
+  "enter_credit_upi_pin": "4-अंकीय क्रेडिट UPI पिन दर्ज करें",
+  "confirm_credit_upi_pin": "क्रेडिट UPI पिन की पुष्टि करें",
+  "set_pin_continue": "पिन सेट करें और जारी रखें",
+
+  "credit_upi_dashboard": "क्रेडिट UPI डैशबोर्ड",
+  "active": "सक्रिय",
+  "available_limit": "उपलब्ध क्रेडिट सीमा",
+  "pay_now": "अभी भुगतान करें",
+  "view_transactions": "लेनदेन देखें",
+  "check_rewards": "इनाम देखें",
+  "manage_upi": "UPI प्रबंधित करें",
+  "insights_benefits": "अंतर्दृष्टि और लाभ",
+  "spend_tracker": "खर्च ट्रैकर",
+  "upcoming_bill": "आगामी बिल तिथि",
+  "rewards": "इनाम",
+  "offers": "ऑफ़र"
 }

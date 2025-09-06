@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
   Image,
   useColorScheme,
   FlatList,
@@ -32,7 +31,6 @@ const CreditUPIPage = () => {
     divider: isDark ? Colors.darkGrey : Colors.grey,
   };
 
-  // Bank Accounts Data
   const bankAccounts = [
     {
       id: '1',
@@ -58,70 +56,50 @@ const CreditUPIPage = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
-      {/* Header at top */}
       <Header title={I18n.t('credit_upi')} onBack={() => navigation.goBack()} />
 
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Credit UPI Status */}
-        <LinearGradient
-          colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
-          style={styles.statusBox}
-        >
-          <Text style={styles.statusTitle}>{I18n.t('credit_upi_status')}</Text>
-          <Text style={styles.statusSub}>
-            {I18n.t('credit_upi_status_subtitle')}
-          </Text>
-          <View style={styles.statusRow}>
-            <Text style={styles.activeText}>🟢 {I18n.t('one_active')}</Text>
-            {/* <Text style={styles.inactiveTextDot}>
-              🔴 {I18n.t('one_inactive')}
-            </Text> */}
-          </View>
-        </LinearGradient>
-
-        {/* Bank Accounts */}
-        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
-          {I18n.t('your_bank_accounts')}
+      {/* Credit UPI Status */}
+      <LinearGradient
+        colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
+        style={styles.statusBox}
+      >
+        <Text style={styles.statusTitle}>{I18n.t('credit_upi_status')}</Text>
+        <Text style={styles.statusSub}>
+          {I18n.t('credit_upi_status_subtitle')}
         </Text>
+        <Text style={styles.activeText}>🟢 {I18n.t('one_active')}</Text>
+      </LinearGradient>
 
-        <FlatList
-          data={bankAccounts}
-          scrollEnabled={false}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <BankCard {...item} themeColors={themeColors} />
-          )}
-          contentContainerStyle={{ paddingBottom: scaleUtils.scaleHeight(20) }}
-          showsVerticalScrollIndicator={false}
-        />
-      </ScrollView>
+      {/* Bank Accounts */}
+      <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
+        {I18n.t('your_bank_accounts')}
+      </Text>
+
+      <FlatList
+        data={bankAccounts}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => (
+          <BankCard {...item} themeColors={themeColors} />
+        )}
+        contentContainerStyle={{ paddingBottom: scaleUtils.scaleHeight(20) }}
+        showsVerticalScrollIndicator={false}
+      />
 
       {/* Bottom Buttons */}
       <View style={styles.bottomRow}>
-        <View style={{ flex: 1 }}>
-          <Button
-            title={I18n.t('add_new_bank')}
-            onPress={() => console.log('Add Bank')}
-          />
-        </View>
-        <View style={{ flex: 1 }}>
-          {/* <Button
-            title={I18n.t('transaction_history')}
-            type="secondary"
-            onPress={() => console.log('Transaction History')}
-            style={{ marginLeft: 8 }}
-          /> */}
-          <LineButton
-            title={I18n.t('transaction_history')}
-            onPress={() => console.log('Activate Clicked')}
-          />
-        </View>
+        <Button
+          title={I18n.t('add_new_bank')}
+          onPress={() => console.log('Add Bank')}
+        />
+        <LineButton
+          title={I18n.t('transaction_history')}
+          onPress={() => console.log('Transaction History')}
+        />
       </View>
     </SafeAreaView>
   );
 };
 
-/* Bank Account Card Component */
 const BankCard = ({
   bankLogo,
   bankName,
@@ -137,19 +115,32 @@ const BankCard = ({
   const isActive = status === 'active';
   const isInactive = status === 'inactive';
 
+  const handlePress = () => {
+    if (isActive) {
+      navigation.navigate('CreditUpiBankDetail', {
+        bankLogo,
+        bankName,
+        account,
+        limit,
+        available,
+        used,
+        lastUsed,
+        status,
+      });
+    } else {
+      console.log('Bank is not active, navigation blocked');
+    }
+  };
+
   return (
-    <View
-      style={[
-        styles.bankCard,
-        {
-          backgroundColor: themeColors.secondaryBg,
-        },
-      ]}
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={handlePress}
+      style={[styles.bankCard, { backgroundColor: themeColors.secondaryBg }]}
     >
+      {/* Bank Header */}
       <View style={styles.bankHeader}>
-        <View
-          style={{ flexDirection: 'row', columnGap: scaleUtils.scaleWidth(10) }}
-        >
+        <View style={styles.bankInfo}>
           <Image source={bankLogo} style={styles.bankIcon} />
           <View>
             <Text style={[styles.bankName, { color: themeColors.text }]}>
@@ -161,52 +152,37 @@ const BankCard = ({
           </View>
         </View>
         {isActive && (
-          <View
-            style={[styles.cardContainer, { backgroundColor: Colors.green }]}
-          >
-            <Text style={[styles.activeBadge, { color: Colors.white }]}>
-              {I18n.t('active')}
-            </Text>
+          <View style={[styles.badge, { backgroundColor: Colors.green }]}>
+            <Text style={styles.badgeText}>{I18n.t('active')}</Text>
           </View>
         )}
         {isInactive && (
-          <View
-            style={[styles.cardContainer, { backgroundColor: Colors.error }]}
-          >
-            <Text style={[styles.inactiveBadge, { color: Colors.white }]}>
-              {I18n.t('inactive')}
-            </Text>
+          <View style={[styles.badge, { backgroundColor: Colors.error }]}>
+            <Text style={styles.badgeText}>{I18n.t('inactive')}</Text>
           </View>
         )}
       </View>
+
+      {/* Credit Info */}
       {limit && (
         <>
           <View
-            style={{
-              width: '100%',
-              height: scaleUtils.scaleHeight(1),
-              backgroundColor: themeColors.divider,
-              marginVertical: scaleUtils.scaleHeight(8),
-            }}
+            style={[styles.divider, { backgroundColor: themeColors.divider }]}
           />
           <View style={styles.creditRow}>
             <View>
-              <Text style={[styles.bankSub, { color: themeColors.subText }]}>
+              <Text style={[styles.label, { color: themeColors.subText }]}>
                 {I18n.t('credit_limit')}:
               </Text>
-              <Text
-                style={[styles.valueTextStyle, { color: themeColors.subText }]}
-              >
+              <Text style={[styles.value, { color: themeColors.subText }]}>
                 {limit}
               </Text>
             </View>
             <View>
-              <Text style={[styles.lastUsed, { color: themeColors.subText }]}>
+              <Text style={[styles.label, { color: themeColors.subText }]}>
                 {I18n.t('last_used')}:
               </Text>
-              <Text
-                style={[styles.valueTextStyle, { color: themeColors.subText }]}
-              >
+              <Text style={[styles.value, { color: themeColors.subText }]}>
                 {lastUsed}
               </Text>
             </View>
@@ -219,22 +195,18 @@ const BankCard = ({
           style={[styles.creditRow, { marginTop: scaleUtils.scaleHeight(12) }]}
         >
           <View>
-            <Text style={[styles.available, { color: themeColors.subText }]}>
+            <Text style={[styles.label, { color: themeColors.subText }]}>
               {I18n.t('available_credit')}:
             </Text>
-            <Text
-              style={[styles.valueTextStyle, { color: themeColors.subText }]}
-            >
+            <Text style={[styles.value, { color: themeColors.subText }]}>
               {available}
             </Text>
           </View>
           <View>
-            <Text style={[styles.used, { color: themeColors.subText }]}>
+            <Text style={[styles.label, { color: themeColors.subText }]}>
               {I18n.t('used_credit')}:
             </Text>
-            <Text style={[styles.valueTextStyle, { color: Colors.error }]}>
-              {used}
-            </Text>
+            <Text style={[styles.value, { color: Colors.error }]}>{used}</Text>
           </View>
         </View>
       )}
@@ -242,20 +214,9 @@ const BankCard = ({
       {isInactive && (
         <>
           <View
-            style={{
-              width: '100%',
-              height: scaleUtils.scaleHeight(1),
-              backgroundColor: themeColors.divider,
-              marginVertical: scaleUtils.scaleHeight(8),
-            }}
+            style={[styles.divider, { backgroundColor: themeColors.divider }]}
           />
-          <View
-            style={{
-              flexDirection: 'row',
-              alignContent: 'center',
-              justifyContent: 'space-between',
-            }}
-          >
+          <View style={styles.inactiveRow}>
             <Text style={styles.inactiveText}>
               {I18n.t('credit_upi_not_activated')}
             </Text>
@@ -268,17 +229,17 @@ const BankCard = ({
           </View>
         </>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 
-export default CreditUPIPage;
-
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  scroll: { paddingHorizontal: scaleUtils.scaleWidth(14) },
+  container: {
+    flex: 1,
+    paddingHorizontal: scaleUtils.scaleWidth(14),
+  },
 
-  /* Credit UPI Status */
+  // Credit UPI Status
   statusBox: {
     borderRadius: scaleUtils.scaleWidth(12),
     marginVertical: scaleUtils.scaleHeight(20),
@@ -289,39 +250,27 @@ const styles = StyleSheet.create({
     fontSize: scaleUtils.scaleFont(16),
     fontFamily: 'Poppins-Bold',
     color: Colors.white,
-    marginBottom: 4,
   },
   statusSub: {
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-SemiBold',
     color: Colors.white,
     opacity: 0.9,
-    marginBottom: 8,
-  },
-  statusRow: {
-    // columnGap: scaleUtils.scaleWidth(30),
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    marginBottom: scaleUtils.scaleHeight(8),
   },
   activeText: {
     fontSize: scaleUtils.scaleFont(13),
     color: Colors.white,
     fontFamily: 'Poppins-SemiBold',
   },
-  inactiveText: {
-    fontSize: scaleUtils.scaleFont(12),
-    color: Colors.primary,
-    fontFamily: 'Poppins-Regular',
-    flexWrap: 'wrap',
-    width: '75%',
-  },
-  inactiveTextDot: {
-    fontSize: scaleUtils.scaleFont(13),
-    color: Colors.error,
-    fontFamily: 'Poppins-SemiBold',
+
+  sectionTitle: {
+    fontSize: scaleUtils.scaleFont(16),
+    fontFamily: 'Poppins-Bold',
+    marginBottom: scaleUtils.scaleHeight(5),
   },
 
-  /* Bank Card */
+  // Bank Card
   bankCard: {
     borderRadius: scaleUtils.scaleWidth(12),
     marginBottom: scaleUtils.scaleHeight(14),
@@ -329,62 +278,73 @@ const styles = StyleSheet.create({
   },
   bankHeader: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  bankInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: scaleUtils.scaleWidth(10),
   },
   bankIcon: {
     width: scaleUtils.scaleWidth(30),
     height: scaleUtils.scaleWidth(30),
-    alignSelf: 'flex-start',
   },
   bankName: {
     fontSize: scaleUtils.scaleFont(15),
     fontFamily: 'Poppins-SemiBold',
-    // textAlign: 'center',
   },
-  activeBadge: {
-    fontSize: scaleUtils.scaleFont(13),
-    fontFamily: 'Poppins-Medium',
-  },
-  inactiveBadge: {
-    fontSize: scaleUtils.scaleFont(13),
-    fontFamily: 'Poppins-Medium',
-  },
-
   bankSub: {
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
   },
+  badge: {
+    paddingHorizontal: scaleUtils.scaleWidth(10),
+    paddingVertical: scaleUtils.scaleHeight(3),
+    borderRadius: scaleUtils.scaleWidth(8),
+  },
+  badgeText: {
+    fontSize: scaleUtils.scaleFont(13),
+    fontFamily: 'Poppins-Medium',
+    color: Colors.white,
+  },
+
+  // Credit Rows
   creditRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: scaleUtils.scaleHeight(2),
   },
-  available: {
+  label: {
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
   },
-  used: {
-    fontSize: scaleUtils.scaleFont(12),
-    fontFamily: 'Poppins-Regular',
-  },
-  lastUsed: {
-    fontSize: scaleUtils.scaleFont(12),
-    fontFamily: 'Poppins-Regular',
-  },
-  valueTextStyle: {
+  value: {
     fontSize: scaleUtils.scaleFont(13),
     fontFamily: 'Poppins-SemiBold',
   },
 
+  divider: {
+    height: scaleUtils.scaleHeight(1),
+    marginVertical: scaleUtils.scaleHeight(8),
+  },
+
+  // Inactive Section
+  inactiveRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  inactiveText: {
+    fontSize: scaleUtils.scaleFont(12),
+    color: Colors.primary,
+    width: '75%',
+  },
   activateBtn: {
     borderWidth: 1,
     borderColor: Colors.primary,
     borderRadius: scaleUtils.scaleWidth(8),
     paddingVertical: scaleUtils.scaleHeight(4),
     paddingHorizontal: scaleUtils.scaleWidth(8),
-    alignSelf: 'center',
-    // marginTop: scaleUtils.scaleHeight(4),
   },
   activateText: {
     color: Colors.primary,
@@ -392,24 +352,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
   },
 
-  /* Bottom Buttons */
+  // Bottom Row
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    columnGap: scaleUtils.scaleWidth(12),
     marginBottom: scaleUtils.scaleHeight(10),
-    marginHorizontal: scaleUtils.scaleWidth(14),
-  },
-  cardContainer: {
-    paddingHorizontal: scaleUtils.scaleWidth(10),
-    paddingVertical: scaleUtils.scaleHeight(3),
-    borderRadius: scaleUtils.scaleWidth(8),
-    alignSelf: 'flex-start',
-  },
-  sectionTitle: {
-    fontSize: scaleUtils.scaleFont(16),
-    fontFamily: 'Poppins-Bold',
-    marginBottom: scaleUtils.scaleHeight(5),
+    columnGap: scaleUtils.scaleWidth(12),
   },
 });
+
+export default CreditUPIPage;
