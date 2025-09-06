@@ -15,8 +15,9 @@ buildscript {
         classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
-        classpath("com.google.gms:google-services:4.4.3") // ✅ Required for Firebase
+        classpath("com.google.gms:google-services:4.4.3") // ✅ Firebase
     }
 }
 
-apply plugin: "com.facebook.react.rootproject"
+// ❌ Removed: apply plugin: "com.facebook.react.rootproject"
+// React Native autolinking handled in settings.gradle now
