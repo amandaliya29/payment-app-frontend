@@ -6,9 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   useColorScheme,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
@@ -18,6 +19,18 @@ import * as Progress from 'react-native-progress';
 
 const CreditUpiBankDetail = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const {
+    bankLogo,
+    bankName,
+    account,
+    limit,
+    available,
+    used,
+    lastUsed,
+    status,
+  } = route.params || {};
+
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
@@ -25,10 +38,15 @@ const CreditUpiBankDetail = () => {
     background: isDark ? Colors.bg : Colors.white,
     text: isDark ? Colors.white : Colors.black,
     subText: isDark ? Colors.grey : Colors.darkGrey,
-    card: isDark ? Colors.cardDark : Colors.white,
-    buttonBg: isDark ? Colors.secondaryBg : Colors.cardGrey,
+    card: isDark ? Colors.secondaryBg : Colors.white,
+    buttonBg: isDark ? Colors.primary : Colors.cardGrey,
     divider: isDark ? Colors.darkGrey : Colors.grey,
   };
+
+  const availableLimit = Number(String(available).replace(/[^0-9.]/g, '')) || 0;
+  const totalLimit = Number(String(limit).replace(/[^0-9.]/g, '')) || 0;
+  const progressValue = totalLimit > 0 ? availableLimit / totalLimit : 0;
+  const usedAmount = Number(String(used).replace(/[^0-9.]/g, '')) || 0;
 
   return (
     <SafeAreaView
@@ -47,69 +65,66 @@ const CreditUpiBankDetail = () => {
         >
           <View style={styles.row}>
             <Text style={styles.email}>nikhil@creditupi</Text>
-            <Text style={styles.active}>{I18n.t('active')}</Text>
+            <View style={[styles.badge, { backgroundColor: Colors.green }]}>
+              <Text style={styles.badgeText}>{I18n.t('active')}</Text>
+            </View>
           </View>
-          <Text style={styles.bank}>HDFC Bank</Text>
+          <View style={styles.bankInfo}>
+            <View style={styles.imageWrapperStyle}>
+              <Image source={bankLogo} style={styles.bankIcon} />
+            </View>
+            <View>
+              <Text style={[styles.bankName, { color: Colors.white }]}>
+                {bankName}
+              </Text>
+              <Text style={[styles.bankSub, { color: Colors.white }]}>
+                {account}
+              </Text>
+            </View>
+          </View>
 
           <View style={styles.limitRow}>
             <View>
               <Text style={styles.label}>{I18n.t('available_limit')}</Text>
-              <Text style={styles.amount}>₹35,000</Text>
+              <Text style={styles.amount}>₹{availableLimit}</Text>
             </View>
-            <Text style={styles.totalLimit}>₹100,000</Text>
+            <Text style={styles.totalLimit}>₹{totalLimit}</Text>
           </View>
 
           <Progress.Bar
-            progress={0.35}
+            progress={progressValue}
             width={null}
             color={Colors.white}
-            height={6}
-            borderRadius={4}
+            height={scaleUtils.scaleHeight(6)}
+            borderRadius={scaleUtils.scaleHeight(6)}
           />
 
           <View style={styles.buttonRow}>
-            {[
-              'pay_now',
-              'view_transactions',
-              'check_rewards',
-              'manage_upi',
-            ].map(key => (
+            {['pay_now', 'view_transactions'].map(key => (
               <TouchableOpacity key={key} style={styles.actionButton}>
                 <Text style={styles.actionText}>{I18n.t(key)}</Text>
               </TouchableOpacity>
             ))}
           </View>
         </LinearGradient>
-
         {/* Insights Section */}
         <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
           {I18n.t('insights_benefits')}
         </Text>
         <View style={[styles.card, { backgroundColor: themeColors.card }]}>
-          <View style={styles.transactionRow}>
-            <Text style={[styles.transactionText, { color: themeColors.text }]}>
-              15 Apr Big Bazaar
-            </Text>
-            <Text
-              style={[styles.transactionAmount, { color: themeColors.text }]}
-            >
-              ₹3,200
-            </Text>
-          </View>
-
           <Text style={[styles.label, { color: themeColors.subText }]}>
             {I18n.t('spend_tracker')}
           </Text>
           <Text style={[styles.spendLimit, { color: themeColors.subText }]}>
-            ₹15,000 of ₹35,000
+            ₹{usedAmount} of ₹{totalLimit}
           </Text>
 
           <Progress.Bar
-            progress={15000 / 35000}
+            progress={totalLimit > 0 ? usedAmount / totalLimit : 0}
             width={null}
-            color="#007AFF"
-            height={6}
-            borderRadius={4}
+            color={Colors.primary}
+            height={scaleUtils.scaleHeight(6)}
+            borderRadius={scaleUtils.scaleHeight(6)}
           />
 
           <View style={styles.billRow}>
@@ -119,11 +134,10 @@ const CreditUpiBankDetail = () => {
             <Text
               style={[styles.transactionAmount, { color: themeColors.text }]}
             >
-              6 Jun
+              {lastUsed || 'N/A'}
             </Text>
           </View>
         </View>
-
         {/* Rewards & Offers */}
         <View style={styles.row}>
           <TouchableOpacity
@@ -132,7 +146,9 @@ const CreditUpiBankDetail = () => {
               { backgroundColor: themeColors.buttonBg },
             ]}
           >
-            <Text style={styles.actionText}>{I18n.t('rewards')}</Text>
+            <Text style={[styles.actionText, { color: themeColors.text }]}>
+              {I18n.t('rewards')}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[
@@ -140,7 +156,9 @@ const CreditUpiBankDetail = () => {
               { backgroundColor: themeColors.buttonBg },
             ]}
           >
-            <Text style={styles.actionText}>{I18n.t('offers')}</Text>
+            <Text style={[styles.actionText, { color: themeColors.text }]}>
+              {I18n.t('offers')}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -205,33 +223,39 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginTop: 10,
+    marginTop: scaleUtils.scaleHeight(10),
   },
   actionButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: Colors.white,
-    margin: 5,
+    width: '46%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: scaleUtils.scaleWidth(6),
+    height: scaleUtils.scaleHeight(35),
+    borderWidth: 0.5,
+    borderColor: Colors.white,
+    marginTop: scaleUtils.scaleHeight(10),
   },
   actionText: {
-    fontSize: scaleUtils.scaleFont(13),
-    color: Colors.primary,
+    fontSize: scaleUtils.scaleFont(12),
+    color: Colors.white,
     fontFamily: 'Poppins-Medium',
   },
   sectionTitle: {
     fontSize: scaleUtils.scaleFont(16),
     fontFamily: 'Poppins-SemiBold',
-    marginVertical: 10,
+    marginTop: scaleUtils.scaleHeight(8),
   },
   card: {
     borderRadius: scaleUtils.scaleWidth(12),
     paddingVertical: scaleUtils.scaleHeight(20),
     paddingHorizontal: scaleUtils.scaleWidth(14),
-    marginVertical: scaleUtils.scaleHeight(20),
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
+    marginBottom: scaleUtils.scaleHeight(20),
+    marginTop: scaleUtils.scaleHeight(14),
+    borderWidth: 0.2,
+    borderColor: Colors.black,
+    // shadowColor: '#000',
+    // shadowOpacity: 0.1,
+    // shadowRadius: 5,
     elevation: 3,
   },
   transactionRow: {
@@ -247,11 +271,15 @@ const styles = StyleSheet.create({
     fontSize: scaleUtils.scaleFont(13),
     fontFamily: 'Poppins-SemiBold',
   },
-  spendLimit: { fontSize: scaleUtils.scaleFont(12), marginBottom: 5 },
+  spendLimit: {
+    fontSize: scaleUtils.scaleFont(12),
+    marginVertical: scaleUtils.scaleHeight(4),
+    marginBottom: scaleUtils.scaleHeight(10),
+  },
   billRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
+    marginTop: scaleUtils.scaleHeight(10),
   },
   bottomButton: {
     flex: 1,
@@ -259,5 +287,41 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginHorizontal: 5,
+  },
+  badge: {
+    paddingHorizontal: scaleUtils.scaleWidth(10),
+    paddingVertical: scaleUtils.scaleHeight(3),
+    borderRadius: scaleUtils.scaleWidth(8),
+  },
+  badgeText: {
+    fontSize: scaleUtils.scaleFont(13),
+    fontFamily: 'Poppins-Medium',
+    color: Colors.white,
+  },
+  bankInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: scaleUtils.scaleWidth(10),
+  },
+  bankIcon: {
+    width: scaleUtils.scaleWidth(30),
+    height: scaleUtils.scaleWidth(30),
+    resizeMode: 'contain',
+  },
+  bankName: {
+    fontSize: scaleUtils.scaleFont(15),
+    fontFamily: 'Poppins-SemiBold',
+  },
+  bankSub: {
+    fontSize: scaleUtils.scaleFont(12),
+    fontFamily: 'Poppins-Regular',
+  },
+  imageWrapperStyle: {
+    width: scaleUtils.scaleWidth(45),
+    height: scaleUtils.scaleWidth(45),
+    borderRadius: scaleUtils.scaleWidth(6),
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
