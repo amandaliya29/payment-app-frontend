@@ -21,6 +21,7 @@ import CreditUPILoadingScreen from '../screen/user/CreditUPILoadingScreen';
 import CreditSetPinPage from '../screen/user/CreditSetPinPage';
 import CreditUpiBankDetail from '../screen/user/CreditUpiBankDetail';
 import { Colors } from '../themes/Colors';
+import SplashScreen from '../screen/auth/SplashScreen';
 
 const Stack = createStackNavigator();
 
@@ -42,6 +43,7 @@ const StackNavigation = () => {
           }, // 👈 use theme bg
         }}
       >
+        <Stack.Screen name="Splash" component={SplashScreen} />
         <Stack.Screen name="MobileNumberEntry" component={MobileNumberEntry} />
         <Stack.Screen name="OtpVerification" component={OtpVerification} />
         <Stack.Screen name="BankLinkScreen" component={BankLinkScreen} />
