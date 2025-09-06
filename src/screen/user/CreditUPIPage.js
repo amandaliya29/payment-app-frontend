@@ -138,7 +138,9 @@ const BankCard = ({
   const isInactive = status === 'inactive';
 
   return (
-    <View
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={() => navigation.navigate('CreditUpiBankDetail')}
       style={[
         styles.bankCard,
         {
@@ -268,7 +270,7 @@ const BankCard = ({
           </View>
         </>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 
