@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,8 @@ const SetPinPage = () => {
   const navigation = useNavigation();
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
-  const pinLength = 4; // Fixed 4-digit PIN
+  const pinLength = 4;
+  const confirmPinRef = useRef(null);
 
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
@@ -30,13 +31,18 @@ const SetPinPage = () => {
     tipBox: isDark ? Colors.secondary : Colors.cardGrey,
   };
 
+  // When PIN is completed, focus on Confirm PIN
+  const handlePinChange = val => {
+    setPin(val);
+    if (val.length === pinLength) {
+      confirmPinRef.current?.focus(); // Auto focus confirm PIN field
+    }
+  };
+
   const handleSetup = () => {
     navigation.reset({
-      index: 1, // CreditUPIPage will be on top
-      routes: [
-        { name: 'HomePage' }, // Bottom of stack
-        { name: 'CreditUPIPage' }, // Top of stack
-      ],
+      index: 1,
+      routes: [{ name: 'HomePage' }, { name: 'CreditUPIPage' }],
     });
   };
 
@@ -60,16 +66,6 @@ const SetPinPage = () => {
           {I18n.t('upi_pin_description')}
         </Text>
 
-        {/* Security Box */}
-        <View style={[styles.tipBox, { backgroundColor: themeColors.tipBox }]}>
-          <Text style={[styles.tipTitle, { color: themeColors.text }]}>
-            {I18n.t('upi_pin_security')}
-          </Text>
-          <Text style={[styles.tipText, { color: themeColors.text }]}>
-            {I18n.t('upi_security_note')}
-          </Text>
-        </View>
-
         {/* Enter PIN */}
         <Text style={[styles.label, { color: themeColors.text }]}>
           {I18n.t('enter_credit_upi_pin')}
@@ -77,7 +73,7 @@ const SetPinPage = () => {
         <View style={{ alignSelf: 'center' }}>
           <OTPInput
             code={pin}
-            setCode={setPin}
+            setCode={handlePinChange}
             length={pinLength}
             isSecure={true}
           />
@@ -89,6 +85,7 @@ const SetPinPage = () => {
         </Text>
         <View style={{ alignSelf: 'center' }}>
           <OTPInput
+            ref={confirmPinRef}
             code={confirmPin}
             setCode={setConfirmPin}
             length={pinLength}
