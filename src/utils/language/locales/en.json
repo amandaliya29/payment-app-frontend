@@ -208,5 +208,11 @@
   "spend_tracker": "Spend Tracker",
   "upcoming_bill": "Upcoming Bill Date",
   "rewards": "Rewards",
-  "offers": "Offers"
+  "offers": "Offers",
+
+  "credit_upi_s": "Credit UPI",
+  "pay_now_settle_later": "Pay Now, Settle Later",
+  "upi_desc": "Seamless UPI payments with monthly bill, powered by NBFC.",
+  "activate_credit_upi": "Activate Credit UPI",
+  "upi_powered_by": "Credit UPI is powered by [NBFC]"
 }

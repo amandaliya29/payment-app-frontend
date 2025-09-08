@@ -20,6 +20,7 @@ import CreditUPIStatusScreen from '../screen/user/CreditUPIStatusScreen';
 import CreditUPILoadingScreen from '../screen/user/CreditUPILoadingScreen';
 import CreditSetPinPage from '../screen/user/CreditSetPinPage';
 import CreditUpiBankDetail from '../screen/user/CreditUpiBankDetail';
+import HbfcCraditUpi from '../screen/hbfcCraditUpi/HbfcCraditUpi';
 import { Colors } from '../themes/Colors';
 import SplashScreen from '../screen/auth/SplashScreen';
 
@@ -86,6 +87,7 @@ const StackNavigation = () => {
           name="CreditUpiBankDetail"
           component={CreditUpiBankDetail}
         />
+        <Stack.Screen name="HbfcCraditUpi" component={HbfcCraditUpi} />
       </Stack.Navigator>
     </>
   );
