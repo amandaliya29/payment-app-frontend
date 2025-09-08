@@ -16,17 +16,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../component/Button';
 import OTPInput from '../../component/OTPInput';
 import { useTranslation } from 'react-i18next';
+import auth from '@react-native-firebase/auth';
 
 const OtpVerification = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { confirm, mobile } = route.params || {};
+  const { verificationId, mobile } = route.params || {}; // updated to receive verificationId
   const [code, setCode] = useState('');
   const [timer, setTimer] = useState(30);
   const { t } = useTranslation();
   const { colors, dark } = useTheme();
 
-  // Countdown timer for Resend OTP
   useEffect(() => {
     if (timer > 0) {
       const interval = setInterval(() => setTimer(prev => prev - 1), 1000);
@@ -34,45 +34,43 @@ const OtpVerification = () => {
     }
   }, [timer]);
 
-  // Handle OTP verification
   const handleVerifyOtp = async () => {
     if (code.length !== 6) {
       Alert.alert(t('error'), t('alert_invalid_otp'));
       return;
     }
     try {
-      // Firebase OTP verification
-      const result = await confirm.confirm(code);
+      // Create credential using verificationId + OTP
+      const credential = auth.PhoneAuthProvider.credential(
+        verificationId,
+        code,
+      );
 
-      // Get user object
+      // Sign in with the credential
+      const result = await auth().signInWithCredential(credential);
+
+      // Extract user info
       const user = result.user;
-
-      // Extract required info
-      const identifier = user.phoneNumber || user.email;
-      const providers = user.providerData.map(p => p.providerId).join(', ');
-      const created = user.metadata.creationTime;
-      const signedIn = user.metadata.lastSignInTime;
-      const uid = user.uid;
-
-      // Log in console
-      console.log('Identifier:', identifier);
-      console.log('Providers:', providers);
-      console.log('Created:', created);
-      console.log('Signed In:', signedIn);
-      console.log('User UID:', uid);
+      console.log('Identifier:', user.phoneNumber || user.email);
+      console.log(
+        'Providers:',
+        user.providerData.map(p => p.providerId).join(', '),
+      );
+      console.log('Created:', user.metadata.creationTime);
+      console.log('Signed In:', user.metadata.lastSignInTime);
+      console.log('User UID:', user.uid);
 
       Alert.alert(t('success'), t('otp_verified'));
-      navigation.replace('BankLinkScreen');
+      navigation.replace('BankLinkScreen'); // your next screen
     } catch (error) {
       Alert.alert(t('error'), t('invalid_otp_message'));
     }
   };
 
-  // Resend OTP handler
   const handleResend = () => {
     if (timer === 0) {
       setTimer(30);
-      console.log('Resend OTP triggered');
+      navigation.replace('MobileNumberEntry', { mobile }); // resend OTP
     }
   };
 
@@ -144,7 +142,6 @@ const OtpVerification = () => {
           </Text>
         </Text>
 
-        {/* Timer */}
         <Text style={[styles.timer, { color: colors.text }]}>
           {`00:${timer < 10 ? `0${timer}` : timer}`}
         </Text>

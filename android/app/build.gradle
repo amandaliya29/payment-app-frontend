@@ -30,14 +30,24 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            // ✅ Update these values with your release keystore details
+            storeFile file("my-release-key.keystore")  // Place keystore in android/app folder
+            storePassword project.MYAPP_KEYSTORE_PASSWORD
+            keyAlias "my-key-alias"
+            keyPassword project.MYAPP_KEY_PASSWORD
+        }
     }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            signingConfig signingConfigs.debug
+            // ✅ Use release signing config for real OTP
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
+            shrinkResources false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
