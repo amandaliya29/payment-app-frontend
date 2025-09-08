@@ -66,15 +66,22 @@ const HomePage = () => {
           </TouchableOpacity>
         </View>
 
-        {/* 🎯 Banner */}
-        <LinearGradient
-          colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
-          style={styles.banner}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={{ flex: 1 }}
+          onPress={() => {
+            navigation.navigate('HbfcCraditUpi');
+          }}
         >
-          <Text style={[styles.bannerText, { color: Colors.white }]}>
-            {I18n.t('credit_upi_banner')}
-          </Text>
-        </LinearGradient>
+          <LinearGradient
+            colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
+            style={styles.banner}
+          >
+            <Text style={[styles.bannerText, { color: Colors.white }]}>
+              {I18n.t('credit_upi_banner')}
+            </Text>
+          </LinearGradient>
+        </TouchableOpacity>
 
         {/* ⚡ Quick Actions (3 per row) */}
         <Text style={[styles.sectionTitle, { color: themeColors.text }]}>

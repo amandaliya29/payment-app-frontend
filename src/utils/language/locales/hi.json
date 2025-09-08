@@ -208,5 +208,11 @@
   "spend_tracker": "खर्च ट्रैकर",
   "upcoming_bill": "आगामी बिल तिथि",
   "rewards": "इनाम",
-  "offers": "ऑफ़र"
+  "offers": "ऑफ़र",
+
+  "credit_upi": "क्रेडिट UPI",
+  "pay_now_settle_later": "अभी भुगतान करें, बाद में निपटान करें",
+  "upi_desc": "मासिक बिल के साथ आसान UPI भुगतान, NBFC द्वारा संचालित।",
+  "activate_credit_upi": "क्रेडिट UPI सक्रिय करें",
+  "upi_powered_by": "क्रेडिट UPI [NBFC] द्वारा संचालित है"
 }

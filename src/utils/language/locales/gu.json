@@ -220,5 +220,11 @@
   "spend_tracker": "ખર્ચ ટ્રેકર",
   "upcoming_bill": "આગામી બિલ તારીખ",
   "rewards": "ઇનામ",
-  "offers": "ઓફર્સ"
+  "offers": "ઓફર્સ",
+
+  "credit_upi_s": "ક્રેડિટ UPI",
+  "pay_now_settle_later": "હવે ચૂકવો, પછી સેટલ કરો",
+  "upi_desc": "માસિક બિલ સાથે સરળ UPI ચુકવણી, NBFC દ્વારા સંચાલિત.",
+  "activate_credit_upi": "ક્રેડિટ UPI સક્રિય કરો",
+  "upi_powered_by": "ક્રેડિટ UPI [NBFC] દ્વારા સંચાલિત છે"
 }
