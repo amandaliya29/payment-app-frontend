@@ -30,6 +30,7 @@ export const MobileNumberEntry = () => {
   const [isChecked, setIsChecked] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [verificationId, setVerificationId] = useState(null);
 
   const languages = [
     { code: 'en', label: 'English' },
@@ -43,7 +44,6 @@ export const MobileNumberEntry = () => {
     }
   }, [route.params?.mobile]);
 
-  // ✅ Send OTP using Firebase
   const handleProceed = async () => {
     if (mobile.length !== 10) {
       Alert.alert(t('alert_invalid_number'));
@@ -56,9 +56,49 @@ export const MobileNumberEntry = () => {
 
     try {
       setLoading(true);
-      const confirmation = await auth().signInWithPhoneNumber(`+91${mobile}`);
-      setLoading(false);
-      navigation.navigate('OtpVerification', { confirm: confirmation, mobile });
+      const phoneNumber = `+91${mobile}`;
+
+      const unsubscribe = auth().verifyPhoneNumber(phoneNumber);
+
+      unsubscribe.on('state_changed', phoneAuthSnapshot => {
+        switch (phoneAuthSnapshot.state) {
+          case auth.PhoneAuthState.CODE_SENT:
+            setVerificationId(phoneAuthSnapshot.verificationId);
+            setLoading(false);
+            navigation.navigate('OtpVerification', {
+              verificationId: phoneAuthSnapshot.verificationId,
+              mobile,
+            });
+            break;
+
+          case auth.PhoneAuthState.AUTO_VERIFIED:
+            const { verificationId, code } = phoneAuthSnapshot;
+            const credential = auth.PhoneAuthProvider.credential(
+              verificationId,
+              code,
+            );
+            auth()
+              .signInWithCredential(credential)
+              .then(() => {
+                setLoading(false);
+                navigation.navigate('Home'); // Change to your next screen
+              })
+              .catch(err => {
+                setLoading(false);
+                Alert.alert('Error', err.message);
+              });
+            break;
+
+          case auth.PhoneAuthState.ERROR:
+            setLoading(false);
+            Alert.alert('Error', phoneAuthSnapshot.error.message);
+            break;
+
+          case auth.PhoneAuthState.CODE_AUTO_RETRIEVED:
+            // Optional auto-retrieved code handling
+            break;
+        }
+      });
     } catch (error) {
       setLoading(false);
       Alert.alert('Error', error.message);
@@ -77,7 +117,6 @@ export const MobileNumberEntry = () => {
         { backgroundColor: dark ? Colors.bg : colors.background },
       ]}
     >
-      {/* Top bar with Language Button */}
       <View style={styles.topBar}>
         <TouchableOpacity
           style={[styles.BtnWarperStyle, { backgroundColor: Colors.primary }]}
@@ -137,7 +176,6 @@ export const MobileNumberEntry = () => {
           />
         </View>
 
-        {/* Title */}
         <Text style={[styles.heading, { color: colors.text }]}>
           {t('enter_mobile_number')}
         </Text>
@@ -145,7 +183,6 @@ export const MobileNumberEntry = () => {
           {t('verification_message')}
         </Text>
 
-        {/* Input */}
         <Input
           label={t('mobile_number_label')}
           value={mobile}
@@ -160,12 +197,10 @@ export const MobileNumberEntry = () => {
           }
         />
 
-        {/* Validation */}
         <Text style={[styles.validationText, { color: colors.text }]}>
           {t('validation_message')}
         </Text>
 
-        {/* Checkbox */}
         <Checkbox
           checked={isChecked}
           onChange={setIsChecked}
@@ -183,7 +218,6 @@ export const MobileNumberEntry = () => {
           }
         />
 
-        {/* Proceed Button */}
         <View style={{ marginBottom: scaleUtils.scaleHeight(20) }}>
           <Button
             title={t('proceed')}
@@ -199,7 +233,7 @@ export const MobileNumberEntry = () => {
 
 export default MobileNumberEntry;
 
-// Keep your same styles here...
+// Styles remain unchanged
 const styles = StyleSheet.create({
   container: { flex: 1 },
   topBar: {

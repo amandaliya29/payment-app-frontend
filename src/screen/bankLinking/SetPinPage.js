@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,8 @@ const SetPinPage = () => {
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
 
+  const confirmPinRef = useRef(null);
+
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
   const themeColors = {
@@ -34,6 +36,13 @@ const SetPinPage = () => {
 
   const handleSetup = () => {
     navigation.navigate('HomePage');
+  };
+
+  const handlePinChange = value => {
+    setPin(value);
+    if (value.length === parseInt(pinLength)) {
+      confirmPinRef.current?.focus(); // Focus Confirm PIN when Set PIN is full
+    }
   };
 
   return (
@@ -60,7 +69,7 @@ const SetPinPage = () => {
         <View style={{ alignSelf: 'center' }}>
           <OTPInput
             code={pin}
-            setCode={setPin}
+            setCode={handlePinChange}
             length={parseInt(pinLength)}
             isSecure={true}
           />
@@ -72,6 +81,7 @@ const SetPinPage = () => {
         </Text>
         <View style={{ alignSelf: 'center' }}>
           <OTPInput
+            ref={confirmPinRef}
             code={confirmPin}
             setCode={setConfirmPin}
             length={parseInt(pinLength)}
