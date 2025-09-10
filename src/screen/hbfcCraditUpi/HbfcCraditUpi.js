@@ -5,14 +5,18 @@ import {
   StyleSheet,
   TouchableOpacity,
   useColorScheme,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
 import { Colors } from '../../themes/Colors';
 import Button from '../../component/Button';
+import Header from '../../component/Header';
+import { useNavigation } from '@react-navigation/native';
 
 const HbfcCraditUpi = () => {
+  const navigation = useNavigation();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
@@ -29,7 +33,15 @@ const HbfcCraditUpi = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
+      <Header title={I18n.t('credit_upi')} onBack={() => navigation.goBack()} />
       <View style={styles.content}>
+        <View style={styles.imagesWarperStyle}>
+          <Image
+            source={require('../../assets/image/appIcon/creditUpi.png')}
+            style={[styles.imageStyle, { tintColor: Colors.primary }]}
+          />
+        </View>
+
         <Text style={[styles.title, { color: themeColors.text }]}>
           {I18n.t('credit_upi')}
         </Text>
@@ -49,7 +61,10 @@ const HbfcCraditUpi = () => {
         </TouchableOpacity> */}
 
         <View style={styles.buttonStyle}>
-          <Button title={I18n.t('activate_credit_upi')} />
+          <Button
+            title={I18n.t('activate_credit_upi')}
+            onPress={() => navigation.navigate('CreditUPITerms')}
+          />
         </View>
 
         <Text style={[styles.footer, { color: themeColors.subText }]}>
@@ -61,22 +76,33 @@ const HbfcCraditUpi = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center' },
+  container: { flex: 1 },
   content: {
+    flex: 1,
     alignItems: 'center',
+    // justifyContent: 'center',
+    marginTop: scaleUtils.scaleHeight(60),
     paddingHorizontal: scaleUtils.scaleWidth(20),
   },
   title: {
-    fontSize: scaleUtils.scaleFont(28),
+    fontSize: scaleUtils.scaleFont(22),
     fontFamily: 'Poppins-Bold',
-    marginTop: scaleUtils.scaleHeight(20),
+    marginBottom: scaleUtils.scaleHeight(8),
     textAlign: 'center',
   },
+  imageStyle: { width: '100%', height: '100%', resizeMode: 'contain' },
+  imagesWarperStyle: {
+    width: scaleUtils.scaleWidth(100),
+    height: scaleUtils.scaleWidth(100),
+    marginVertical: scaleUtils.scaleHeight(20),
+    // backgroundColor: 'red',
+    alignSelf: 'center',
+  },
   subtitle: {
-    fontSize: scaleUtils.scaleFont(20),
+    fontSize: scaleUtils.scaleFont(18),
     fontFamily: 'Poppins-SemiBold',
     textAlign: 'center',
-    marginTop: scaleUtils.scaleHeight(10),
+    // marginTop: scaleUtils.scaleHeight(20),
     marginBottom: scaleUtils.scaleHeight(20),
   },
   description: {
@@ -86,26 +112,19 @@ const styles = StyleSheet.create({
     marginBottom: scaleUtils.scaleHeight(24),
     paddingHorizontal: scaleUtils.scaleWidth(10),
   },
-  button: {
-    paddingVertical: scaleUtils.scaleHeight(14),
-    paddingHorizontal: scaleUtils.scaleWidth(40),
-    borderRadius: scaleUtils.scaleWidth(10),
-    marginBottom: scaleUtils.scaleHeight(30),
-  },
-  buttonText: {
-    fontSize: scaleUtils.scaleFont(16),
-    fontFamily: 'Poppins-Bold',
-    textAlign: 'center',
-  },
   footer: {
-    fontSize: scaleUtils.scaleFont(13),
+    fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
     textAlign: 'center',
-    marginTop: '20%',
+    // marginTop: '20%',
+    position: 'absolute',
+    bottom: scaleUtils.scaleHeight(20),
   },
   buttonStyle: {
     paddingVertical: scaleUtils.scaleHeight(14),
     width: '100%',
+    position: 'absolute',
+    bottom: scaleUtils.scaleHeight(40),
   },
 });
 
