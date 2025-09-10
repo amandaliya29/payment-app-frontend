@@ -248,5 +248,10 @@
   "hbfc_resend_in": "फिर से भेजें",
   "hbfc_resend_now": "अभी भेजें",
   "hbfc_verify_activate": "सत्यापित करें और सक्रिय करें",
-  "hbfc_terms_condition": "आगे बढ़ते हुए, आप नियम और शर्तों से सहमत हैं"
+  "hbfc_terms_condition": "आगे बढ़ते हुए, आप नियम और शर्तों से सहमत हैं",
+
+  "hbfc_credit_limit_ready": "आपकी क्रेडिट सीमा तैयार है",
+  "hbfc_credit_limit_message": "अब आप अपने HDFC क्रेडिट UPI का उपयोग असाइन की गई क्रेडिट सीमा के साथ लेन-देन के लिए कर सकते हैं।",
+  "hbfc_credit_limit": "क्रेडिट सीमा",
+  "hbfc_credit_limit_desc": "यह आपकी असाइन की गई क्रेडिट सीमा है जिससे आप आसानी से लेन-देन कर सकते हैं।"
 }

@@ -248,5 +248,10 @@
   "hbfc_resend_in": "Resend in",
   "hbfc_resend_now": "Resend Now",
   "hbfc_verify_activate": "Verify & Activate",
-  "hbfc_terms_condition": "By proceeding, you agree to the Terms & Conditions"
+  "hbfc_terms_condition": "By proceeding, you agree to the Terms & Conditions",
+
+  "hbfc_credit_limit_ready": "Your Credit Limit is Ready",
+  "hbfc_credit_limit_message": "You can now use your HDFC Credit UPI for transactions with the assigned credit limit.",
+  "hbfc_credit_limit": "Credit Limit",
+  "hbfc_credit_limit_desc": "This is your assigned credit limit for seamless transactions."
 }

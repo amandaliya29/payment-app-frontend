@@ -24,6 +24,8 @@ import HbfcCraditUpi from '../screen/hbfcCraditUpi/HbfcCraditUpi';
 import CreditUPITerms from '../screen/hbfcCraditUpi/CreditUPITerms';
 import MobileHbfc from '../screen/hbfcCraditUpi/MobileHbfc';
 import HbfCreditUpiVerification from '../screen/hbfcCraditUpi/HbfCreditUpiVerification';
+import HbfcCrditLoadingScreen from '../screen/hbfcCraditUpi/HbfcCrditLoadingScreen';
+import HbfcCreditLimitActivate from '../screen/hbfcCraditUpi/HbfcCreditLimitActivate';
 import { Colors } from '../themes/Colors';
 import SplashScreen from '../screen/auth/SplashScreen';
 
@@ -92,10 +94,18 @@ const StackNavigation = () => {
         />
         <Stack.Screen name="HbfcCraditUpi" component={HbfcCraditUpi} />
         <Stack.Screen name="CreditUPITerms" component={CreditUPITerms} />
-        {/* <Stack.Screen name="MobileHbfc" component={MobileHbfc} />
+        <Stack.Screen name="MobileHbfc" component={MobileHbfc} />
         <Stack.Screen
           name="HbfCreditUpiVerification"
           component={HbfCreditUpiVerification}
+        />
+        {/* <Stack.Screen
+          name="HbfcCrditLoadingScreen"
+          component={HbfcCrditLoadingScreen}
+        />
+        <Stack.Screen
+          name="HbfcCreditLimitActivate"
+          component={HbfcCreditLimitActivate}
         /> */}
       </Stack.Navigator>
     </>

@@ -7,6 +7,7 @@ import {
   useColorScheme,
   Image,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import I18n from '../../utils/language/i18n';
 import { Colors } from '../../themes/Colors';
@@ -26,8 +27,6 @@ const CreditUPITerms = () => {
     bg: isDark ? Colors.bg : Colors.lightBg,
     text: isDark ? Colors.white : Colors.black,
     subText: isDark ? Colors.grey : Colors.darkGrey,
-    card: isDark ? Colors.secondary : Colors.cardGrey,
-    button: isDark ? Colors.secondary : Colors.primary,
     buttonText: Colors.white,
   };
 
@@ -50,8 +49,11 @@ const CreditUPITerms = () => {
           {I18n.t('credit_upi_terms_title')}
         </Text>
 
-        {/* Card with improved design */}
-        <View style={[styles.card, { backgroundColor: themeColors.card }]}>
+        {/* Gradient Card */}
+        <LinearGradient
+          colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
+          style={styles.cardGradient}
+        >
           {terms.map((item, index) => (
             <View key={index} style={styles.termRow}>
               <View style={styles.iconWrapper}>
@@ -61,12 +63,12 @@ const CreditUPITerms = () => {
                   resizeMode="contain"
                 />
               </View>
-              <Text style={[styles.termText, { color: themeColors.text }]}>
+              <Text style={[styles.termText, { color: Colors.white }]}>
                 {item}
               </Text>
             </View>
           ))}
-        </View>
+        </LinearGradient>
 
         {/* Checkbox Section */}
         <Checkbox
@@ -86,7 +88,7 @@ const CreditUPITerms = () => {
             title={I18n.t('agree_continue')}
             textStyle={{ color: themeColors.buttonText }}
             disabled={!agree}
-            // onPress={() => navigation.navigate('MobileHbfc')}
+            onPress={() => navigation.navigate('MobileHbfc')}
           />
         </View>
       </ScrollView>
@@ -111,27 +113,29 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginVertical: scaleUtils.scaleHeight(20),
   },
-  card: {
+  cardGradient: {
     borderRadius: scaleUtils.scaleWidth(12),
-    padding: scaleUtils.scaleHeight(14),
+    paddingVertical: scaleUtils.scaleHeight(14),
+    paddingHorizontal: scaleUtils.scaleWidth(14),
     marginBottom: scaleUtils.scaleHeight(16),
-    elevation: 3,
+    rowGap: scaleUtils.scaleHeight(14),
+    elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
   },
   termRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    columnGap: scaleUtils.scaleWidth(14),
-    marginBottom: scaleUtils.scaleHeight(12),
+    columnGap: scaleUtils.scaleWidth(12),
+    // marginBottom: scaleUtils.scaleHeight(12),
   },
   iconWrapper: {
     width: scaleUtils.scaleWidth(22),
     height: scaleUtils.scaleWidth(22),
     borderRadius: scaleUtils.scaleWidth(11),
-    backgroundColor: Colors.secondaryBg,
+    backgroundColor: Colors.cardGrey,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 2,
@@ -139,7 +143,7 @@ const styles = StyleSheet.create({
   checkIcon: {
     width: scaleUtils.scaleWidth(16),
     height: scaleUtils.scaleWidth(16),
-    tintColor: Colors.white,
+    tintColor: Colors.primary,
   },
   termText: {
     fontSize: scaleUtils.scaleFont(12),

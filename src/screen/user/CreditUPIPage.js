@@ -87,14 +87,18 @@ const CreditUPIPage = () => {
 
       {/* Bottom Buttons */}
       <View style={styles.bottomRow}>
-        <Button
-          title={I18n.t('add_new_bank')}
-          onPress={() => console.log('Add Bank')}
-        />
-        <LineButton
-          title={I18n.t('transaction_history')}
-          onPress={() => console.log('Transaction History')}
-        />
+        <View style={{ flex: 1 }}>
+          <Button
+            title={I18n.t('add_new_bank')}
+            onPress={() => console.log('Add Bank')}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <LineButton
+            title={I18n.t('transaction_history')}
+            onPress={() => console.log('Transaction History')}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -358,6 +362,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: scaleUtils.scaleHeight(10),
     columnGap: scaleUtils.scaleWidth(12),
+    alignItems: 'center',
   },
 });
 

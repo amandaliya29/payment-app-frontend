@@ -260,5 +260,10 @@
   "hbfc_resend_in": "ફરી મોકલો",
   "hbfc_resend_now": "હમણાં મોકલો",
   "hbfc_verify_activate": "ચકાસો અને સક્રિય કરો",
-  "hbfc_terms_condition": "આગળ વધીને, તમે શરતો અને નિયમો માટે સંમત થાઓ છો"
+  "hbfc_terms_condition": "આગળ વધીને, તમે શરતો અને નિયમો માટે સંમત થાઓ છો",
+
+  "hbfc_credit_limit_ready": "તમારી ક્રેડિટ લિમિટ તૈયાર છે",
+  "hbfc_credit_limit_message": "હવે તમે તમારી HDFC ક્રેડિટ UPI નો ઉપયોગ સોંપેલ ક્રેડિટ લિમિટ સાથે વ્યવહારો માટે કરી શકો છો.",
+  "hbfc_credit_limit": "ક્રેડિટ લિમિટ",
+  "hbfc_credit_limit_desc": "આ તમારી સોંપેલ ક્રેડિટ લિમિટ છે જે સરળ વ્યવહારો માટે છે."
 }
