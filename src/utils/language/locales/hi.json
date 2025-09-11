@@ -226,7 +226,7 @@
   "agree_continue": "सहमत हूँ और आगे बढ़ें",
   "credit_upi_footer": "क्रेडिट UPI एक अल्पकालिक ऋण सुविधा है जो [NBFC नाम] द्वारा RBI नियमों के तहत प्रदान की जाती है।",
 
-  "hbfc_credit_upi": "HBFC क्रेडिट UPI",
+  "hbfc_credit_upi": "NBFC क्रेडिट UPI",
   "hbfc_enter_mobile_number": "मोबाइल नंबर दर्ज करें",
   "hbfc_verification_message": "हम आपके मोबाइल नंबर को सत्यापित करने के लिए OTP भेजेंगे।",
   "hbfc_mobile_number_label": "मोबाइल नंबर",
@@ -242,7 +242,7 @@
   "hbfc_alert_terms": "कृपया आगे बढ़ने के लिए नियम और शर्तों से सहमत हों।",
 
   "hbfc_otp_verification": "OTP सत्यापन",
-  "hbfc_activate_credit_upi": "HBFC क्रेडिट UPI सक्रिय करें",
+  "hbfc_activate_credit_upi": "NBFC क्रेडिट UPI सक्रिय करें",
   "hbfc_otp_instruction": "अपने पंजीकृत मोबाइल नंबर पर भेजा गया 6-अंकों का OTP दर्ज करें",
   "hbfc_didnt_receive": "कोड नहीं मिला?",
   "hbfc_resend_in": "फिर से भेजें",
@@ -251,7 +251,7 @@
   "hbfc_terms_condition": "आगे बढ़ते हुए, आप नियम और शर्तों से सहमत हैं",
 
   "hbfc_credit_limit_ready": "आपकी क्रेडिट सीमा तैयार है",
-  "hbfc_credit_limit_message": "अब आप अपने HDFC क्रेडिट UPI का उपयोग असाइन की गई क्रेडिट सीमा के साथ लेन-देन के लिए कर सकते हैं।",
+  "hbfc_credit_limit_message": "अब आप अपने NBFC क्रेडिट UPI का उपयोग असाइन की गई क्रेडिट सीमा के साथ लेन-देन के लिए कर सकते हैं।",
   "hbfc_credit_limit": "क्रेडिट सीमा",
   "hbfc_credit_limit_desc": "यह आपकी असाइन की गई क्रेडिट सीमा है जिससे आप आसानी से लेन-देन कर सकते हैं।"
 }

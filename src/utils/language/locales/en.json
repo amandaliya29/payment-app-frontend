@@ -226,7 +226,7 @@
   "agree_continue": "Agree & Continue",
   "credit_upi_footer": "Credit UPI is a short-term loan facility provided by [NBFC Name] under RBI regulations.",
 
-  "hbfc_credit_upi": "HBFC Credit UPI",
+  "hbfc_credit_upi": "NBFC Credit UPI",
   "hbfc_enter_mobile_number": "Enter Mobile Number",
   "hbfc_verification_message": "We will send an OTP to verify your mobile number.",
   "hbfc_mobile_number_label": "Mobile Number",
@@ -242,7 +242,7 @@
   "hbfc_alert_terms": "Please agree to Terms & Conditions to continue.",
 
   "hbfc_otp_verification": "OTP Verification",
-  "hbfc_activate_credit_upi": "Activate HBFC Credit UPI",
+  "hbfc_activate_credit_upi": "Activate NBFC Credit UPI",
   "hbfc_otp_instruction": "Enter the 6-digit OTP sent to your registered mobile number",
   "hbfc_didnt_receive": "Didn't receive the code?",
   "hbfc_resend_in": "Resend in",
@@ -251,7 +251,7 @@
   "hbfc_terms_condition": "By proceeding, you agree to the Terms & Conditions",
 
   "hbfc_credit_limit_ready": "Your Credit Limit is Ready",
-  "hbfc_credit_limit_message": "You can now use your HDFC Credit UPI for transactions with the assigned credit limit.",
+  "hbfc_credit_limit_message": "You can now use your NBFC Credit UPI for transactions with the assigned credit limit.",
   "hbfc_credit_limit": "Credit Limit",
   "hbfc_credit_limit_desc": "This is your assigned credit limit for seamless transactions."
 }

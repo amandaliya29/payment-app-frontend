@@ -85,7 +85,12 @@ const HbfcCreditLimitActivate = () => {
         {/* Activate Button */}
         <Button
           title={I18n.t('hbfc_verify_activate')}
-          onPress={() => navigation.navigate('HbfcCrditLoadingScreen')}
+          onPress={() =>
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'HomePage' }],
+            })
+          }
         />
 
         {/* Terms & Conditions */}

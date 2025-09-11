@@ -238,7 +238,7 @@
   "agree_continue": "સંમતિ આપો અને આગળ વધો",
   "credit_upi_footer": "ક્રેડિટ UPI એ ટૂંકા ગાળાની લોન સુવિધા છે જે [NBFC નામ] દ્વારા RBI નિયમો હેઠળ પૂરી પાડવામાં આવે છે.",
 
-  "hbfc_credit_upi": "HBFC ક્રેડિટ UPI",
+  "hbfc_credit_upi": "NBFC ક્રેડિટ UPI",
   "hbfc_enter_mobile_number": "મોબાઇલ નંબર દાખલ કરો",
   "hbfc_verification_message": "અમે તમારા મોબાઇલ નંબરને ચકાસવા માટે OTP મોકલીશું.",
   "hbfc_mobile_number_label": "મોબાઇલ નંબર",
@@ -254,7 +254,7 @@
   "hbfc_alert_terms": "કૃપા કરીને આગળ વધવા માટે શરતો અને નિયમો સાથે સંમત થાઓ.",
 
   "hbfc_otp_verification": "OTP ચકાસણી",
-  "hbfc_activate_credit_upi": "HBFC ક્રેડિટ UPI સક્રિય કરો",
+  "hbfc_activate_credit_upi": "NBFC ક્રેડિટ UPI સક્રિય કરો",
   "hbfc_otp_instruction": "તમારા નોંધાયેલા મોબાઇલ નંબર પર મોકલેલ 6-અંકનો OTP દાખલ કરો",
   "hbfc_didnt_receive": "કોડ મળ્યો નથી?",
   "hbfc_resend_in": "ફરી મોકલો",
@@ -263,7 +263,7 @@
   "hbfc_terms_condition": "આગળ વધીને, તમે શરતો અને નિયમો માટે સંમત થાઓ છો",
 
   "hbfc_credit_limit_ready": "તમારી ક્રેડિટ લિમિટ તૈયાર છે",
-  "hbfc_credit_limit_message": "હવે તમે તમારી HDFC ક્રેડિટ UPI નો ઉપયોગ સોંપેલ ક્રેડિટ લિમિટ સાથે વ્યવહારો માટે કરી શકો છો.",
+  "hbfc_credit_limit_message": "હવે તમે તમારી NBFC ક્રેડિટ UPI નો ઉપયોગ સોંપેલ ક્રેડિટ લિમિટ સાથે વ્યવહારો માટે કરી શકો છો.",
   "hbfc_credit_limit": "ક્રેડિટ લિમિટ",
   "hbfc_credit_limit_desc": "આ તમારી સોંપેલ ક્રેડિટ લિમિટ છે જે સરળ વ્યવહારો માટે છે."
 }

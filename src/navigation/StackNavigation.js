@@ -99,14 +99,14 @@ const StackNavigation = () => {
           name="HbfCreditUpiVerification"
           component={HbfCreditUpiVerification}
         />
-        {/* <Stack.Screen
+        <Stack.Screen
           name="HbfcCrditLoadingScreen"
           component={HbfcCrditLoadingScreen}
         />
         <Stack.Screen
           name="HbfcCreditLimitActivate"
           component={HbfcCreditLimitActivate}
-        /> */}
+        />
       </Stack.Navigator>
     </>
   );

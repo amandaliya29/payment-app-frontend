@@ -106,7 +106,7 @@ const HbfCreditUpiVerification = () => {
         <Button
           title={I18n.t('hbfc_verify_activate')}
           disabled={otp.length !== 6}
-          // onPress={() => navigation.navigate('HbfcCrditLoadingScreen')}
+          onPress={() => navigation.navigate('HbfcCrditLoadingScreen')}
         />
 
         {/* Terms & Conditions at Bottom */}
