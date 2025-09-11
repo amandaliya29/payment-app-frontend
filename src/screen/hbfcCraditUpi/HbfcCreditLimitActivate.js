@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -12,18 +12,16 @@ import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import I18n from '../../utils/language/i18n';
-import OTPInput from '../../component/OTPInput';
-import { useNavigation } from '@react-navigation/native';
 import Button from '../../component/Button';
+import { useNavigation } from '@react-navigation/native';
+import LinearGradient from 'react-native-linear-gradient';
 
-const HbfCreditUpiVerification = () => {
+const HbfcCreditLimitActivate = () => {
   const navigation = useNavigation();
-  const [otp, setOtp] = useState('');
-  const [timer, setTimer] = useState(45);
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
-  // Theme colors
+  // Theme Colors
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
     text: isDark ? Colors.white : Colors.black,
@@ -32,24 +30,12 @@ const HbfCreditUpiVerification = () => {
     primary: Colors.primary,
   };
 
-  // Timer logic
-  useEffect(() => {
-    if (timer === 0) return;
-    const interval = setInterval(() => setTimer(prev => prev - 1), 1000);
-    return () => clearInterval(interval);
-  }, [timer]);
-
-  const handleResend = useCallback(() => {
-    setTimer(45);
-    // Resend OTP API call here
-  }, []);
-
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
       <Header
-        title={I18n.t('hbfc_otp_verification')}
+        title={I18n.t('credit_upi_setup')}
         onBack={() => navigation.goBack()}
       />
 
@@ -58,7 +44,7 @@ const HbfCreditUpiVerification = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* Icon Section */}
-        <View style={styles.content}>
+        <View style={styles.topContainer}>
           <View
             style={[
               styles.iconContainer,
@@ -66,50 +52,48 @@ const HbfCreditUpiVerification = () => {
             ]}
           >
             <Image
-              source={require('../../assets/image/homeIcon/card.png')}
+              source={require('../../assets/image/appIcon/success.png')}
               style={styles.iconImage}
             />
           </View>
           <Text style={[styles.title, { color: themeColors.text }]}>
-            {I18n.t('hbfc_activate_credit_upi')}
+            {I18n.t('hbfc_credit_limit_ready')}
           </Text>
           <Text style={[styles.subtitle, { color: themeColors.subText }]}>
-            {I18n.t('hbfc_otp_instruction')}
+            {I18n.t('hbfc_credit_limit_message')}
           </Text>
         </View>
 
-        {/* OTP Input */}
-        <View style={styles.otpContainer}>
-          <OTPInput code={otp} setCode={setOtp} length={6} />
-        </View>
-
-        {/* Resend OTP */}
-        <View style={styles.resendContainer}>
-          <Text style={[styles.resendText, { color: themeColors.subText }]}>
-            {I18n.t('hbfc_didnt_receive')}
+        {/* Credit Limit Details */}
+        <LinearGradient
+          colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
+          style={styles.card}
+        >
+          <Text style={[styles.limitTitle, { color: themeColors.text }]}>
+            {I18n.t('hbfc_credit_limit')}
           </Text>
-          {timer > 0 ? (
-            <Text style={[styles.resendTime, { color: themeColors.primary }]}>
-              {I18n.t('hbfc_resend_in')} {timer}s
-            </Text>
-          ) : (
-            <Text
-              style={[styles.resendNow, { color: themeColors.primary }]}
-              onPress={handleResend}
-            >
-              {I18n.t('hbfc_resend_now')}
-            </Text>
-          )}
-        </View>
+          <Text style={[styles.limitAmount, { color: themeColors.text }]}>
+            ₹50,000
+          </Text>
+          <Text
+            style={[styles.limitDescription, { color: themeColors.subText }]}
+          >
+            {I18n.t('hbfc_credit_limit_desc')}
+          </Text>
+        </LinearGradient>
 
-        {/* Verify Button */}
+        {/* Activate Button */}
         <Button
           title={I18n.t('hbfc_verify_activate')}
-          disabled={otp.length !== 6}
-          onPress={() => navigation.navigate('HbfcCrditLoadingScreen')}
+          onPress={() =>
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'HomePage' }],
+            })
+          }
         />
 
-        {/* Terms & Conditions at Bottom */}
+        {/* Terms & Conditions */}
         <View style={styles.bottomContainer}>
           <Text style={[styles.bottomText, { color: themeColors.subText }]}>
             {I18n.t('hbfc_terms_condition')}
@@ -120,7 +104,7 @@ const HbfCreditUpiVerification = () => {
   );
 };
 
-export default HbfCreditUpiVerification;
+export default HbfcCreditLimitActivate;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -130,18 +114,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: scaleUtils.scaleWidth(16),
     paddingBottom: scaleUtils.scaleHeight(20),
   },
-  content: {
+  topContainer: {
     alignItems: 'center',
     marginTop: scaleUtils.scaleHeight(30),
   },
   iconContainer: {
     borderRadius: scaleUtils.scaleWidth(50),
-    padding: scaleUtils.scaleWidth(22),
+    padding: scaleUtils.scaleWidth(26),
     marginBottom: scaleUtils.scaleHeight(20),
   },
   iconImage: {
-    width: scaleUtils.scaleWidth(34),
-    height: scaleUtils.scaleWidth(34),
+    width: scaleUtils.scaleWidth(40),
+    height: scaleUtils.scaleWidth(40),
     tintColor: Colors.white,
   },
   title: {
@@ -153,33 +137,29 @@ const styles = StyleSheet.create({
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Regular',
     textAlign: 'center',
-    marginTop: scaleUtils.scaleHeight(20),
+    marginTop: scaleUtils.scaleHeight(10),
     marginBottom: scaleUtils.scaleHeight(20),
     paddingHorizontal: scaleUtils.scaleWidth(20),
   },
-  otpContainer: {
-    alignSelf: 'center',
-  },
-  resendContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  card: {
+    borderRadius: scaleUtils.scaleWidth(10),
+    padding: scaleUtils.scaleWidth(20),
+    marginVertical: scaleUtils.scaleHeight(20),
     alignItems: 'center',
-    marginVertical: scaleUtils.scaleHeight(10),
-    marginBottom: scaleUtils.scaleHeight(30),
-    columnGap: scaleUtils.scaleWidth(8),
   },
-  resendText: {
-    fontSize: scaleUtils.scaleFont(12),
+  limitTitle: {
+    fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Regular',
   },
-  resendTime: {
-    fontSize: scaleUtils.scaleFont(12),
-    fontFamily: 'Poppins-SemiBold',
+  limitAmount: {
+    fontSize: scaleUtils.scaleFont(26),
+    fontFamily: 'Poppins-Bold',
+    marginVertical: scaleUtils.scaleHeight(10),
   },
-  resendNow: {
+  limitDescription: {
     fontSize: scaleUtils.scaleFont(12),
-    fontFamily: 'Poppins-SemiBold',
-    textDecorationLine: 'underline',
+    fontFamily: 'Poppins-Regular',
+    textAlign: 'center',
   },
   bottomContainer: {
     marginTop: 'auto',

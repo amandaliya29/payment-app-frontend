@@ -59,42 +59,60 @@ const CreditUPIPage = () => {
       <Header title={I18n.t('credit_upi')} onBack={() => navigation.goBack()} />
 
       {/* Credit UPI Status */}
-      <LinearGradient
-        colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
-        style={styles.statusBox}
-      >
-        <Text style={styles.statusTitle}>{I18n.t('credit_upi_status')}</Text>
-        <Text style={styles.statusSub}>
-          {I18n.t('credit_upi_status_subtitle')}
+      <View style={{ flex: 1, paddingHorizontal: scaleUtils.scaleWidth(14) }}>
+        <LinearGradient
+          colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
+          style={styles.statusBox}
+        >
+          <Text style={styles.statusTitle}>{I18n.t('credit_upi_status')}</Text>
+          <Text style={styles.statusSub}>
+            {I18n.t('credit_upi_status_subtitle')}
+          </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: scaleUtils.scaleHeight(6),
+            }}
+          >
+            <Text style={styles.activeText}>🟢 {I18n.t('one_active')}</Text>
+            <Text style={styles.inactiveBankText}>
+              🔴 {I18n.t('one_inactive')}
+            </Text>
+          </View>
+        </LinearGradient>
+
+        {/* Bank Accounts */}
+        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
+          {I18n.t('your_bank_accounts')}
         </Text>
-        <Text style={styles.activeText}>🟢 {I18n.t('one_active')}</Text>
-      </LinearGradient>
 
-      {/* Bank Accounts */}
-      <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
-        {I18n.t('your_bank_accounts')}
-      </Text>
-
-      <FlatList
-        data={bankAccounts}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => (
-          <BankCard {...item} themeColors={themeColors} />
-        )}
-        contentContainerStyle={{ paddingBottom: scaleUtils.scaleHeight(20) }}
-        showsVerticalScrollIndicator={false}
-      />
-
-      {/* Bottom Buttons */}
-      <View style={styles.bottomRow}>
-        <Button
-          title={I18n.t('add_new_bank')}
-          onPress={() => console.log('Add Bank')}
+        <FlatList
+          data={bankAccounts}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => (
+            <BankCard {...item} themeColors={themeColors} />
+          )}
+          contentContainerStyle={{ paddingBottom: scaleUtils.scaleHeight(20) }}
+          showsVerticalScrollIndicator={false}
         />
-        <LineButton
-          title={I18n.t('transaction_history')}
-          onPress={() => console.log('Transaction History')}
-        />
+
+        {/* Bottom Buttons */}
+        <View style={styles.bottomRow}>
+          <View style={{ flex: 1 }}>
+            <Button
+              title={I18n.t('add_new_bank')}
+              onPress={() => console.log('Add Bank')}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <LineButton
+              title={I18n.t('transaction_history')}
+              onPress={() => console.log('Transaction History')}
+            />
+          </View>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -236,7 +254,7 @@ const BankCard = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: scaleUtils.scaleWidth(14),
+    // paddingHorizontal: scaleUtils.scaleWidth(14),
   },
 
   // Credit UPI Status
@@ -358,6 +376,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: scaleUtils.scaleHeight(10),
     columnGap: scaleUtils.scaleWidth(12),
+    alignItems: 'center',
+  },
+  inactiveBankText: {
+    fontSize: scaleUtils.scaleFont(13),
+    color: Colors.white,
+    fontFamily: 'Poppins-SemiBold',
   },
 });
 
