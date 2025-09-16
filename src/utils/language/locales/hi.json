@@ -253,5 +253,14 @@
   "hbfc_credit_limit_ready": "आपकी क्रेडिट सीमा तैयार है",
   "hbfc_credit_limit_message": "अब आप अपने NBFC क्रेडिट UPI का उपयोग असाइन की गई क्रेडिट सीमा के साथ लेन-देन के लिए कर सकते हैं।",
   "hbfc_credit_limit": "क्रेडिट सीमा",
-  "hbfc_credit_limit_desc": "यह आपकी असाइन की गई क्रेडिट सीमा है जिससे आप आसानी से लेन-देन कर सकते हैं।"
+  "hbfc_credit_limit_desc": "यह आपकी असाइन की गई क्रेडिट सीमा है जिससे आप आसानी से लेन-देन कर सकते हैं।",
+
+  "qr_found": "QR कोड मिला",
+  "gallery_selected": "छवि चयनित",
+  "processing_pending": "गैलरी से QR प्रोसेसिंग लंबित...",
+  "qr_code": "QR कोड",
+  "available_limit_limit": "उपलब्ध सीमा",
+  "torch_on": "टॉर्च चालू",
+  "torch_off": "टॉर्च बंद",
+  "gallery": "गैलरी से अपलोड करें"
 }

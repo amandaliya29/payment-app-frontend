@@ -10,11 +10,6 @@ const QrPage = () => {
   const navigation = useNavigation();
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View
-        style={{ width: '100%', paddingVertical: scaleUtils.scaleHeight(8) }}
-      >
-        <Header title="QR Scanner" onBack={() => navigation.goBack()} />
-      </View>
       <CustomQRScanner />
     </SafeAreaView>
   );
