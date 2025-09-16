@@ -28,6 +28,7 @@ import HbfcCrditLoadingScreen from '../screen/hbfcCraditUpi/HbfcCrditLoadingScre
 import HbfcCreditLimitActivate from '../screen/hbfcCraditUpi/HbfcCreditLimitActivate';
 import { Colors } from '../themes/Colors';
 import SplashScreen from '../screen/auth/SplashScreen';
+import QrPage from '../screen/qrPages/QrPage';
 
 const Stack = createStackNavigator();
 
@@ -107,6 +108,7 @@ const StackNavigation = () => {
           name="HbfcCreditLimitActivate"
           component={HbfcCreditLimitActivate}
         />
+        <Stack.Screen name="QrPage" component={QrPage} />
       </Stack.Navigator>
     </>
   );

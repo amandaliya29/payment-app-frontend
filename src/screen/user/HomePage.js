@@ -89,6 +89,7 @@ const HomePage = () => {
         </Text>
         <View style={styles.grid}>
           <ActionButton3
+            onPress={() => navigation.navigate('QrPage')}
             title={I18n.t('scan_pay')}
             image={require('../../assets/image/homeIcon/scan.png')}
             themeColors={themeColors}
@@ -204,9 +205,10 @@ const HomePage = () => {
 };
 
 /* 🔘 Action Button for 3 per row */
-const ActionButton3 = ({ title, image, themeColors }) => (
+const ActionButton3 = ({ title, image, themeColors, onPress }) => (
   <TouchableOpacity
     activeOpacity={0.8}
+    onPress={onPress}
     style={[styles.actionBtn3, { backgroundColor: themeColors.secondaryBg }]}
   >
     <Image source={image} style={styles.actionIcon} resizeMode="contain" />
