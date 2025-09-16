@@ -265,5 +265,14 @@
   "hbfc_credit_limit_ready": "તમારી ક્રેડિટ લિમિટ તૈયાર છે",
   "hbfc_credit_limit_message": "હવે તમે તમારી NBFC ક્રેડિટ UPI નો ઉપયોગ સોંપેલ ક્રેડિટ લિમિટ સાથે વ્યવહારો માટે કરી શકો છો.",
   "hbfc_credit_limit": "ક્રેડિટ લિમિટ",
-  "hbfc_credit_limit_desc": "આ તમારી સોંપેલ ક્રેડિટ લિમિટ છે જે સરળ વ્યવહારો માટે છે."
+  "hbfc_credit_limit_desc": "આ તમારી સોંપેલ ક્રેડિટ લિમિટ છે જે સરળ વ્યવહારો માટે છે.",
+
+  "qr_found": "QR કોડ મળ્યો",
+  "gallery_selected": "છબી પસંદ થઈ",
+  "processing_pending": "ગેલેરીમાંથી QR પ્રક્રિયા બાકી છે...",
+  "qr_code": "QR કોડ",
+  "available_limit_limit": "ઉપલબ્ધ મર્યાદા",
+  "torch_on": "ટોર્ચ ચાલુ",
+  "torch_off": "ટોર્ચ બંધ",
+  "gallery": "ગેલેરીમાંથી અપલોડ કરો"
 }

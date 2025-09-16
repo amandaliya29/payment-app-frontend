@@ -253,5 +253,14 @@
   "hbfc_credit_limit_ready": "Your Credit Limit is Ready",
   "hbfc_credit_limit_message": "You can now use your NBFC Credit UPI for transactions with the assigned credit limit.",
   "hbfc_credit_limit": "Credit Limit",
-  "hbfc_credit_limit_desc": "This is your assigned credit limit for seamless transactions."
+  "hbfc_credit_limit_desc": "This is your assigned credit limit for seamless transactions.",
+
+  "qr_found": "QR Code Found",
+  "gallery_selected": "Image Selected",
+  "processing_pending": "QR from gallery processing pending...",
+  "qr_code": "QR Code",
+  "available_limit_limit": "Available Limit",
+  "torch_on": "Torch On",
+  "torch_off": "Torch Off",
+  "gallery": "Upload from Gallery"
 }
