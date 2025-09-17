@@ -12,23 +12,25 @@ import { Camera } from 'react-native-camera-kit';
 import * as ImagePicker from 'react-native-image-picker';
 import { Colors } from '../themes/Colors';
 import scaleUtils from '../utils/Responsive';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import I18n from '../utils/language/i18n';
-import { useNavigation } from '@react-navigation/native';
+import Button from './Button';
 
-const CustomQRScanner = () => {
+const CustomQRScanner = ({ navigation }) => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
-  const navigation = useNavigation();
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
     text: isDark ? Colors.white : Colors.black,
+    subText: isDark ? Colors.grey : Colors.darkGrey,
+    card: isDark ? Colors.secondaryBg : Colors.white,
+    divider: isDark ? Colors.darkGrey : Colors.grey,
   };
 
   const cameraRef = useRef(null);
   const [qrValue, setQrValue] = useState('');
   const [torchOn, setTorchOn] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
 
   const handleReadCode = event => {
     setQrValue(event.nativeEvent.codeStringValue);
@@ -38,71 +40,17 @@ const CustomQRScanner = () => {
   const toggleTorch = () => setTorchOn(prev => !prev);
 
   const openGallery = () => {
-    ImagePicker.launchImageLibrary(
-      { mediaType: 'photo', quality: 1 },
-      response => {
-        if (response.didCancel) {
-          Alert.alert(I18n.t('gallery_cancelled'), I18n.t('no_image_selected'));
-        } else if (response.errorCode) {
-          Alert.alert(
-            I18n.t('error'),
-            response.errorMessage || I18n.t('something_went_wrong'),
-          );
-        } else if (response.assets && response.assets.length > 0) {
-          const uri = response.assets[0].uri;
-          setSelectedImage(uri);
-          Alert.alert(
-            I18n.t('gallery_selected'),
-            I18n.t('image_selected_successfully'),
-          );
-        }
-      },
-    );
+    ImagePicker.launchImageLibrary({ mediaType: 'photo' }, response => {
+      if (!response.didCancel && response.assets?.length > 0) {
+        Alert.alert(I18n.t('gallery_selected'), I18n.t('processing_pending'));
+      }
+    });
   };
 
   return (
     <View
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
-      {/* Top Custom Header */}
-      <View style={styles.topHeader}>
-        {/* Back Button */}
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <Image
-            source={require('../assets/image/appIcon/back.png')}
-            style={styles.backIcon}
-          />
-        </TouchableOpacity>
-
-        {/* Right side buttons */}
-        <View style={styles.rightButtons}>
-          <TouchableOpacity onPress={toggleTorch} style={styles.iconWrapper}>
-            <Image
-              source={
-                torchOn
-                  ? require('../assets/image/appIcon/tourch_on.png')
-                  : require('../assets/image/appIcon/tourch_off.png')
-              }
-              style={styles.iconButton}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => Alert.alert('QR Button Pressed')}
-            style={styles.iconWrapper}
-          >
-            <Image
-              source={require('../assets/image/appIcon/qr.png')}
-              style={styles.QrIcon}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Camera */}
       {!qrValue ? (
         <>
           <View style={styles.cameraWrapper}>
@@ -115,7 +63,7 @@ const CustomQRScanner = () => {
               torchMode={torchOn ? 'on' : 'off'}
             />
 
-            {/* Overlays */}
+            {/* Blurred Overlay */}
             <View style={styles.overlay}>
               <View style={styles.topOverlay} />
               <View style={styles.centerRow}>
@@ -131,8 +79,8 @@ const CustomQRScanner = () => {
               <View style={styles.bottomOverlay} />
             </View>
 
-            {/* Gallery Button at Bottom (unchanged) */}
-            <View style={styles.bottomGalleryButton}>
+            {/* Torch & Gallery Buttons */}
+            <View style={styles.actionButtons}>
               <TouchableOpacity
                 onPress={openGallery}
                 style={styles.galleryButton}
@@ -143,18 +91,21 @@ const CustomQRScanner = () => {
                 />
                 <Text style={styles.galleryText}>{I18n.t('gallery')}</Text>
               </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.iconWrapper}
+                onPress={toggleTorch}
+              >
+                <Image
+                  source={
+                    torchOn
+                      ? require('../assets/image/appIcon/tourch_on.png') // ON image
+                      : require('../assets/image/appIcon/tourch_off.png') // OFF image
+                  }
+                  style={styles.iconButton}
+                />
+              </TouchableOpacity>
             </View>
           </View>
-
-          {/* Show selected image if available */}
-          {selectedImage && (
-            <View style={styles.previewContainer}>
-              <Image
-                source={{ uri: selectedImage }}
-                style={styles.previewImage}
-              />
-            </View>
-          )}
         </>
       ) : (
         <View style={styles.resultBox}>
@@ -176,44 +127,9 @@ const styles = StyleSheet.create({
   cameraWrapper: { flex: 1 },
   camera: { flex: 1, width: '100%' },
 
-  // Top Header
-  topHeader: {
-    position: 'absolute',
-    top: scaleUtils.scaleHeight(10),
-    left: 0,
-    right: 0,
-    zIndex: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: scaleUtils.scaleWidth(16),
-    alignItems: 'center',
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
   },
-  backButton: { padding: scaleUtils.scaleWidth(8) },
-  backIcon: {
-    width: scaleUtils.scaleWidth(24),
-    height: scaleUtils.scaleWidth(24),
-    tintColor: Colors.white,
-  },
-  rightButtons: {
-    flexDirection: 'row',
-    columnGap: scaleUtils.scaleWidth(10),
-  },
-  iconWrapper: {
-    width: scaleUtils.scaleWidth(36),
-    height: scaleUtils.scaleWidth(36),
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: scaleUtils.scaleWidth(20),
-  },
-  iconButton: {
-    width: scaleUtils.scaleWidth(24),
-    height: scaleUtils.scaleWidth(24),
-    tintColor: Colors.white,
-  },
-
-  // Overlay
-  overlay: { ...StyleSheet.absoluteFillObject },
   topOverlay: { paddingTop: '25%', backgroundColor: 'rgba(0,0,0,0.6)' },
   centerRow: { flexDirection: 'row' },
   sideOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' },
@@ -231,7 +147,7 @@ const styles = StyleSheet.create({
     width: scaleUtils.scaleWidth(35),
     height: scaleUtils.scaleWidth(35),
     borderColor: Colors.primary,
-    borderWidth: scaleUtils.scaleWidth(3),
+    borderWidth: 3,
     margin: scaleUtils.scaleHeight(-10),
     zIndex: 1,
   },
@@ -263,39 +179,35 @@ const styles = StyleSheet.create({
     borderTopWidth: 0,
     borderBottomRightRadius: scaleUtils.scaleWidth(10),
   },
-  // Bottom Gallery Button
-  bottomGalleryButton: {
+  actionButtons: {
+    top: '55%',
+    flexDirection: 'row',
+    columnGap: scaleUtils.scaleWidth(20),
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: scaleUtils.scaleHeight(16),
     position: 'absolute',
-    top: '54%',
     left: 0,
     right: 0,
-    alignItems: 'center',
   },
-  galleryButton: {
-    flexDirection: 'row',
+  iconWrapper: {
+    width: scaleUtils.scaleWidth(36),
+    height: scaleUtils.scaleWidth(36),
+    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    borderRadius: scaleUtils.scaleWidth(8),
-    height: scaleUtils.scaleHeight(34),
-    width: '50%',
-    columnGap: scaleUtils.scaleWidth(10),
+    borderRadius: scaleUtils.scaleWidth(30),
+  },
+  iconButton: {
+    width: scaleUtils.scaleWidth(23),
+    height: scaleUtils.scaleWidth(23),
+    tintColor: Colors.white,
   },
   galleryIcon: {
     width: scaleUtils.scaleWidth(18),
     height: scaleUtils.scaleWidth(18),
     tintColor: Colors.white,
   },
-  QrIcon: {
-    width: scaleUtils.scaleWidth(16),
-    height: scaleUtils.scaleWidth(16),
-    tintColor: Colors.white,
-  },
-  galleryText: {
-    fontSize: scaleUtils.scaleFont(14),
-    color: Colors.white,
-  },
-
   resultBox: {
     flex: 1,
     justifyContent: 'center',
@@ -307,16 +219,20 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontFamily: 'Poppins-SemiBold',
   },
-  previewContainer: {
-    position: 'absolute',
-    bottom: scaleUtils.scaleHeight(20),
-    left: 0,
-    right: 0,
+  galleryButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  previewImage: {
-    width: scaleUtils.scaleWidth(150),
-    height: scaleUtils.scaleWidth(150),
+    justifyContent: 'center',
+    backgroundColor: Colors.primary,
     borderRadius: scaleUtils.scaleWidth(8),
+    height: scaleUtils.scaleHeight(34),
+    width: '54%',
+    columnGap: scaleUtils.scaleWidth(10),
+  },
+
+  galleryText: {
+    fontSize: scaleUtils.scaleFont(14),
+    color: Colors.white,
+    // fontFamily: 'Poppins-SemiBold',
   },
 });
