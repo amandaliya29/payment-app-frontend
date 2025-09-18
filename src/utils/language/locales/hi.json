@@ -262,5 +262,14 @@
   "available_limit_limit": "उपलब्ध सीमा",
   "torch_on": "टॉर्च चालू",
   "torch_off": "टॉर्च बंद",
-  "gallery": "गैलरी से अपलोड करें"
+  "gallery": "गैलरी से अपलोड करें",
+
+  "bank_balance_title": "बैंक बैलेंस",
+  "bank_balance_footer": "यहां अपने सभी बैंक बैलेंस जांचें",
+
+  "receive_money_title": "पैसे प्राप्त करें",
+  "select_bank": "बैंक चुनें",
+  "upi_id_label": "यूपीआई आईडी -",
+  "upi_id_copied": "यूपीआई आईडी कॉपी हो गया!",
+  "copied": "कॉपी हुआ"
 }

@@ -61,7 +61,7 @@ const SplashScreen = () => {
       <Animated.Text
         style={[styles.title, { opacity: fadeAnim, color: themeColors.text }]}
       >
-        Quick Pay
+        Cya Pay
       </Animated.Text>
     </View>
   );

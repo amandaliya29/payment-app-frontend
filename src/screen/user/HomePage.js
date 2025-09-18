@@ -105,6 +105,7 @@ const HomePage = () => {
             themeColors={themeColors}
           />
           <ActionButton3
+            onPress={() => navigation.navigate('ReceiveMoneyScreen')}
             title={I18n.t('receive')}
             image={require('../../assets/image/homeIcon/receive.png')}
             themeColors={themeColors}
@@ -189,6 +190,7 @@ const HomePage = () => {
         </View>
         <View style={styles.bottomRow}>
           <ActionButton2
+            onPress={() => navigation.navigate('BankBalanceScreen')}
             title={I18n.t('check_balance')}
             image={require('../../assets/image/homeIcon/balance.png')}
             themeColors={themeColors}
@@ -222,8 +224,9 @@ const ActionButton3 = ({ title, image, themeColors, onPress }) => (
 );
 
 /* 🔘 Action Button for 2 per row */
-const ActionButton2 = ({ title, image, themeColors }) => (
+const ActionButton2 = ({ title, image, themeColors, onPress }) => (
   <TouchableOpacity
+    onPress={onPress}
     activeOpacity={0.8}
     style={[styles.actionBtn2, { backgroundColor: themeColors.secondaryBg }]}
   >
