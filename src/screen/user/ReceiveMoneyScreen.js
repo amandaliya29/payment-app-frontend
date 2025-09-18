@@ -112,7 +112,7 @@ const ReceiveMoneyScreen = () => {
             />
           </View>
 
-          <Text style={styles.upiId}>{I18n.t('upi_id_label')}</Text>
+          {/* <Text style={styles.upiId}>{I18n.t('upi_id_label')}</Text> */}
 
           <View style={styles.upiContainer}>
             <Text style={styles.upiId}>{selectedBank.upiId}</Text>
@@ -256,6 +256,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     columnGap: scaleUtils.scaleWidth(10),
     marginBottom: scaleUtils.scaleHeight(20),
+    marginTop: scaleUtils.scaleHeight(10),
   },
   bankSelector: {
     flexDirection: 'row',
