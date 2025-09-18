@@ -15,7 +15,7 @@ const SplashScreen = () => {
     text: isDark ? Colors.white : Colors.black,
     subText: isDark ? Colors.white : Colors.darkGrey,
     secondaryBg: isDark ? Colors.secondaryBg : Colors.cardGrey,
-    divider: isDark ? Colors.darkGrey : Colors.grey,
+    divider: isDark ? Colors.grey : Colors.grey,
   };
 
   // Animated values
@@ -59,9 +59,17 @@ const SplashScreen = () => {
         ]}
       />
       <Animated.Text
-        style={[styles.title, { opacity: fadeAnim, color: themeColors.text }]}
+        style={[styles.title, { opacity: scaleAnim, color: themeColors.text }]}
       >
-        Quick Pay
+        Cya Pay
+      </Animated.Text>
+      <Animated.Text
+        style={[
+          styles.subTitle,
+          { opacity: scaleAnim, color: themeColors.divider },
+        ]}
+      >
+        We value your time
       </Animated.Text>
     </View>
   );
@@ -84,6 +92,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: scaleUtils.scaleFont(22),
     fontFamily: 'Poppins-SemiBold',
-    marginTop: scaleUtils.scaleHeight(-20),
+    marginTop: scaleUtils.scaleHeight(-30),
+  },
+  subTitle: {
+    fontSize: scaleUtils.scaleFont(14),
+    fontFamily: 'Poppins-Medium',
+    marginTop: scaleUtils.scaleHeight(0),
   },
 });

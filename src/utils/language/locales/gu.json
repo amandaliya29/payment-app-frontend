@@ -274,5 +274,14 @@
   "available_limit_limit": "ઉપલબ્ધ મર્યાદા",
   "torch_on": "ટોર્ચ ચાલુ",
   "torch_off": "ટોર્ચ બંધ",
-  "gallery": "ગેલેરીમાંથી અપલોડ કરો"
+  "gallery": "ગેલેરીમાંથી અપલોડ કરો",
+
+  "bank_balance_title": "બેન્ક બેલેન્સ",
+  "bank_balance_footer": "અહીં તમારા બધા બેન્ક બેલેન્સ તપાસો",
+
+  "receive_money_title": "પૈસા મેળવો",
+  "select_bank": "બેંક પસંદ કરો",
+  "upi_id_label": "યુપીઆઈ આઈડી -",
+  "upi_id_copied": "યુપીઆઈ આઈડી નકલ થઈ!",
+  "copied": "નકલ થયું"
 }
