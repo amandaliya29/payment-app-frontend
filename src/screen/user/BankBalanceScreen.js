@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,19 +7,19 @@ import {
   TouchableOpacity,
   ScrollView,
   useColorScheme,
-  Modal,
-  FlatList,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import I18n from '../../utils/language/i18n';
 
 const BankBalanceScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
@@ -27,48 +27,48 @@ const BankBalanceScreen = () => {
     background: isDark ? Colors.bg : Colors.white,
     text: Colors.white,
     subText: isDark ? Colors.white : Colors.black,
-    mText: isDark ? Colors.white : Colors.black,
     btnColor: isDark ? Colors.darkGrey : Colors.cardGrey,
   };
 
-  const banks = [
-    {
-      id: 1,
-      name: 'State Bank of India',
-      balance: '2,50,000',
-      accountNumber: 'XXXX XXXX XXXX 1234',
-      type: 'Savings',
-      logo: require('../../assets/image/bankIcon/sbi.png'),
-    },
-    {
-      id: 2,
-      name: 'HDFC Bank',
-      balance: '1,10,500',
-      accountNumber: 'XXXX XXXX XXXX 5678',
-      type: 'Current',
-      logo: require('../../assets/image/bankIcon/hdfc.png'),
-    },
-    {
-      id: 3,
-      name: 'ICICI Bank',
-      balance: '95,000',
-      accountNumber: 'XXXX XXXX XXXX 9012',
-      type: 'Savings',
-      logo: require('../../assets/image/bankIcon/icici.png'),
-    },
-  ];
+  const defaultBank = {
+    id: 1,
+    name: 'State Bank of India',
+    balance: '2,50,000',
+    accountNumber: 'XXXX XXXX XXXX 1234',
+    type: 'Savings',
+    logo: require('../../assets/image/bankIcon/sbi.png'),
+  };
 
-  const [selectedBank, setSelectedBank] = useState(banks[0]);
+  const [selectedBank, setSelectedBank] = useState(
+    route.params?.selectedBank || defaultBank,
+  );
   const [showBalance, setShowBalance] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+
+  // Animation
+  const cardScale = useRef(new Animated.Value(0.9)).current;
+  const cardOpacity = useRef(new Animated.Value(0)).current;
+
+  const animateCard = () => {
+    Animated.parallel([
+      Animated.timing(cardScale, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.timing(cardOpacity, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  useEffect(() => {
+    if (route.params?.selectedBank) setSelectedBank(route.params.selectedBank);
+    animateCard();
+  }, [route.params?.selectedBank]);
 
   const toggleBalance = () => setShowBalance(prev => !prev);
-
-  const handleBankSelect = bank => {
-    setSelectedBank(bank);
-    setShowBalance(false);
-    setModalVisible(false);
-  };
 
   return (
     <SafeAreaView
@@ -80,70 +80,68 @@ const BankBalanceScreen = () => {
       />
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <LinearGradient
-          colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
-          style={styles.cardGradient}
+        <Animated.View
+          style={{ transform: [{ scale: cardScale }], opacity: cardOpacity }}
         >
-          <Text style={styles.balanceLabel}>
-            {I18n.t('bank_balance_title')}
-          </Text>
+          <LinearGradient
+            colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
+            style={styles.cardGradient}
+          >
+            <Text style={styles.balanceLabel}>
+              {I18n.t('bank_balance_title')}
+            </Text>
 
-          <View style={styles.balanceRow}>
-            <Text style={styles.balance}>
-              ₹{' '}
-              {showBalance
-                ? Number(selectedBank.balance.replace(/,/g, '')).toLocaleString(
-                    'en-IN',
-                    {
+            <View style={styles.balanceRow}>
+              <Text style={styles.balance}>
+                ₹{' '}
+                {showBalance
+                  ? Number(
+                      selectedBank.balance.replace(/,/g, ''),
+                    ).toLocaleString('en-IN', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
-                    },
-                  )
-                : selectedBank.balance.replace(/./g, '.')}
-            </Text>
-            <TouchableOpacity onPress={toggleBalance}>
+                    })
+                  : '⁕⁕⁕⁕⁕'}
+              </Text>
+              <TouchableOpacity onPress={toggleBalance}>
+                <Image
+                  source={
+                    showBalance
+                      ? require('../../assets/image/appIcon/eye-open.png')
+                      : require('../../assets/image/appIcon/eye-closed.png')
+                  }
+                  style={styles.eyeIcon}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.divider} />
+
+            <View style={styles.bankRow}>
               <Image
-                source={
-                  showBalance
-                    ? require('../../assets/image/appIcon/eye-open.png')
-                    : require('../../assets/image/appIcon/eye-closed.png')
-                }
-                style={styles.eyeIcon}
+                source={selectedBank.logo}
+                style={styles.bankLogo}
                 resizeMode="contain"
               />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.divider} />
-
-          <View style={styles.bankRow}>
-            <Image
-              source={selectedBank.logo}
-              style={styles.bankLogo}
-              resizeMode="contain"
-            />
-            <View style={styles.bankInfo}>
-              <Text style={styles.bankName}>{selectedBank.name}</Text>
-              <Text style={styles.bankDetails}>
-                {selectedBank.accountNumber}
-              </Text>
-              <Text style={styles.bankDetails}>{selectedBank.type}</Text>
+              <View style={styles.bankInfo}>
+                <Text style={styles.bankName}>{selectedBank.name}</Text>
+                <Text style={styles.bankDetails}>
+                  {selectedBank.accountNumber}
+                </Text>
+                <Text style={styles.bankDetails}>{selectedBank.type}</Text>
+              </View>
             </View>
-          </View>
-        </LinearGradient>
-        {/* Select Bank Button */}
-        <TouchableOpacity
+          </LinearGradient>
+        </Animated.View>
+
+        {/* <TouchableOpacity
           style={[
             styles.bankSelector,
             { backgroundColor: themeColors.btnColor },
           ]}
-          onPress={() => setModalVisible(true)}
+          onPress={() => navigation.navigate('SelectBankScreen')}
         >
-          {/* <Image
-            source={selectedBank.logo}
-            style={styles.bankIcon}
-            resizeMode="contain"
-          /> */}
           <Text style={[styles.bankName, { color: themeColors.subText }]}>
             {I18n.t('select_bank')}
           </Text>
@@ -152,41 +150,8 @@ const BankBalanceScreen = () => {
             style={[styles.rightIcon, { tintColor: themeColors.subText }]}
             resizeMode="contain"
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </ScrollView>
-
-      {/* Bottom Modal */}
-      <Modal visible={modalVisible} animationType="slide" transparent={true}>
-        <View style={styles.modalOverlay}>
-          <View
-            style={[
-              styles.modalContainer,
-              { backgroundColor: themeColors.background },
-            ]}
-          >
-            <Text style={[styles.modalTitle, { color: themeColors.mText }]}>
-              {I18n.t('select_bank')}
-            </Text>
-            <FlatList
-              data={banks}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.modalItem}
-                  onPress={() => handleBankSelect(item)}
-                >
-                  <Image source={item.logo} style={styles.modalIcon} />
-                  <Text
-                    style={[styles.modalText, { color: themeColors.mText }]}
-                  >
-                    {item.name}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </View>
-      </Modal>
     </SafeAreaView>
   );
 };
@@ -197,11 +162,6 @@ const styles = StyleSheet.create({
   cardGradient: {
     borderRadius: scaleUtils.scaleWidth(16),
     padding: scaleUtils.scaleWidth(16),
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
     marginBottom: scaleUtils.scaleHeight(20),
   },
   balanceLabel: {
@@ -232,10 +192,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.3)',
     marginVertical: scaleUtils.scaleHeight(12),
   },
-  bankRow: {
-    flexDirection: 'row',
-    marginBottom: scaleUtils.scaleHeight(12),
-  },
+  bankRow: { flexDirection: 'row' },
   bankLogo: {
     width: scaleUtils.scaleWidth(36),
     height: scaleUtils.scaleWidth(36),
@@ -248,10 +205,6 @@ const styles = StyleSheet.create({
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Medium',
     color: Colors.white,
-  },
-  bankBtnName: {
-    fontSize: scaleUtils.scaleFont(14),
-    fontFamily: 'Poppins-Medium',
   },
   bankDetails: {
     fontSize: scaleUtils.scaleFont(12),
@@ -269,45 +222,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: scaleUtils.scaleHeight(12),
   },
-  bankIcon: {
-    width: scaleUtils.scaleWidth(26),
-    height: scaleUtils.scaleWidth(26),
-  },
   rightIcon: {
     width: scaleUtils.scaleWidth(12),
     height: scaleUtils.scaleWidth(12),
     tintColor: Colors.black,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContainer: {
-    borderTopLeftRadius: scaleUtils.scaleWidth(16),
-    borderTopRightRadius: scaleUtils.scaleWidth(16),
-    padding: scaleUtils.scaleWidth(16),
-    maxHeight: '50%',
-  },
-  modalTitle: {
-    fontSize: scaleUtils.scaleFont(18),
-    fontFamily: 'Poppins-Bold',
-    marginBottom: scaleUtils.scaleHeight(10),
-    alignSelf: 'center',
-  },
-  modalItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: scaleUtils.scaleHeight(12),
-  },
-  modalIcon: {
-    width: scaleUtils.scaleWidth(24),
-    height: scaleUtils.scaleWidth(24),
-    marginRight: scaleUtils.scaleWidth(10),
-  },
-  modalText: {
-    fontSize: scaleUtils.scaleFont(14),
-    fontFamily: 'Poppins-Regular',
   },
 });
 

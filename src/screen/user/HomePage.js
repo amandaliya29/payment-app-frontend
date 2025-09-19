@@ -31,6 +31,33 @@ const HomePage = () => {
     card: isDark ? Colors.card : Colors.cardGrey,
   };
 
+  const banks = [
+    {
+      id: 1,
+      name: 'State Bank of India',
+      balance: '2,50,000',
+      accountNumber: 'XXXX XXXX XXXX 1234',
+      type: 'Savings',
+      logo: require('../../assets/image/bankIcon/sbi.png'),
+    },
+    {
+      id: 2,
+      name: 'HDFC Bank',
+      balance: '1,10,500',
+      accountNumber: 'XXXX XXXX XXXX 5678',
+      type: 'Current',
+      logo: require('../../assets/image/bankIcon/hdfc.png'),
+    },
+    {
+      id: 3,
+      name: 'ICICI Bank',
+      balance: '95,000',
+      accountNumber: 'XXXX XXXX XXXX 9012',
+      type: 'Savings',
+      logo: require('../../assets/image/bankIcon/icici.png'),
+    },
+  ];
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
@@ -190,7 +217,15 @@ const HomePage = () => {
         </View>
         <View style={styles.bottomRow}>
           <ActionButton2
-            onPress={() => navigation.navigate('BankBalanceScreen')}
+            onPress={() => {
+              if (banks.length === 1) {
+                // Only one bank → directly go to BankBalanceScreen
+                navigation.navigate('BankBalanceScreen', { bank: banks[0] });
+              } else {
+                // Multiple banks → show SelectBankScreen
+                navigation.navigate('SelectBankScreen', { banks });
+              }
+            }}
             title={I18n.t('check_balance')}
             image={require('../../assets/image/homeIcon/balance.png')}
             themeColors={themeColors}
