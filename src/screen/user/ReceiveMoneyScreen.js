@@ -106,7 +106,7 @@ const ReceiveMoneyScreen = () => {
           <View style={styles.qrWrapper}>
             <QRCode
               value={selectedBank.upiId}
-              size={scaleUtils.scaleWidth(180)}
+              size={scaleUtils.scaleWidth(220)}
               color={Colors.black}
               backgroundColor={Colors.white}
             />
