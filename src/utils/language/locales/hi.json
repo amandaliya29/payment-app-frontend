@@ -271,5 +271,10 @@
   "select_bank": "बैंक चुनें",
   "upi_id_label": "यूपीआई आईडी -",
   "upi_id_copied": "यूपीआई आईडी कॉपी हो गया!",
-  "copied": "कॉपी हुआ"
+  "copied": "कॉपी हुआ",
+
+  "enter_pin_your": "पिन दर्ज करें",
+  "enter_your_pin": "अपना पिन दर्ज करें",
+  "enter_pin_to_continue": "कृपया जारी रखने के लिए अपना पिन दर्ज करें",
+  "enter_pin_label": "पिन"
 }

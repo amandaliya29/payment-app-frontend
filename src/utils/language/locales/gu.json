@@ -283,5 +283,10 @@
   "select_bank": "બેંક પસંદ કરો",
   "upi_id_label": "યુપીઆઈ આઈડી -",
   "upi_id_copied": "યુપીઆઈ આઈડી નકલ થઈ!",
-  "copied": "નકલ થયું"
+  "copied": "નકલ થયું",
+
+  "enter_pin_your": "પિન દાખલ કરો",
+  "enter_your_pin": "તમારો પિન દાખલ કરો",
+  "enter_pin_to_continue": "કૃપા કરીને ચાલુ રાખવા માટે તમારો પિન દાખલ કરો",
+  "enter_pin_label": "પિન"
 }

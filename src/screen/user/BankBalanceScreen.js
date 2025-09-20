@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   Image,
-  TouchableOpacity,
   ScrollView,
   useColorScheme,
   Animated,
@@ -42,7 +41,7 @@ const BankBalanceScreen = () => {
   const [selectedBank, setSelectedBank] = useState(
     route.params?.selectedBank || defaultBank,
   );
-  const [showBalance, setShowBalance] = useState(false);
+  const [showBalance, setShowBalance] = useState(true); // Always show balance
 
   // Animation
   const cardScale = useRef(new Animated.Value(0.9)).current;
@@ -68,8 +67,6 @@ const BankBalanceScreen = () => {
     animateCard();
   }, [route.params?.selectedBank]);
 
-  const toggleBalance = () => setShowBalance(prev => !prev);
-
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
@@ -94,26 +91,14 @@ const BankBalanceScreen = () => {
             <View style={styles.balanceRow}>
               <Text style={styles.balance}>
                 ₹{' '}
-                {showBalance
-                  ? Number(
-                      selectedBank.balance.replace(/,/g, ''),
-                    ).toLocaleString('en-IN', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })
-                  : '⁕⁕⁕⁕⁕'}
+                {Number(selectedBank.balance.replace(/,/g, '')).toLocaleString(
+                  'en-IN',
+                  {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  },
+                )}
               </Text>
-              <TouchableOpacity onPress={toggleBalance}>
-                <Image
-                  source={
-                    showBalance
-                      ? require('../../assets/image/appIcon/eye-open.png')
-                      : require('../../assets/image/appIcon/eye-closed.png')
-                  }
-                  style={styles.eyeIcon}
-                  resizeMode="contain"
-                />
-              </TouchableOpacity>
             </View>
 
             <View style={styles.divider} />
@@ -134,23 +119,6 @@ const BankBalanceScreen = () => {
             </View>
           </LinearGradient>
         </Animated.View>
-
-        {/* <TouchableOpacity
-          style={[
-            styles.bankSelector,
-            { backgroundColor: themeColors.btnColor },
-          ]}
-          onPress={() => navigation.navigate('SelectBankScreen')}
-        >
-          <Text style={[styles.bankName, { color: themeColors.subText }]}>
-            {I18n.t('select_bank')}
-          </Text>
-          <Image
-            source={require('../../assets/image/appIcon/right.png')}
-            style={[styles.rightIcon, { tintColor: themeColors.subText }]}
-            resizeMode="contain"
-          />
-        </TouchableOpacity> */}
       </ScrollView>
     </SafeAreaView>
   );
@@ -173,19 +141,13 @@ const styles = StyleSheet.create({
   balanceRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     marginTop: 4,
   },
   balance: {
     fontSize: scaleUtils.scaleFont(18),
     fontFamily: 'Poppins-Bold',
     color: Colors.white,
-  },
-  eyeIcon: {
-    width: scaleUtils.scaleWidth(22),
-    height: scaleUtils.scaleWidth(22),
-    tintColor: Colors.white,
-    marginLeft: 10,
   },
   divider: {
     height: 1,
@@ -198,7 +160,7 @@ const styles = StyleSheet.create({
     height: scaleUtils.scaleWidth(36),
     marginRight: scaleUtils.scaleWidth(14),
     borderRadius: scaleUtils.scaleWidth(22),
-    backgroundColor: 'white',
+    backgroundColor: Colors.white,
   },
   bankInfo: { flex: 1 },
   bankName: {
@@ -209,23 +171,7 @@ const styles = StyleSheet.create({
   bankDetails: {
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
-    color: 'rgba(255,255,255,0.85)',
-  },
-  bankSelector: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-    alignItems: 'center',
-    paddingVertical: scaleUtils.scaleHeight(8),
-    paddingHorizontal: scaleUtils.scaleWidth(20),
-    borderRadius: scaleUtils.scaleWidth(10),
-    columnGap: scaleUtils.scaleWidth(10),
-    justifyContent: 'center',
-    marginTop: scaleUtils.scaleHeight(12),
-  },
-  rightIcon: {
-    width: scaleUtils.scaleWidth(12),
-    height: scaleUtils.scaleWidth(12),
-    tintColor: Colors.black,
+    color: Colors.white,
   },
 });
 
