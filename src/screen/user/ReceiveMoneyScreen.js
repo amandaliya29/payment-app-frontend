@@ -36,22 +36,22 @@ const ReceiveMoneyScreen = () => {
   const banks = [
     {
       id: 1,
-      name: 'Ashish Jagdishbhai Mandaliya',
-      upiId: 'ashishmandaliay123@sbi',
+      name: 'Nikhil kumar',
+      upiId: 'nikhilkumar123@sbi',
       logo: require('../../assets/image/bankIcon/sbi.png'),
       bankName: 'State Bank of India',
     },
     {
       id: 2,
-      name: 'Ashish Jagdishbhai Mandaliya',
-      upiId: 'ashishmandaliay456@hdfcbank',
+      name: 'Nikhil kumar',
+      upiId: 'nikhilkumar456@hdfcbank',
       logo: require('../../assets/image/bankIcon/hdfc.png'),
       bankName: 'HDFC Bank',
     },
     {
       id: 3,
-      name: 'Ashish Jagdishbhai Mandaliya',
-      upiId: 'ashishmandaliay789@icici',
+      name: 'Nikhil kumar',
+      upiId: 'nikhilkumar789@icici',
       logo: require('../../assets/image/bankIcon/icici.png'),
       bankName: 'ICICI Bank',
     },
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: scaleUtils.scaleFont(24),
-    fontFamily: 'Poppins-Bold',
+    fontWeight: 'bold',
   },
   userName: {
     fontSize: scaleUtils.scaleFont(14),

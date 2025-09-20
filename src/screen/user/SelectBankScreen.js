@@ -33,7 +33,7 @@ const SelectBankScreen = () => {
   };
 
   const handleBankSelect = bank => {
-    navigation.navigate('BankBalanceScreen', { bank });
+    navigation.navigate('EnterPinScreen', { selectedBank: bank });
   };
 
   // Auto navigate if only one bank exists

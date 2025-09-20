@@ -271,5 +271,10 @@
   "select_bank": "Select Bank",
   "upi_id_label": "UPI ID -",
   "upi_id_copied": "UPI ID copied!",
-  "copied": "Copied"
+  "copied": "Copied",
+
+  "enter_pin_your": "Enter PIN",
+  "enter_your_pin": "Enter Your PIN",
+  "enter_pin_to_continue": "Please enter your PIN to continue",
+  "enter_pin_label": "PIN"
 }

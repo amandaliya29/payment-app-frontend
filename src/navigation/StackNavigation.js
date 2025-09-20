@@ -32,6 +32,7 @@ import QrPage from '../screen/qrPages/QrPage';
 import BankBalanceScreen from '../screen/user/BankBalanceScreen';
 import ReceiveMoneyScreen from '../screen/user/ReceiveMoneyScreen';
 import SelectBankScreen from '../screen/user/SelectBankScreen';
+import EnterPinScreen from '../screen/user/EnterPinScreen';
 
 const Stack = createStackNavigator();
 
@@ -118,6 +119,7 @@ const StackNavigation = () => {
           component={ReceiveMoneyScreen}
         />
         <Stack.Screen name="SelectBankScreen" component={SelectBankScreen} />
+        <Stack.Screen name="EnterPinScreen" component={EnterPinScreen} />
       </Stack.Navigator>
     </>
   );
