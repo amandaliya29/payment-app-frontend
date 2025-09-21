@@ -8,7 +8,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Modal,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import scaleUtils from '../../utils/Responsive';
@@ -19,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../../utils/language/i18n';
 import { Colors } from '../../themes/Colors';
 import auth from '@react-native-firebase/auth';
+import { Toast } from '../../utils/Toast';
 
 export const MobileNumberEntry = () => {
   const navigation = useNavigation();
@@ -31,6 +31,15 @@ export const MobileNumberEntry = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [verificationId, setVerificationId] = useState(null);
+
+  // Toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+  };
 
   const languages = [
     { code: 'en', label: 'English' },
@@ -46,11 +55,11 @@ export const MobileNumberEntry = () => {
 
   const handleProceed = async () => {
     if (mobile.length !== 10) {
-      Alert.alert(t('alert_invalid_number'));
+      showToast(t('alert_invalid_number'));
       return;
     }
     if (!isChecked) {
-      Alert.alert(t('alert_terms'));
+      showToast(t('alert_terms'));
       return;
     }
 
@@ -65,6 +74,7 @@ export const MobileNumberEntry = () => {
           case auth.PhoneAuthState.CODE_SENT:
             setVerificationId(phoneAuthSnapshot.verificationId);
             setLoading(false);
+            showToast(t('otp_sent_successfully'));
             navigation.navigate('OtpVerification', {
               verificationId: phoneAuthSnapshot.verificationId,
               mobile,
@@ -81,27 +91,26 @@ export const MobileNumberEntry = () => {
               .signInWithCredential(credential)
               .then(() => {
                 setLoading(false);
-                navigation.navigate('Home'); // Change to your next screen
+                navigation.navigate('Home');
               })
-              .catch(err => {
+              .catch(() => {
                 setLoading(false);
-                Alert.alert('Error', err.message);
+                showToast(t('otp_invalid'));
               });
             break;
 
           case auth.PhoneAuthState.ERROR:
             setLoading(false);
-            Alert.alert('Error', phoneAuthSnapshot.error.message);
+            showToast(t('otp_invalid'));
             break;
 
           case auth.PhoneAuthState.CODE_AUTO_RETRIEVED:
-            // Optional auto-retrieved code handling
             break;
         }
       });
-    } catch (error) {
+    } catch {
       setLoading(false);
-      Alert.alert('Error', error.message);
+      showToast(t('otp_invalid'));
     }
   };
 
@@ -117,6 +126,9 @@ export const MobileNumberEntry = () => {
         { backgroundColor: dark ? Colors.bg : colors.background },
       ]}
     >
+      {/* Toast Component */}
+      <Toast visible={toastVisible} message={toastMessage} isDark={dark} />
+
       <View style={styles.topBar}>
         <TouchableOpacity
           style={[styles.BtnWarperStyle, { backgroundColor: Colors.primary }]}
@@ -233,7 +245,6 @@ export const MobileNumberEntry = () => {
 
 export default MobileNumberEntry;
 
-// Styles remain unchanged
 const styles = StyleSheet.create({
   container: { flex: 1 },
   topBar: {

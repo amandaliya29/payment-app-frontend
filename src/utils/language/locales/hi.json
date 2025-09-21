@@ -15,7 +15,7 @@
 
   "otp_verification": "ओटीपी सत्यापन",
   "verify_mobile_number": "अपना मोबाइल नंबर सत्यापित करें",
-  "otp_sent_message": "हमने आपके मोबाइल नंबर पर 6 अंकों का सत्यापन कोड भेजा है",
+  "otp_sent_message_mob": "हमने आपके मोबाइल नंबर पर 6 अंकों का सत्यापन कोड भेजा है",
   "tap_edit_number": "नंबर संपादित करने के लिए टैप करें",
   "enter_otp": "ओटीपी दर्ज करें",
   "verify_continue": "सत्यापित करें और जारी रखें",
@@ -276,5 +276,10 @@
   "enter_pin_your": "पिन दर्ज करें",
   "enter_your_pin": "अपना पिन दर्ज करें",
   "enter_pin_to_continue": "कृपया जारी रखने के लिए अपना पिन दर्ज करें",
-  "enter_pin_label": "पिन"
+  "enter_pin_label": "पिन",
+
+  "alert_terms": "कृपया नियम और शर्तें स्वीकार करें",
+  "otp_sent_successfully": "OTP सफलतापूर्वक भेजा गया",
+  "otp_invalid": "अमान्य OTP",
+  "please_wait_resend": "OTP फिर से भेजने से पहले कृपया प्रतीक्षा करें"
 }
