@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Animated, useColorScheme } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
+import { getUserData } from '../../utils/async/storage';
 
 const SplashScreen = () => {
   const scheme = useColorScheme();
@@ -37,10 +38,15 @@ const SplashScreen = () => {
         useNativeDriver: true,
       }),
     ]).start(() => {
-      // Navigate after animation complete
-      setTimeout(() => {
-        navigation.replace('MobileNumberEntry');
-      }, 2000); // 2 seconds
+      // Check AsyncStorage after animation completes
+      setTimeout(async () => {
+        const userData = await getUserData();
+        if (userData) {
+          navigation.replace('BankLinkScreen'); // Already logged in
+        } else {
+          navigation.replace('MobileNumberEntry'); // Login flow
+        }
+      }, 1000); // Small delay for smooth transition
     });
   }, [fadeAnim, scaleAnim, navigation]);
 
@@ -52,10 +58,7 @@ const SplashScreen = () => {
         source={require('../../assets/image/appIcon/appLogo.png')}
         style={[
           styles.logo,
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }],
-          },
+          { opacity: fadeAnim, transform: [{ scale: scaleAnim }] },
         ]}
       />
       <Animated.Text

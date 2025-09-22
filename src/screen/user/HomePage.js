@@ -85,7 +85,10 @@ const HomePage = () => {
               onSearchPress={() => console.log('Search Pressed:', search)}
             />
           </View>
-          <TouchableOpacity style={styles.notifyButton}>
+          <TouchableOpacity
+            style={styles.notifyButton}
+            onPress={() => navigation.navigate('ProfileScreen')}
+          >
             <Image
               source={require('../../assets/image/homeIcon/user.png')}
               style={[styles.notifyIcon]}

@@ -281,5 +281,15 @@
   "alert_terms": "कृपया नियम और शर्तें स्वीकार करें",
   "otp_sent_successfully": "OTP सफलतापूर्वक भेजा गया",
   "otp_invalid": "अमान्य OTP",
-  "please_wait_resend": "OTP फिर से भेजने से पहले कृपया प्रतीक्षा करें"
+  "please_wait_resend": "OTP फिर से भेजने से पहले कृपया प्रतीक्षा करें",
+
+  "profile": "प्रोफ़ाइल",
+  "bank_account": "बैंक खाता",
+  "credit_upi": "क्रेडिट UPI",
+  "your_qr_code": "आपका QR कोड",
+  "personal_info": "व्यक्तिगत जानकारी",
+  "notifications_email": "सूचनाएं और ईमेल",
+  "about": "के बारे में",
+  "languages": "भाषाएँ",
+  "logout": "लॉगआउट"
 }

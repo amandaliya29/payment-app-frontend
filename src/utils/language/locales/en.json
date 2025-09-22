@@ -281,5 +281,15 @@
   "alert_terms": "Please accept the terms and conditions",
   "otp_sent_successfully": "OTP sent successfully",
   "otp_invalid": "Invalid OTP",
-  "please_wait_resend": "Please wait before resending OTP"
+  "please_wait_resend": "Please wait before resending OTP",
+
+  "profile": "Profile",
+  "bank_account": "Bank Account",
+  "credit_upi": "Credit UPI",
+  "your_qr_code": "Your QR Code",
+  "personal_info": "Personal Info",
+  "notifications_email": "Notifications & Email",
+  "about": "About",
+  "languages": "Languages",
+  "logout": "Logout"
 }

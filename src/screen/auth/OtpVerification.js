@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import auth from '@react-native-firebase/auth';
 import { Toast } from '../../utils/Toast';
 import { loginUser } from '../../utils/apiHelper/Axios';
-import { BASE_URL } from '@env';
+import { saveUserData } from '../../utils/async/storage';
 
 const OtpVerification = () => {
   const navigation = useNavigation();
@@ -57,13 +57,19 @@ const OtpVerification = () => {
         verificationId,
         code,
       );
-      const userCredential = await auth().signInWithCredential(credential);
+      await auth().signInWithCredential(credential);
       const idToken = await auth().currentUser.getIdToken();
 
       // ✅ Call backend login API here
       const loginResponse = await loginUser(idToken);
 
       if (loginResponse.status) {
+        // Save user data in AsyncStorage
+        await saveUserData({
+          token: idToken,
+          user: loginResponse.user || {}, // depends on API response
+        });
+
         showToast(loginResponse.messages);
         navigation.replace('BankLinkScreen');
       } else {

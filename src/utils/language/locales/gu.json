@@ -293,5 +293,15 @@
   "alert_terms": "કૃપા કરીને નિયમો અને શરતો સ્વીકારી લો",
   "otp_sent_successfully": "OTP સફળતાપૂર્વક મોકલાયો",
   "otp_invalid": "અમાન્ય OTP",
-  "please_wait_resend": "OTP ફરી મોકલવા પહેલા કૃપા કરીને રાહ જુઓ"
+  "please_wait_resend": "OTP ફરી મોકલવા પહેલા કૃપા કરીને રાહ જુઓ",
+
+  "profile": "પ્રોફાઇલ",
+  "bank_account": "બેંક એકાઉન્ટ",
+  "credit_upi": "ક્રેડિટ UPI",
+  "your_qr_code": "તમારો QR કોડ",
+  "personal_info": "વ્યક્તિગત માહિતી",
+  "notifications_email": "સૂચનાઓ અને ઇમેઇલ",
+  "about": "વિશે",
+  "languages": "ભાષાઓ",
+  "logout": "લૉગઆઉટ"
 }
