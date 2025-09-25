@@ -296,12 +296,13 @@
   "please_wait_resend": "OTP ફરી મોકલવા પહેલા કૃપા કરીને રાહ જુઓ",
 
   "profile": "પ્રોફાઇલ",
-  "bank_account": "બેંક એકાઉન્ટ",
-  "credit_upi": "ક્રેડિટ UPI",
+  "bank_account": "બેંક ખાતું",
   "your_qr_code": "તમારો QR કોડ",
   "personal_info": "વ્યક્તિગત માહિતી",
-  "notifications_email": "સૂચનાઓ અને ઇમેઇલ",
+  "notifications_email": "સૂચનાઓ અને ઈમેઈલ",
   "about": "વિશે",
   "languages": "ભાષાઓ",
-  "logout": "લૉગઆઉટ"
+  "logout": "લૉગ આઉટ",
+  "add_bank_account": "બેંક ખાતું ઉમેરો",
+  "bank_accounts_cards": "બેંક ખાતાઓ અને કાર્ડ"
 }

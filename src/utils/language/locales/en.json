@@ -285,11 +285,12 @@
 
   "profile": "Profile",
   "bank_account": "Bank Account",
-  "credit_upi": "Credit UPI",
   "your_qr_code": "Your QR Code",
   "personal_info": "Personal Info",
   "notifications_email": "Notifications & Email",
   "about": "About",
   "languages": "Languages",
-  "logout": "Logout"
+  "logout": "Logout",
+  "add_bank_account": "Add Bank Account",
+  "bank_accounts_cards": "Bank accounts & Cards"
 }

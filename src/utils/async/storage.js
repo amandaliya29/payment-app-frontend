@@ -4,6 +4,7 @@ const USER_DATA_KEY = 'user_data';
 
 export const saveUserData = async userData => {
   try {
+    console.log('userData', userData);
     await AsyncStorage.setItem(USER_DATA_KEY, JSON.stringify(userData));
   } catch (e) {
     console.error('Error saving user data:', e);

@@ -7,15 +7,41 @@ import {
   TouchableOpacity,
   Image,
   useColorScheme,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import QRCode from 'react-native-qrcode-svg';
 import I18n from '../../utils/language/i18n';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
+import { useNavigation } from '@react-navigation/native';
+import { logoutUser } from '../../utils/apiHelper/Axios';
+
+const banks = [
+  {
+    id: 1,
+    name: 'State Bank of India',
+    accountNumber: '•••• 1234',
+    type: 'Savings • Primary Account',
+    logo: require('../../assets/image/bankIcon/sbi.png'),
+  },
+  {
+    id: 2,
+    name: 'HDFC Bank',
+    accountNumber: '•••• 5678',
+    type: 'Current',
+    logo: require('../../assets/image/bankIcon/hdfc.png'),
+  },
+  {
+    id: 3,
+    name: 'ICICI Bank',
+    accountNumber: '•••• 9012',
+    type: 'Savings',
+    logo: require('../../assets/image/bankIcon/icici.png'),
+  },
+];
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -25,15 +51,21 @@ const ProfileScreen = () => {
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
     text: isDark ? Colors.white : Colors.black,
-    card: isDark ? Colors.cardDark : Colors.cardLight,
+    card: isDark ? Colors.cardGrey : Colors.white,
+    placeholder: isDark ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.6)',
+    iconBox: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+    border: isDark ? Colors.white : Colors.black,
+    paymentText: isDark ? Colors.white : Colors.black,
+    bankIcon: isDark ? Colors.cardGrey : Colors.darkGrey,
   };
 
-  // User Details
   const [user] = useState({
     name: 'Nikil Kumar',
     upiId: 'nikilkumar123@sbi',
     upiNumber: '7668766533',
   });
+
+  const [bankAccountAdded, setBankAccountAdded] = useState(false);
 
   const menuItems = [
     {
@@ -70,10 +102,33 @@ const ProfileScreen = () => {
       id: 7,
       title: I18n.t('logout'),
       icon: require('../../assets/image/appIcon/logout.png'),
+      logout: true, // to identify logout
     },
   ];
 
   const getInitial = name => name?.charAt(0)?.toUpperCase() || '';
+
+  const handleLogout = () => {
+    Alert.alert(
+      I18n.t('logout'),
+      I18n.t('are_you_sure_logout'),
+      [
+        { text: I18n.t('no'), style: 'cancel' },
+        {
+          text: I18n.t('yes'),
+          onPress: async () => {
+            try {
+              await logoutUser();
+              navigation.replace('MobileNumberEntry');
+            } catch (error) {
+              Alert.alert(I18n.t('error'), error.message || 'Logout failed');
+            }
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
 
   return (
     <SafeAreaView
@@ -81,14 +136,23 @@ const ProfileScreen = () => {
     >
       <Header title={I18n.t('profile')} onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {/* User Info Card */}
         <LinearGradient
           colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
           style={styles.userCard}
         >
           <View style={styles.userRow}>
-            {/* Avatar with QR badge */}
+            <View style={{ flex: 1 }}>
+              <Text style={styles.userName}>{user.name}</Text>
+              <Text style={styles.upiId}>{user.upiId}</Text>
+              <View style={styles.upiRow}>
+                <Text style={styles.upiNumber}>{user.upiNumber}</Text>
+              </View>
+            </View>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{getInitial(user.name)}</Text>
               <View style={styles.qrBadge}>
@@ -98,70 +162,115 @@ const ProfileScreen = () => {
                 />
               </View>
             </View>
-            {/* User Details */}
-            <View style={{ flex: 1, marginLeft: 14 }}>
-              <Text style={styles.userName}>{user.name}</Text>
-              <Text style={styles.upiLabel}>UPI ID:</Text>
-              <Text style={styles.upiId}>{user.upiId}</Text>
-              <View style={styles.upiRow}>
-                <Text style={styles.upiNumber}>{user.upiNumber}</Text>
-                <View style={styles.upiBadge}>
-                  <Text style={styles.upiBadgeText}>UPI number</Text>
-                </View>
-              </View>
-            </View>
           </View>
         </LinearGradient>
 
         {/* Payment Methods */}
-        <LinearGradient
-          colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
-          style={styles.paymentCard}
-        >
-          <Text style={styles.paymentTitle}>Set up payment methods 1/3</Text>
-          <View style={styles.paymentRow}>
-            <TouchableOpacity style={styles.paymentOption}>
-              <Image
-                source={require('../../assets/image/homeIcon/bank.png')}
-                style={styles.paymentIcon}
-              />
-              <Text style={styles.paymentText}>
-                Bank account{'\n'}1 account
-              </Text>
-            </TouchableOpacity>
+        <View style={styles.paymentCard}>
+          <Text style={[styles.paymentTitle, { color: themeColors.text }]}>
+            {I18n.t('bank_accounts_cards')}
+          </Text>
 
-            <TouchableOpacity style={styles.paymentOption}>
-              <Image
-                source={require('../../assets/image/homeIcon/credit.png')}
-                style={styles.paymentIcon}
-              />
-              <Text style={styles.paymentText}>
-                RuPay credit card{'\n'}Pay with UPI
-              </Text>
-            </TouchableOpacity>
+          {banks.map(bank => (
+            <View key={bank.id} style={styles.bankContainer}>
+              <View style={styles.bankInfo}>
+                <View
+                  style={[
+                    styles.bankIconBox,
+                    { backgroundColor: themeColors.iconBox },
+                  ]}
+                >
+                  <Image source={bank.logo} style={styles.bankLogo} />
+                </View>
+                <View style={{ marginLeft: scaleUtils.scaleWidth(8) }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      columnGap: scaleUtils.scaleWidth(8),
+                      alignItems: 'center',
+                    }}
+                  >
+                    <Text
+                      style={[styles.bankName, { color: themeColors.text }]}
+                    >
+                      {bank.name}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.bankAccountNumber,
+                        { color: themeColors.placeholder },
+                      ]}
+                    >
+                      {bank.accountNumber}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.bankAccountType,
+                      { color: themeColors.placeholder },
+                    ]}
+                  >
+                    {bank.type}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          ))}
 
-            <TouchableOpacity style={styles.paymentOption}>
-              {/* <Image
-                source={require('../../assets/image/appIcon/upi.png')}
-                style={styles.paymentIcon}
-              /> */}
-              <Text style={styles.paymentText}>UPI Lite{'\n'}Pay PIN-free</Text>
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
-
-        {/* Menu List */}
-        {menuItems.map(item => (
+          {/* Add Bank Account */}
           <TouchableOpacity
-            key={item.id}
-            style={[styles.menuItem, { backgroundColor: themeColors.card }]}
+            style={[
+              styles.paymentOption,
+              { marginTop: scaleUtils.scaleHeight(10) },
+            ]}
+            onPress={() => setBankAccountAdded(!bankAccountAdded)}
           >
-            <Image source={item.icon} style={styles.menuIcon} />
-            <Text style={[styles.menuText, { color: themeColors.text }]}>
-              {item.title}
+            <View
+              style={[
+                styles.dottedContainer,
+                {
+                  borderColor: themeColors.border,
+                  backgroundColor: themeColors.iconBox,
+                },
+              ]}
+            >
+              <Image
+                source={require('../../assets/image/appIcon/add.png')}
+                style={[
+                  styles.paymentIcon,
+                  { tintColor: themeColors.bankIcon },
+                ]}
+              />
+            </View>
+            <Text
+              style={[styles.paymentText, { color: themeColors.paymentText }]}
+            >
+              {I18n.t('add_bank_account')}
             </Text>
           </TouchableOpacity>
-        ))}
+        </View>
+
+        {/* Menu List */}
+        <View style={{ marginVertical: scaleUtils.scaleHeight(6) }}>
+          {menuItems.map(item => (
+            <TouchableOpacity
+              key={item.id}
+              style={[styles.menuItem]}
+              onPress={() => item.logout && handleLogout()}
+            >
+              <Image
+                source={item.icon}
+                style={[
+                  styles.menuIcon,
+                  { tintColor: themeColors.placeholder },
+                ]}
+              />
+              <Text style={[styles.menuText, { color: themeColors.text }]}>
+                {item.title}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -173,86 +282,138 @@ const styles = StyleSheet.create({
 
   // User Card
   userCard: {
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 20,
+    paddingHorizontal: scaleUtils.scaleWidth(16),
+    paddingVertical: scaleUtils.scaleWidth(20),
+    borderRadius: scaleUtils.scaleWidth(12),
+    marginBottom: scaleUtils.scaleHeight(26),
   },
   userRow: { flexDirection: 'row', alignItems: 'center' },
   avatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: '#1976D2',
+    width: scaleUtils.scaleWidth(75),
+    height: scaleUtils.scaleWidth(75),
+    borderRadius: scaleUtils.scaleWidth(100),
+    backgroundColor: Colors.white,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
-  avatarText: { fontSize: 28, fontWeight: 'bold', color: 'white' },
+  avatarText: {
+    fontSize: scaleUtils.scaleFont(30),
+    fontWeight: '900',
+    color: Colors.primary,
+  },
   qrBadge: {
     position: 'absolute',
-    bottom: -4,
-    right: -4,
-    backgroundColor: 'black',
-    borderRadius: 16,
-    padding: 8,
+    bottom: scaleUtils.scaleHeight(-4),
+    right: scaleUtils.scaleWidth(-4),
+    backgroundColor: Colors.secondary,
+    borderRadius: scaleUtils.scaleWidth(16),
+    padding: scaleUtils.scaleWidth(8),
   },
   qrIcon: {
-    width: 14,
-    height: 14,
-    tintColor: 'white',
-  },
-  userName: { fontSize: 18, fontWeight: '600', color: Colors.white },
-  upiLabel: { fontSize: 12, color: '#ccc', marginTop: 4 },
-  upiId: { fontSize: 14, color: Colors.white },
-  upiRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6 },
-  upiNumber: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginRight: 8,
-    color: Colors.white,
-  },
-  upiBadge: {
-    backgroundColor: '#1976D2',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 16,
-  },
-  upiBadgeText: { color: Colors.white, fontSize: 12, fontWeight: '500' },
-
-  // Payment Methods
-  paymentCard: {
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  paymentTitle: { fontSize: 13, color: Colors.white, marginBottom: 14 },
-  paymentRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  paymentOption: {
-    flex: 1,
-    alignItems: 'center',
-    marginHorizontal: 4,
-    padding: 12,
-    borderRadius: 10,
-    backgroundColor: 'rgba(0,0,0,0.2)',
-  },
-  paymentIcon: {
-    width: 28,
-    height: 28,
-    marginBottom: 6,
+    width: scaleUtils.scaleWidth(14),
+    height: scaleUtils.scaleWidth(14),
     tintColor: Colors.white,
   },
-  paymentText: { fontSize: 12, textAlign: 'center', color: Colors.white },
+  userName: {
+    fontSize: scaleUtils.scaleFont(16),
+    fontFamily: 'Poppins-Bold',
+    color: Colors.white,
+  },
+  upiId: {
+    fontSize: scaleUtils.scaleFont(14),
+    color: Colors.white,
+    fontFamily: 'Poppins-Regular',
+  },
+  upiRow: { flexDirection: 'row', alignItems: 'center' },
+  upiNumber: {
+    fontSize: scaleUtils.scaleFont(14),
+    fontFamily: 'Poppins-Bold',
+    color: Colors.white,
+  },
+
+  // Payment Methods
+  paymentCard: { marginBottom: scaleUtils.scaleHeight(20) },
+  paymentTitle: {
+    fontSize: scaleUtils.scaleFont(15),
+    marginBottom: scaleUtils.scaleHeight(8),
+    fontFamily: 'Poppins-Regular',
+  },
+  bankContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginVertical: scaleUtils.scaleWidth(10),
+  },
+  bankInfo: {
+    flexDirection: 'row',
+    columnGap: scaleUtils.scaleWidth(10),
+    alignItems: 'center',
+  },
+  bankIconBox: {
+    width: scaleUtils.scaleWidth(60),
+    height: scaleUtils.scaleWidth(40),
+    borderRadius: scaleUtils.scaleWidth(8),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bankLogo: {
+    width: scaleUtils.scaleWidth(24),
+    height: scaleUtils.scaleWidth(24),
+    resizeMode: 'contain',
+  },
+  bankName: {
+    fontSize: scaleUtils.scaleFont(14),
+    fontFamily: 'Poppins-SemiBold',
+  },
+  bankAccountType: {
+    fontSize: scaleUtils.scaleFont(12),
+    fontFamily: 'Poppins-Regular',
+  },
+  bankAccountNumber: {
+    fontSize: scaleUtils.scaleFont(12),
+    fontFamily: 'Poppins-Regular',
+  },
+  paymentOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: scaleUtils.scaleWidth(16),
+  },
+  dottedContainer: {
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderRadius: scaleUtils.scaleWidth(8),
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: scaleUtils.scaleWidth(60),
+    height: scaleUtils.scaleWidth(40),
+  },
+  paymentIcon: {
+    width: scaleUtils.scaleWidth(16),
+    height: scaleUtils.scaleWidth(16),
+  },
+  paymentText: {
+    fontSize: scaleUtils.scaleFont(12),
+    textAlign: 'center',
+    fontFamily: 'Poppins-Regular',
+  },
 
   // Menu List
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
-    borderRadius: 10,
-    marginBottom: 10,
+    paddingVertical: scaleUtils.scaleHeight(12),
+    borderRadius: scaleUtils.scaleWidth(10),
   },
-  menuIcon: { width: 20, height: 20, marginRight: 12 },
-  menuText: { fontSize: 14, fontFamily: 'Poppins-Regular' },
+  menuIcon: {
+    width: scaleUtils.scaleWidth(20),
+    height: scaleUtils.scaleWidth(20),
+    marginRight: scaleUtils.scaleWidth(16),
+  },
+  menuText: {
+    fontSize: scaleUtils.scaleFont(14),
+    fontFamily: 'Poppins-Regular',
+  },
 });
 
 export default ProfileScreen;

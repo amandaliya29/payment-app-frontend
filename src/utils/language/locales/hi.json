@@ -285,11 +285,12 @@
 
   "profile": "प्रोफ़ाइल",
   "bank_account": "बैंक खाता",
-  "credit_upi": "क्रेडिट UPI",
   "your_qr_code": "आपका QR कोड",
   "personal_info": "व्यक्तिगत जानकारी",
   "notifications_email": "सूचनाएं और ईमेल",
   "about": "के बारे में",
   "languages": "भाषाएँ",
-  "logout": "लॉगआउट"
+  "logout": "लॉग आउट",
+  "add_bank_account": "बैंक खाता जोड़ें",
+  "bank_accounts_cards": "बैंक खाते और कार्ड"
 }

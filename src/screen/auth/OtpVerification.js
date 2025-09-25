@@ -65,10 +65,7 @@ const OtpVerification = () => {
 
       if (loginResponse.status) {
         // Save user data in AsyncStorage
-        await saveUserData({
-          token: idToken,
-          user: loginResponse.user || {}, // depends on API response
-        });
+        await saveUserData(loginResponse.data);
 
         showToast(loginResponse.messages);
         navigation.replace('BankLinkScreen');
