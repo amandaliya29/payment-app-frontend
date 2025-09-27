@@ -33,6 +33,7 @@ import BankBalanceScreen from '../screen/user/BankBalanceScreen';
 import ReceiveMoneyScreen from '../screen/user/ReceiveMoneyScreen';
 import SelectBankScreen from '../screen/user/SelectBankScreen';
 import EnterPinScreen from '../screen/user/EnterPinScreen';
+import ProfileScreen from '../screen/user/ProfileScreen';
 
 const Stack = createStackNavigator();
 
@@ -120,6 +121,7 @@ const StackNavigation = () => {
         />
         <Stack.Screen name="SelectBankScreen" component={SelectBankScreen} />
         <Stack.Screen name="EnterPinScreen" component={EnterPinScreen} />
+        <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       </Stack.Navigator>
     </>
   );

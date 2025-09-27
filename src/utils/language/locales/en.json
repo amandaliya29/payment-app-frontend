@@ -15,7 +15,7 @@
 
   "otp_verification": "OTP Verification",
   "verify_mobile_number": "Verify Your Mobile Number",
-  "otp_sent_message": "We've sent a 6-digit verification code to your mobile number",
+  "otp_sent_message_mob": "We've sent a 6-digit verification code to your mobile number",
   "tap_edit_number": "Tap to edit number",
   "enter_otp": "Enter OTP",
   "verify_continue": "Verify & Continue",
@@ -276,5 +276,21 @@
   "enter_pin_your": "Enter PIN",
   "enter_your_pin": "Enter Your PIN",
   "enter_pin_to_continue": "Please enter your PIN to continue",
-  "enter_pin_label": "PIN"
+  "enter_pin_label": "PIN",
+
+  "alert_terms": "Please accept the terms and conditions",
+  "otp_sent_successfully": "OTP sent successfully",
+  "otp_invalid": "Invalid OTP",
+  "please_wait_resend": "Please wait before resending OTP",
+
+  "profile": "Profile",
+  "bank_account": "Bank Account",
+  "your_qr_code": "Your QR Code",
+  "personal_info": "Personal Info",
+  "notifications_email": "Notifications & Email",
+  "about": "About",
+  "languages": "Languages",
+  "logout": "Logout",
+  "add_bank_account": "Add Bank Account",
+  "bank_accounts_cards": "Bank accounts & Cards"
 }

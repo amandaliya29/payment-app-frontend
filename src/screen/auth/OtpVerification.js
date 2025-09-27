@@ -6,7 +6,6 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  Alert,
 } from 'react-native';
 import Header from '../../component/Header';
 import { Colors } from '../../themes/Colors';
@@ -17,15 +16,28 @@ import Button from '../../component/Button';
 import OTPInput from '../../component/OTPInput';
 import { useTranslation } from 'react-i18next';
 import auth from '@react-native-firebase/auth';
+import { Toast } from '../../utils/Toast';
+import { loginUser } from '../../utils/apiHelper/Axios';
+import { getUserData, saveUserData } from '../../utils/async/storage';
 
 const OtpVerification = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { verificationId, mobile } = route.params || {}; // updated to receive verificationId
+  const { verificationId, mobile } = route.params || {};
   const [code, setCode] = useState('');
   const [timer, setTimer] = useState(30);
   const { t } = useTranslation();
   const { colors, dark } = useTheme();
+  const [resending, setResending] = useState(false);
+
+  // Toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+  };
 
   useEffect(() => {
     if (timer > 0) {
@@ -36,41 +48,72 @@ const OtpVerification = () => {
 
   const handleVerifyOtp = async () => {
     if (code.length !== 6) {
-      Alert.alert(t('error'), t('alert_invalid_otp'));
+      showToast(t('enter_valid_otp'));
       return;
     }
+
     try {
-      // Create credential using verificationId + OTP
       const credential = auth.PhoneAuthProvider.credential(
         verificationId,
         code,
       );
+      await auth().signInWithCredential(credential);
+      const idToken = await auth().currentUser.getIdToken();
 
-      // Sign in with the credential
-      const result = await auth().signInWithCredential(credential);
+      // ✅ Call backend login API here
+      const loginResponse = await loginUser(idToken);
 
-      // Extract user info
-      const user = result.user;
-      console.log('Identifier:', user.phoneNumber || user.email);
-      console.log(
-        'Providers:',
-        user.providerData.map(p => p.providerId).join(', '),
-      );
-      console.log('Created:', user.metadata.creationTime);
-      console.log('Signed In:', user.metadata.lastSignInTime);
-      console.log('User UID:', user.uid);
+      // console.log('loginResponse', loginResponse.data.user.has_bank_accounts);
 
-      Alert.alert(t('success'), t('otp_verified'));
-      navigation.replace('BankLinkScreen'); // your next screen
+      if (loginResponse.status) {
+        // Save user data in AsyncStorage
+        await saveUserData(loginResponse.data);
+
+        showToast(loginResponse.messages);
+        if (loginResponse.data.user.has_bank_accounts === false) {
+          navigation.replace('BankLinkScreen');
+        } else {
+          navigation.replace('HomePage');
+        }
+      } else {
+        showToast('Login failed');
+      }
     } catch (error) {
-      Alert.alert(t('error'), t('invalid_otp_message'));
+      console.error('OTP Verification Error:', error);
+      showToast(error.message || t('otp_invalid'));
     }
   };
 
-  const handleResend = () => {
-    if (timer === 0) {
-      setTimer(30);
-      navigation.replace('MobileNumberEntry', { mobile }); // resend OTP
+  const handleResend = async () => {
+    if (timer !== 0 || resending) {
+      showToast(t('please_wait_resend', { timer }));
+      return;
+    }
+
+    setResending(true);
+    setTimer(30);
+
+    try {
+      const phoneNumber = `+91${mobile}`;
+      const unsubscribe = auth().verifyPhoneNumber(phoneNumber);
+
+      unsubscribe.on('state_changed', phoneAuthSnapshot => {
+        switch (phoneAuthSnapshot.state) {
+          case auth.PhoneAuthState.CODE_SENT:
+            route.params.verificationId = phoneAuthSnapshot.verificationId;
+            setResending(false);
+            showToast(t('otp_sent_successfully'));
+            break;
+
+          case auth.PhoneAuthState.ERROR:
+            showToast(t('otp_invalid'));
+            setResending(false);
+            break;
+        }
+      });
+    } catch {
+      showToast(t('otp_invalid'));
+      setResending(false);
     }
   };
 
@@ -81,6 +124,8 @@ const OtpVerification = () => {
         { backgroundColor: dark ? Colors.bg : colors.background },
       ]}
     >
+      <Toast visible={toastVisible} message={toastMessage} isDark={dark} />
+
       <Header
         title={t('otp_verification')}
         onBack={() => navigation.goBack()}
@@ -94,7 +139,7 @@ const OtpVerification = () => {
           {t('verify_mobile_number')}
         </Text>
         <Text style={[styles.subtitle, { color: colors.text }]}>
-          {t('otp_sent_message')}
+          {t('otp_sent_message_mob')}
         </Text>
 
         <Text style={[styles.edit, { color: colors.text }]}>
