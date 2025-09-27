@@ -7,7 +7,6 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
-  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import scaleUtils from '../../utils/Responsive';
@@ -19,6 +18,7 @@ import i18n from '../../utils/language/i18n';
 import { Colors } from '../../themes/Colors';
 import auth from '@react-native-firebase/auth';
 import { Toast } from '../../utils/Toast';
+import LanguageModal from '../../component/LanguageModal'; // <-- Import the new modal component
 
 export const MobileNumberEntry = () => {
   const navigation = useNavigation();
@@ -41,12 +41,6 @@ export const MobileNumberEntry = () => {
     setToastVisible(true);
   };
 
-  const languages = [
-    { code: 'en', label: 'English' },
-    { code: 'hi', label: 'हिन्दी' },
-    { code: 'gu', label: 'ગુજરાતી' },
-  ];
-
   useEffect(() => {
     if (route.params?.mobile) {
       setMobile(route.params.mobile);
@@ -66,7 +60,6 @@ export const MobileNumberEntry = () => {
     try {
       setLoading(true);
       const phoneNumber = `+91${mobile}`;
-
       const unsubscribe = auth().verifyPhoneNumber(phoneNumber);
 
       unsubscribe.on('state_changed', phoneAuthSnapshot => {
@@ -114,11 +107,6 @@ export const MobileNumberEntry = () => {
     }
   };
 
-  const selectLanguage = langCode => {
-    i18n.changeLanguage(langCode);
-    setModalVisible(false);
-  };
-
   return (
     <SafeAreaView
       style={[
@@ -129,6 +117,7 @@ export const MobileNumberEntry = () => {
       {/* Toast Component */}
       <Toast visible={toastVisible} message={toastMessage} isDark={dark} />
 
+      {/* Top Bar */}
       <View style={styles.topBar}>
         <TouchableOpacity
           style={[styles.BtnWarperStyle, { backgroundColor: Colors.primary }]}
@@ -141,45 +130,16 @@ export const MobileNumberEntry = () => {
         </TouchableOpacity>
       </View>
 
+      {/* Language Modal Component */}
+      <LanguageModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{ padding: scaleUtils.scaleWidth(20) }}
       >
-        {/* Language Modal */}
-        <Modal transparent visible={modalVisible} animationType="slide">
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalBox, { backgroundColor: colors.card }]}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>
-                {t('select_language')}
-              </Text>
-
-              {languages.map(lang => (
-                <TouchableOpacity
-                  key={lang.code}
-                  style={[
-                    styles.langOption,
-                    { borderColor: Colors.primary },
-                    i18n.language === lang.code && {
-                      backgroundColor: Colors.primary,
-                    },
-                  ]}
-                  onPress={() => selectLanguage(lang.code)}
-                >
-                  <Text
-                    style={[
-                      styles.langOptionText,
-                      { color: Colors.primary },
-                      i18n.language === lang.code && { color: colors.card },
-                    ]}
-                  >
-                    {lang.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </Modal>
-
         {/* Phone Icon */}
         <View style={styles.imagesWarperStyle}>
           <Image
@@ -263,35 +223,6 @@ const styles = StyleSheet.create({
     borderRadius: scaleUtils.scaleWidth(35),
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalBox: {
-    width: '80%',
-    borderRadius: 12,
-    padding: 20,
-  },
-  modalTitle: {
-    fontSize: scaleUtils.scaleFont(18),
-    fontFamily: 'Poppins-SemiBold',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  langOption: {
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    marginVertical: 6,
-    borderWidth: 1,
-  },
-  langOptionText: {
-    fontSize: scaleUtils.scaleFont(16),
-    fontFamily: 'Poppins-Regular',
-    textAlign: 'center',
   },
   imageStyle: { width: '100%', height: '100%', resizeMode: 'contain' },
   imagesWarperStyle: {

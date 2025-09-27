@@ -28,7 +28,7 @@ const SplashScreen = () => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 1000,
+        duration: 50,
         useNativeDriver: true,
       }),
       Animated.spring(scaleAnim, {
@@ -42,11 +42,11 @@ const SplashScreen = () => {
       setTimeout(async () => {
         const userData = await getUserData();
         if (userData) {
-          navigation.replace('BankLinkScreen'); // Already logged in
+          navigation.replace('HomePage'); // Already logged in
         } else {
           navigation.replace('MobileNumberEntry'); // Login flow
         }
-      }, 1000); // Small delay for smooth transition
+      }, 0); // Small delay for smooth transition
     });
   }, [fadeAnim, scaleAnim, navigation]);
 

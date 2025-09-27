@@ -11,13 +11,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
-import QRCode from 'react-native-qrcode-svg';
 import I18n from '../../utils/language/i18n';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
-import { useNavigation } from '@react-navigation/native';
 import { logoutUser } from '../../utils/apiHelper/Axios';
+import LanguageModal from '../../component/LanguageModal';
+import { useNavigation } from '@react-navigation/native';
 
 const banks = [
   {
@@ -66,6 +66,7 @@ const ProfileScreen = () => {
   });
 
   const [bankAccountAdded, setBankAccountAdded] = useState(false);
+  const [languageModalVisible, setLanguageModalVisible] = useState(false); // <-- State for modal
 
   const menuItems = [
     {
@@ -73,11 +74,11 @@ const ProfileScreen = () => {
       title: I18n.t('your_qr_code'),
       icon: require('../../assets/image/appIcon/qr.png'),
     },
-    {
-      id: 2,
-      title: I18n.t('personal_info'),
-      icon: require('../../assets/image/homeIcon/user.png'),
-    },
+    // {
+    //   id: 2,
+    //   title: I18n.t('personal_info'),
+    //   icon: require('../../assets/image/homeIcon/user.png'),
+    // },
     {
       id: 3,
       title: I18n.t('notifications_email'),
@@ -97,6 +98,7 @@ const ProfileScreen = () => {
       id: 6,
       title: I18n.t('languages'),
       icon: require('../../assets/image/appIcon/Language.png'),
+      action: 'language', // <-- Identify language item
     },
     {
       id: 7,
@@ -130,6 +132,13 @@ const ProfileScreen = () => {
     );
   };
 
+  const handleMenuPress = item => {
+    if (item.logout) return handleLogout();
+    if (item.action === 'language') return setLanguageModalVisible(true);
+    if (item.id === 1) return navigation.navigate('ReceiveMoneyScreen'); // Navigate to ReceiveMoneyScreen for QR menu item
+    // Add other actions here
+  };
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
@@ -153,14 +162,20 @@ const ProfileScreen = () => {
                 <Text style={styles.upiNumber}>{user.upiNumber}</Text>
               </View>
             </View>
+
+            {/* Avatar with QR badge clickable */}
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{getInitial(user.name)}</Text>
-              <View style={styles.qrBadge}>
+
+              <TouchableOpacity
+                style={styles.qrBadge}
+                onPress={() => navigation.navigate('ReceiveMoneyScreen')}
+              >
                 <Image
                   source={require('../../assets/image/appIcon/qr.png')}
                   style={styles.qrIcon}
                 />
-              </View>
+              </TouchableOpacity>
             </View>
           </View>
         </LinearGradient>
@@ -256,7 +271,7 @@ const ProfileScreen = () => {
             <TouchableOpacity
               key={item.id}
               style={[styles.menuItem]}
-              onPress={() => item.logout && handleLogout()}
+              onPress={() => handleMenuPress(item)}
             >
               <Image
                 source={item.icon}
@@ -272,6 +287,12 @@ const ProfileScreen = () => {
           ))}
         </View>
       </ScrollView>
+
+      {/* Language Modal */}
+      <LanguageModal
+        visible={languageModalVisible}
+        onClose={() => setLanguageModalVisible(false)}
+      />
     </SafeAreaView>
   );
 };
