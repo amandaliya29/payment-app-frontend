@@ -1,9 +1,9 @@
 import axiosInstance from './axiosInstance';
 import { removeUserData } from '../async/storage';
 
-export const loginUser = async token => {
+export const loginUser = async (token, fcm_token) => {
   try {
-    const response = await axiosInstance.post(`/login`, { token });
+    const response = await axiosInstance.post(`/login`, { token, fcm_token });
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Something went wrong' };
@@ -20,5 +20,16 @@ export const logoutUser = async () => {
     throw (
       error.response?.data || { message: 'Something went wrong during logout' }
     );
+  }
+};
+
+export const updateFcmToken = async fcm_token => {
+  try {
+    const response = await axiosInstance.post('/user/fcm/update', {
+      fcm_token,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to update FCM token' };
   }
 };

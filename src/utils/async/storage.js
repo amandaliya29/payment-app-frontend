@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { deleteFCMToken } from '../notificationService';
 
 const USER_DATA_KEY = 'user_data';
 
@@ -24,6 +25,7 @@ export const getUserData = async () => {
 export const removeUserData = async () => {
   try {
     await AsyncStorage.removeItem(USER_DATA_KEY);
+    deleteFCMToken();
   } catch (e) {
     console.error('Error removing user data:', e);
   }

@@ -19,6 +19,7 @@ import auth from '@react-native-firebase/auth';
 import { Toast } from '../../utils/Toast';
 import { loginUser } from '../../utils/apiHelper/Axios';
 import { getUserData, saveUserData } from '../../utils/async/storage';
+import { getFCMToken } from '../../utils/notificationService';
 
 const OtpVerification = () => {
   const navigation = useNavigation();
@@ -59,9 +60,11 @@ const OtpVerification = () => {
       );
       await auth().signInWithCredential(credential);
       const idToken = await auth().currentUser.getIdToken();
+      const fcm = await getFCMToken();
+      // console.log('fcm', fcm);
 
       // ✅ Call backend login API here
-      const loginResponse = await loginUser(idToken);
+      const loginResponse = await loginUser(idToken, fcm);
 
       // console.log('loginResponse', loginResponse.data.user.has_bank_accounts);
 
