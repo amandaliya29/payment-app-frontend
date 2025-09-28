@@ -15,7 +15,7 @@
 
   "otp_verification": "ઓટીપી ચકાસણી",
   "verify_mobile_number": "તમારો મોબાઇલ નંબર ચકાસો",
-  "otp_sent_message": "અમે તમારા મોબાઇલ નંબર પર 6 અંકનો ચકાસણી કોડ મોકલ્યો છે",
+  "otp_sent_message_mob": "અમે તમારા મોબાઇલ નંબર પર 6 અંકનો ચકાસણી કોડ મોકલ્યો છે",
   "tap_edit_number": "નંબર સંપાદિત કરવા માટે ટેપ કરો",
   "enter_otp": "ઓટીપી દાખલ કરો",
   "verify_continue": "ચકાસો અને આગળ વધો",
@@ -288,5 +288,21 @@
   "enter_pin_your": "પિન દાખલ કરો",
   "enter_your_pin": "તમારો પિન દાખલ કરો",
   "enter_pin_to_continue": "કૃપા કરીને ચાલુ રાખવા માટે તમારો પિન દાખલ કરો",
-  "enter_pin_label": "પિન"
+  "enter_pin_label": "પિન",
+
+  "alert_terms": "કૃપા કરીને નિયમો અને શરતો સ્વીકારી લો",
+  "otp_sent_successfully": "OTP સફળતાપૂર્વક મોકલાયો",
+  "otp_invalid": "અમાન્ય OTP",
+  "please_wait_resend": "OTP ફરી મોકલવા પહેલા કૃપા કરીને રાહ જુઓ",
+
+  "profile": "પ્રોફાઇલ",
+  "bank_account": "બેંક ખાતું",
+  "your_qr_code": "તમારો QR કોડ",
+  "personal_info": "વ્યક્તિગત માહિતી",
+  "notifications_email": "સૂચનાઓ અને ઈમેઈલ",
+  "about": "વિશે",
+  "languages": "ભાષાઓ",
+  "logout": "લૉગ આઉટ",
+  "add_bank_account": "બેંક ખાતું ઉમેરો",
+  "bank_accounts_cards": "બેંક ખાતાઓ અને કાર્ડ"
 }

@@ -7,8 +7,6 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
-  Modal,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import scaleUtils from '../../utils/Responsive';
@@ -19,6 +17,8 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../../utils/language/i18n';
 import { Colors } from '../../themes/Colors';
 import auth from '@react-native-firebase/auth';
+import { Toast } from '../../utils/Toast';
+import LanguageModal from '../../component/LanguageModal'; // <-- Import the new modal component
 
 export const MobileNumberEntry = () => {
   const navigation = useNavigation();
@@ -32,11 +32,14 @@ export const MobileNumberEntry = () => {
   const [loading, setLoading] = useState(false);
   const [verificationId, setVerificationId] = useState(null);
 
-  const languages = [
-    { code: 'en', label: 'English' },
-    { code: 'hi', label: 'हिन्दी' },
-    { code: 'gu', label: 'ગુજરાતી' },
-  ];
+  // Toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+  };
 
   useEffect(() => {
     if (route.params?.mobile) {
@@ -46,18 +49,17 @@ export const MobileNumberEntry = () => {
 
   const handleProceed = async () => {
     if (mobile.length !== 10) {
-      Alert.alert(t('alert_invalid_number'));
+      showToast(t('alert_invalid_number'));
       return;
     }
     if (!isChecked) {
-      Alert.alert(t('alert_terms'));
+      showToast(t('alert_terms'));
       return;
     }
 
     try {
       setLoading(true);
       const phoneNumber = `+91${mobile}`;
-
       const unsubscribe = auth().verifyPhoneNumber(phoneNumber);
 
       unsubscribe.on('state_changed', phoneAuthSnapshot => {
@@ -65,6 +67,7 @@ export const MobileNumberEntry = () => {
           case auth.PhoneAuthState.CODE_SENT:
             setVerificationId(phoneAuthSnapshot.verificationId);
             setLoading(false);
+            showToast(t('otp_sent_successfully'));
             navigation.navigate('OtpVerification', {
               verificationId: phoneAuthSnapshot.verificationId,
               mobile,
@@ -81,33 +84,27 @@ export const MobileNumberEntry = () => {
               .signInWithCredential(credential)
               .then(() => {
                 setLoading(false);
-                navigation.navigate('Home'); // Change to your next screen
+                navigation.navigate('Home');
               })
-              .catch(err => {
+              .catch(() => {
                 setLoading(false);
-                Alert.alert('Error', err.message);
+                showToast(t('otp_invalid'));
               });
             break;
 
           case auth.PhoneAuthState.ERROR:
             setLoading(false);
-            Alert.alert('Error', phoneAuthSnapshot.error.message);
+            showToast(t('otp_invalid'));
             break;
 
           case auth.PhoneAuthState.CODE_AUTO_RETRIEVED:
-            // Optional auto-retrieved code handling
             break;
         }
       });
-    } catch (error) {
+    } catch {
       setLoading(false);
-      Alert.alert('Error', error.message);
+      showToast(t('otp_invalid'));
     }
-  };
-
-  const selectLanguage = langCode => {
-    i18n.changeLanguage(langCode);
-    setModalVisible(false);
   };
 
   return (
@@ -117,6 +114,10 @@ export const MobileNumberEntry = () => {
         { backgroundColor: dark ? Colors.bg : colors.background },
       ]}
     >
+      {/* Toast Component */}
+      <Toast visible={toastVisible} message={toastMessage} isDark={dark} />
+
+      {/* Top Bar */}
       <View style={styles.topBar}>
         <TouchableOpacity
           style={[styles.BtnWarperStyle, { backgroundColor: Colors.primary }]}
@@ -129,45 +130,16 @@ export const MobileNumberEntry = () => {
         </TouchableOpacity>
       </View>
 
+      {/* Language Modal Component */}
+      <LanguageModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+      />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{ padding: scaleUtils.scaleWidth(20) }}
       >
-        {/* Language Modal */}
-        <Modal transparent visible={modalVisible} animationType="slide">
-          <View style={styles.modalOverlay}>
-            <View style={[styles.modalBox, { backgroundColor: colors.card }]}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>
-                {t('select_language')}
-              </Text>
-
-              {languages.map(lang => (
-                <TouchableOpacity
-                  key={lang.code}
-                  style={[
-                    styles.langOption,
-                    { borderColor: Colors.primary },
-                    i18n.language === lang.code && {
-                      backgroundColor: Colors.primary,
-                    },
-                  ]}
-                  onPress={() => selectLanguage(lang.code)}
-                >
-                  <Text
-                    style={[
-                      styles.langOptionText,
-                      { color: Colors.primary },
-                      i18n.language === lang.code && { color: colors.card },
-                    ]}
-                  >
-                    {lang.label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </Modal>
-
         {/* Phone Icon */}
         <View style={styles.imagesWarperStyle}>
           <Image
@@ -233,7 +205,6 @@ export const MobileNumberEntry = () => {
 
 export default MobileNumberEntry;
 
-// Styles remain unchanged
 const styles = StyleSheet.create({
   container: { flex: 1 },
   topBar: {
@@ -252,35 +223,6 @@ const styles = StyleSheet.create({
     borderRadius: scaleUtils.scaleWidth(35),
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalBox: {
-    width: '80%',
-    borderRadius: 12,
-    padding: 20,
-  },
-  modalTitle: {
-    fontSize: scaleUtils.scaleFont(18),
-    fontFamily: 'Poppins-SemiBold',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  langOption: {
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    marginVertical: 6,
-    borderWidth: 1,
-  },
-  langOptionText: {
-    fontSize: scaleUtils.scaleFont(16),
-    fontFamily: 'Poppins-Regular',
-    textAlign: 'center',
   },
   imageStyle: { width: '100%', height: '100%', resizeMode: 'contain' },
   imagesWarperStyle: {

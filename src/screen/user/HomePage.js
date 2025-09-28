@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -13,15 +13,19 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
-import I18n from '../../utils/language/i18n';
+import i18n from '../../utils/language/i18n';
 import Input from '../../component/Input';
 import { useNavigation } from '@react-navigation/native';
+import { LanguageContext } from '../../utils/language/LanguageContext';
 
 const HomePage = () => {
   const scheme = useColorScheme();
   const navigation = useNavigation();
   const isDark = scheme === 'dark';
   const [search, setSearch] = useState('');
+
+  // Get language context to re-render on change
+  const { language } = useContext(LanguageContext);
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -65,27 +69,19 @@ const HomePage = () => {
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* 🔎 Top Search & Notification */}
         <View style={styles.topBar}>
-          {/* <TextInput
-            placeholder={I18n.t('search')}
-            placeholderTextColor={themeColors.text}
-            style={[
-              styles.searchInput,
-              {
-                backgroundColor: themeColors.secondaryBg,
-                color: themeColors.text,
-              },
-            ]}
-          /> */}
           <View style={{ flex: 1, marginRight: scaleUtils.scaleWidth(10) }}>
             <Input
               isSearch
               value={search}
               onChange={setSearch}
-              placeholder={I18n.t('search')}
+              placeholder={i18n.t('search')}
               onSearchPress={() => console.log('Search Pressed:', search)}
             />
           </View>
-          <TouchableOpacity style={styles.notifyButton}>
+          <TouchableOpacity
+            style={styles.notifyButton}
+            onPress={() => navigation.navigate('ProfileScreen')}
+          >
             <Image
               source={require('../../assets/image/homeIcon/user.png')}
               style={[styles.notifyIcon]}
@@ -105,45 +101,45 @@ const HomePage = () => {
             style={styles.banner}
           >
             <Text style={[styles.bannerText, { color: Colors.white }]}>
-              {I18n.t('credit_upi_banner')}
+              {i18n.t('credit_upi_banner')}
             </Text>
           </LinearGradient>
         </TouchableOpacity>
 
         {/* ⚡ Quick Actions (3 per row) */}
         <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
-          {I18n.t('quick_actions')}
+          {i18n.t('quick_actions')}
         </Text>
         <View style={styles.grid}>
           <ActionButton3
             onPress={() => navigation.navigate('QrPage')}
-            title={I18n.t('scan_pay')}
+            title={i18n.t('scan_pay')}
             image={require('../../assets/image/homeIcon/scan.png')}
             themeColors={themeColors}
           />
           <ActionButton3
-            title={I18n.t('to_mobile')}
+            title={i18n.t('to_mobile')}
             image={require('../../assets/image/homeIcon/mobile.png')}
             themeColors={themeColors}
           />
           <ActionButton3
-            title={I18n.t('to_bank')}
+            title={i18n.t('to_bank')}
             image={require('../../assets/image/homeIcon/bank.png')}
             themeColors={themeColors}
           />
           <ActionButton3
             onPress={() => navigation.navigate('ReceiveMoneyScreen')}
-            title={I18n.t('receive')}
+            title={i18n.t('receive')}
             image={require('../../assets/image/homeIcon/receive.png')}
             themeColors={themeColors}
           />
           <ActionButton3
-            title={I18n.t('self_transfer')}
+            title={i18n.t('self_transfer')}
             image={require('../../assets/image/homeIcon/transfer.png')}
             themeColors={themeColors}
           />
           <ActionButton3
-            title={I18n.t('transaction_history')}
+            title={i18n.t('transaction_history')}
             image={require('../../assets/image/homeIcon/history.png')}
             themeColors={themeColors}
           />
@@ -151,7 +147,7 @@ const HomePage = () => {
 
         {/* 💳 Credit & Loans */}
         <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
-          {I18n.t('credit_loans')}
+          {i18n.t('credit_loans')}
         </Text>
         <View style={styles.creditRow}>
           {/* Left Big Card */}
@@ -171,10 +167,10 @@ const HomePage = () => {
                 style={styles.creditIcon}
               />
               <Text style={[styles.creditTitle, { color: Colors.white }]}>
-                {I18n.t('credit_upi')}
+                {i18n.t('credit_upi')}
               </Text>
               <Text style={[styles.creditSub, { color: themeColors.subText }]}>
-                {I18n.t('credit_upi_subtitle')}
+                {i18n.t('credit_upi_subtitle')}
               </Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -182,12 +178,12 @@ const HomePage = () => {
           {/* Right Column (stacked small buttons) */}
           <View style={styles.rightColumn}>
             <SmallButton
-              title={I18n.t('add_credit_card')}
+              title={i18n.t('add_credit_card')}
               image={require('../../assets/image/homeIcon/card.png')}
               themeColors={themeColors}
             />
             <SmallButton
-              title={I18n.t('loan_offers')}
+              title={i18n.t('loan_offers')}
               image={require('../../assets/image/homeIcon/loan.png')}
               themeColors={themeColors}
             />
@@ -196,21 +192,21 @@ const HomePage = () => {
 
         {/* 📱 Recharge & Bills */}
         <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
-          {I18n.t('recharge_bills')}
+          {i18n.t('recharge_bills')}
         </Text>
         <View style={styles.grid}>
           <ActionButton3
-            title={I18n.t('mobile_recharge')}
+            title={i18n.t('mobile_recharge')}
             image={require('../../assets/image/homeIcon/mobile.png')}
             themeColors={themeColors}
           />
           <ActionButton3
-            title={I18n.t('electricity_bill')}
+            title={i18n.t('electricity_bill')}
             image={require('../../assets/image/homeIcon/electricity.png')}
             themeColors={themeColors}
           />
           <ActionButton3
-            title={I18n.t('fastag_recharge')}
+            title={i18n.t('fastag_recharge')}
             image={require('../../assets/image/homeIcon/fastag.png')}
             themeColors={themeColors}
           />
@@ -219,19 +215,17 @@ const HomePage = () => {
           <ActionButton2
             onPress={() => {
               if (banks.length === 1) {
-                // Only one bank → directly go to BankBalanceScreen
                 navigation.navigate('BankBalanceScreen', { bank: banks[0] });
               } else {
-                // Multiple banks → show SelectBankScreen
                 navigation.navigate('SelectBankScreen', { banks });
               }
             }}
-            title={I18n.t('check_balance')}
+            title={i18n.t('check_balance')}
             image={require('../../assets/image/homeIcon/balance.png')}
             themeColors={themeColors}
           />
           <ActionButton2
-            title={I18n.t('linked_account')}
+            title={i18n.t('linked_account')}
             image={require('../../assets/image/homeIcon/link.png')}
             themeColors={themeColors}
           />
@@ -304,8 +298,6 @@ const styles = StyleSheet.create({
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: Colors.error,
-    // marginTop: scaleUtils.scaleHeight(4),
   },
   notifyButton: {
     backgroundColor: Colors.primary,
@@ -342,8 +334,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-
-  /* 3-per-row buttons */
   actionBtn3: {
     width: '30%',
     height: scaleUtils.scaleHeight(120),
@@ -354,8 +344,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: scaleUtils.scaleHeight(12),
   },
-
-  /* 2-per-row buttons */
   actionBtn2: {
     width: '48%',
     flexDirection: 'row',
@@ -368,7 +356,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: scaleUtils.scaleHeight(12),
   },
-
   actionIcon: {
     width: scaleUtils.scaleWidth(26),
     height: scaleUtils.scaleWidth(26),
@@ -379,7 +366,6 @@ const styles = StyleSheet.create({
     width: scaleUtils.scaleWidth(26),
     height: scaleUtils.scaleWidth(26),
     tintColor: Colors.primary,
-    // marginBottom: scaleUtils.scaleHeight(8),
   },
   actionText: {
     color: Colors.white,
@@ -387,8 +373,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     textAlign: 'center',
   },
-
-  /* Credit & Loans */
   creditRow: {
     flexDirection: 'row',
     marginBottom: scaleUtils.scaleHeight(12),
@@ -398,7 +382,6 @@ const styles = StyleSheet.create({
     borderRadius: scaleUtils.scaleWidth(12),
     padding: scaleUtils.scaleHeight(18),
     flex: 1,
-    // marginRight: scaleUtils.scaleWidth(10),
   },
   creditIcon: {
     width: scaleUtils.scaleWidth(28),
@@ -428,7 +411,6 @@ const styles = StyleSheet.create({
     paddingVertical: scaleUtils.scaleHeight(12),
     paddingHorizontal: scaleUtils.scaleWidth(6),
     alignItems: 'center',
-    // marginBottom: scaleUtils.scaleHeight(10),
   },
   smallIcon: {
     width: scaleUtils.scaleWidth(22),
