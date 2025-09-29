@@ -33,3 +33,14 @@ export const updateFcmToken = async fcm_token => {
     throw error.response?.data || { message: 'Failed to update FCM token' };
   }
 };
+
+export const BankList = async () => {
+  try {
+    const response = await axiosInstance.get('/bank/list');
+    console.log(response.data);
+
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'error' };
+  }
+};
