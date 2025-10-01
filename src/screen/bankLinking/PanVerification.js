@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
 import Header from '../../component/Header';
 import scaleUtils from '../../utils/Responsive';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../component/Button';
 import Input from '../../component/Input';
@@ -13,6 +13,8 @@ const PanVerification = () => {
   const navigation = useNavigation();
   const { colors, dark } = useTheme(); // 👈 theme hook
   const [name, setName] = useState('');
+  const route = useRoute();
+  const { aadhaar, Itemid } = route?.params || {};
   const [panNumber, setPanNumber] = useState('');
 
   const validatePan = pan => {
@@ -32,8 +34,15 @@ const PanVerification = () => {
     }
 
     // Navigate or API call
-    navigation.navigate('VideoKYCVerification');
+    navigation.navigate('VideoKYCVerification', {
+      aadhaar,
+      panNumber,
+      name,
+      Itemid,
+    });
   };
+
+  // console.log('post', aadhaar, panNumber, name);
 
   return (
     <SafeAreaView

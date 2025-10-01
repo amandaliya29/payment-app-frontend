@@ -44,3 +44,26 @@ export const BankList = async () => {
     throw error.response?.data || { message: 'error' };
   }
 };
+
+export const saveBankDetails = async ({
+  bank_id,
+  aadhaar_number,
+  pan_number,
+  account_holder_name,
+  account_number,
+  ifsc_code,
+}) => {
+  try {
+    const response = await axiosInstance.post('/bank/details', {
+      bank_id,
+      aadhaar_number,
+      pan_number,
+      account_holder_name,
+      account_number,
+      ifsc_code,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to save bank details' };
+  }
+};

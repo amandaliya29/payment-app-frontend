@@ -55,8 +55,9 @@ const BankLinkScreen = () => {
         { backgroundColor: dark ? Colors.secondaryBg : Colors.cardGrey },
       ]}
       onPress={() => {
-        console.log('Selected:', item.name);
-        navigation.navigate('AadhaarVerification');
+        console.log('Selected:', item.id);
+        const Itemid = item.id;
+        navigation.navigate('AadhaarVerification', { Itemid });
       }}
     >
       <Image
