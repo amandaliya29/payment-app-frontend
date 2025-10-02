@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Header from '../../component/Header';
 import Button from '../../component/Button';
+import { Toast } from '../../utils/Toast'; // 👈 add your Toast component
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
@@ -23,6 +24,16 @@ const FaceIDVerification = () => {
   const { aadhaar, panNumber, name, Itemid } = route?.params || {};
 
   console.log(aadhaar, panNumber, name, Itemid);
+
+  // ✅ Toast states
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 2000); // auto hide after 2s
+  };
 
   // Pick theme colors dynamically
   const isDark = scheme === 'dark';
@@ -66,12 +77,14 @@ const FaceIDVerification = () => {
         ifsc_code,
       });
 
-      console.log('Bank Details Saved:', result);
+      showToast('Bank Details Saved');
+      // console.log('Bank Details Saved:', result);
 
       // ✅ Navigate after success
       navigation.navigate('UPIPinSetup');
     } catch (error) {
       console.log('Error Saving Bank:', error);
+      showToast('Failed to Save Bank Details');
     }
   };
 
@@ -147,6 +160,9 @@ const FaceIDVerification = () => {
           {I18n.t('kyc_terms_text')}
         </Text>
       </ScrollView>
+
+      {/* ✅ Toast at bottom */}
+      <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
 };

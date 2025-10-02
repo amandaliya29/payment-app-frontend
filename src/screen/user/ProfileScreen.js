@@ -238,7 +238,7 @@ const ProfileScreen = () => {
               styles.paymentOption,
               { marginTop: scaleUtils.scaleHeight(10) },
             ]}
-            onPress={() => setBankAccountAdded(!bankAccountAdded)}
+            onPress={() => navigation.navigate('BankLinkScreen')}
           >
             <View
               style={[
