@@ -20,7 +20,7 @@ import { Colors } from '../../themes/Colors';
 const AadhaarOTPVerification = ({ route }) => {
   const navigation = useNavigation();
   const { colors, dark } = useTheme(); // 👈 theme hook
-  const { aadhaar } = route.params || {};
+  const { aadhaar, Itemid } = route.params || {};
   const [code, setCode] = useState('');
   const [timer, setTimer] = useState(45);
 
@@ -40,7 +40,7 @@ const AadhaarOTPVerification = ({ route }) => {
 
   const handleVerify = () => {
     if (code.length === 6) {
-      navigation.navigate('PanVerification');
+      navigation.navigate('PanVerification', { aadhaar, Itemid });
     } else {
       Alert.alert(I18n.t('enter_valid_otp'));
     }

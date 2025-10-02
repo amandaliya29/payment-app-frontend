@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,16 +8,32 @@ import {
   useColorScheme,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Header from '../../component/Header';
 import Button from '../../component/Button';
+import { Toast } from '../../utils/Toast'; // 👈 add your Toast component
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
+import { saveBankDetails } from '../../utils/apiHelper/Axios';
 
 const FaceIDVerification = () => {
   const navigation = useNavigation();
   const scheme = useColorScheme(); // 👈 detect dark / light theme
+  const route = useRoute();
+  const { aadhaar, panNumber, name, Itemid } = route?.params || {};
+
+  console.log(aadhaar, panNumber, name, Itemid);
+
+  // ✅ Toast states
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 2000); // auto hide after 2s
+  };
 
   // Pick theme colors dynamically
   const isDark = scheme === 'dark';
@@ -26,6 +42,50 @@ const FaceIDVerification = () => {
     text: isDark ? Colors.white : Colors.black,
     subText: isDark ? Colors.grey : Colors.grey,
     card: isDark ? Colors.secondaryBg : Colors.cardGrey,
+  };
+
+  // Generate random account number (10-12 digits)
+  const generateAccountNumber = () => {
+    let acc = '';
+    for (let i = 0; i < 12; i++) {
+      acc += Math.floor(Math.random() * 10); // random digit 0-9
+    }
+    return acc;
+  };
+
+  // Generate random IFSC code (e.g., HDFC0001234 format)
+  const generateIFSC = () => {
+    const banks = ['HDFC', 'ICIC', 'SBI', 'PNB', 'AXIS'];
+    const bankCode = banks[Math.floor(Math.random() * banks.length)]; // random bank prefix
+    const branchCode = String(Math.floor(100000 + Math.random() * 900000)); // 6-digit branch code
+    return `${bankCode}0${branchCode}`; // e.g. HDFC0123456
+  };
+
+  const handleSaveBank = async () => {
+    try {
+      const account_number = generateAccountNumber();
+      const ifsc_code = generateIFSC();
+
+      const cleanedAadhaar = (aadhaar || '').replace(/\s+/g, '');
+
+      const result = await saveBankDetails({
+        bank_id: Itemid,
+        aadhaar_number: cleanedAadhaar, // from route params
+        pan_number: panNumber,
+        account_holder_name: name,
+        account_number,
+        ifsc_code,
+      });
+
+      showToast('Bank Details Saved');
+      // console.log('Bank Details Saved:', result);
+
+      // ✅ Navigate after success
+      navigation.navigate('UPIPinSetup');
+    } catch (error) {
+      console.log('Error Saving Bank:', error);
+      showToast('Failed to Save Bank Details');
+    }
   };
 
   return (
@@ -93,16 +153,16 @@ const FaceIDVerification = () => {
         </Text>
 
         {/* Button */}
-        <Button
-          title={I18n.t('complete_video_kyc')}
-          onPress={() => navigation.navigate('UPIPinSetup')}
-        />
+        <Button title={I18n.t('complete_video_kyc')} onPress={handleSaveBank} />
 
         {/* Footer Text */}
         <Text style={[styles.footer, { color: themeColors.subText }]}>
           {I18n.t('kyc_terms_text')}
         </Text>
       </ScrollView>
+
+      {/* ✅ Toast at bottom */}
+      <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,24 +7,47 @@ import {
   StyleSheet,
   Image,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import { useNavigation, useTheme } from '@react-navigation/native';
-import { banks } from '../../utils/BankList';
 import Input from '../../component/Input';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import I18n from '../../utils/language/i18n';
+import { BankList } from '../../utils/apiHelper/Axios';
+
+const IMAGE_BASE_URL = 'https://cyapay.ddns.net'; // 👈 Dynamic images
 
 const BankLinkScreen = () => {
   const navigation = useNavigation();
-  const { colors, dark } = useTheme(); // 👈 theme hook
+  const { colors, dark } = useTheme();
   const [search, setSearch] = useState('');
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredBanks = banks.filter(bank =>
+  // Fetch bank list from API
+  const fetchBankList = async () => {
+    try {
+      const res = await BankList();
+      setData(res.data || []); // API should return array of banks
+    } catch (error) {
+      console.log('Bank List Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBankList();
+  }, []);
+
+  // Filter banks based on search text
+  const filteredBanks = data.filter(bank =>
     bank.name.toLowerCase().includes(search.toLowerCase()),
   );
 
+  // Render each bank item
   const renderBank = ({ item }) => (
     <TouchableOpacity
       style={[
@@ -32,17 +55,21 @@ const BankLinkScreen = () => {
         { backgroundColor: dark ? Colors.secondaryBg : Colors.cardGrey },
       ]}
       onPress={() => {
-        console.log('Selected:', item.name);
-        navigation.navigate('AadhaarVerification');
+        console.log('Selected:', item.id);
+        const Itemid = item.id;
+        navigation.navigate('AadhaarVerification', { Itemid });
       }}
     >
-      <Image source={item.logo} style={styles.bankLogo} />
+      <Image
+        source={{ uri: `${IMAGE_BASE_URL}/${item.logo}` }} // 👈 dynamic logo
+        style={styles.bankLogo}
+      />
       <View style={styles.bankInfo}>
         <Text style={[styles.bankName, { color: colors.text }]}>
           {item.name}
         </Text>
         <Text style={[styles.bankSubtitle, { color: Colors.grey }]}>
-          {item.subtitle}
+          {item.slogan || 'Bank Subtitle'}
         </Text>
       </View>
       <Image
@@ -93,16 +120,25 @@ const BankLinkScreen = () => {
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
           {I18n.t('popular_banks')}
         </Text>
-        <FlatList
-          data={filteredBanks}
-          scrollEnabled={false}
-          keyExtractor={item => item.id}
-          renderItem={renderBank}
-          showsVerticalScrollIndicator={false}
-          ListFooterComponent={() => (
-            <View style={{ marginBottom: scaleUtils.scaleHeight(40) }} />
-          )}
-        />
+
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+            color={Colors.primary}
+            style={{ marginTop: 20 }}
+          />
+        ) : (
+          <FlatList
+            data={filteredBanks}
+            scrollEnabled={false}
+            keyExtractor={item => item.id.toString()}
+            renderItem={renderBank}
+            showsVerticalScrollIndicator={false}
+            ListFooterComponent={
+              <View style={{ marginBottom: scaleUtils.scaleHeight(40) }} />
+            }
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -111,9 +147,7 @@ const BankLinkScreen = () => {
 export default BankLinkScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -159,9 +193,7 @@ const styles = StyleSheet.create({
     marginRight: scaleUtils.scaleWidth(12),
     resizeMode: 'contain',
   },
-  bankInfo: {
-    flex: 1,
-  },
+  bankInfo: { flex: 1 },
   bankName: {
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Medium',

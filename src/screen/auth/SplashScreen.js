@@ -41,6 +41,8 @@ const SplashScreen = () => {
       // Check AsyncStorage after animation completes
       setTimeout(async () => {
         const userData = await getUserData();
+        console.log(userData);
+
         if (userData) {
           navigation.replace('HomePage'); // Already logged in
         } else {

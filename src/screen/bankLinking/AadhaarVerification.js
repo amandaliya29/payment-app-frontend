@@ -12,12 +12,15 @@ import { Colors } from '../../themes/Colors';
 const AadhaarVerification = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const { Itemid } = route?.params || {};
   const { colors, dark } = useTheme(); // 👈 theme hook
   const [aadhaar, setAadhaar] = useState('');
 
+  // console.log(Itemid);
+
   const handleSendOtp = () => {
     if (aadhaar.length === 14) {
-      navigation.navigate('AadhaarOTPVerification', { aadhaar });
+      navigation.navigate('AadhaarOTPVerification', { aadhaar, Itemid });
     } else {
       Alert.alert(I18n.t('aadhaar_invalid'));
     }

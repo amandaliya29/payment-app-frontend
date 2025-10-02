@@ -12,13 +12,17 @@ import scaleUtils from '../../utils/Responsive';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import I18n from '../../utils/language/i18n';
 import Button from '../../component/Button';
-import { useNavigation, useTheme } from '@react-navigation/native';
+import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 import { Colors } from '../../themes/Colors';
 
 const VideoKYCVerification = () => {
   const navigation = useNavigation();
   const { dark, colors } = useTheme(); // 👈 theme hook
   const [selectedDoc, setSelectedDoc] = useState('aadhaar');
+  const route = useRoute();
+  const { aadhaar, panNumber, name, Itemid } = route?.params || {};
+
+  // console.log(aadhaar, panNumber, name);
 
   const documents = [
     { key: 'aadhaar', label: I18n.t('aadhaar_card') },
@@ -92,7 +96,14 @@ const VideoKYCVerification = () => {
         <View style={{ marginVertical: scaleUtils.scaleHeight(20) }}>
           <Button
             title={I18n.t('start_video_kyc')}
-            onPress={() => navigation.navigate('FaceIDVerification')}
+            onPress={() =>
+              navigation.navigate('FaceIDVerification', {
+                aadhaar,
+                panNumber,
+                name,
+                Itemid,
+              })
+            }
           />
         </View>
       </ScrollView>
