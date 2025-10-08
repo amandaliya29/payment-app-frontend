@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -17,36 +17,15 @@ import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import { logoutUser } from '../../utils/apiHelper/Axios';
 import LanguageModal from '../../component/LanguageModal';
+import { getUserProfile } from '../../utils/apiHelper/Axios'; // added import
 import { useNavigation } from '@react-navigation/native';
-
-const banks = [
-  {
-    id: 1,
-    name: 'State Bank of India',
-    accountNumber: '•••• 1234',
-    type: 'Savings • Primary Account',
-    logo: require('../../assets/image/bankIcon/sbi.png'),
-  },
-  {
-    id: 2,
-    name: 'HDFC Bank',
-    accountNumber: '•••• 5678',
-    type: 'Current',
-    logo: require('../../assets/image/bankIcon/hdfc.png'),
-  },
-  {
-    id: 3,
-    name: 'ICICI Bank',
-    accountNumber: '•••• 9012',
-    type: 'Savings',
-    logo: require('../../assets/image/bankIcon/icici.png'),
-  },
-];
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+
+  const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -59,54 +38,45 @@ const ProfileScreen = () => {
     bankIcon: isDark ? Colors.cardGrey : Colors.darkGrey,
   };
 
-  const [user] = useState({
-    name: 'Nikil Kumar',
-    upiId: 'nikilkumar123@sbi',
-    upiNumber: '7668766533',
+  const [user, setUser] = useState({
+    name: '',
+    upiId: '',
+    upiNumber: '',
   });
 
-  const [bankAccountAdded, setBankAccountAdded] = useState(false);
-  const [languageModalVisible, setLanguageModalVisible] = useState(false); // <-- State for modal
+  const [bankAccounts, setBankAccounts] = useState([]);
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
 
-  const menuItems = [
-    {
-      id: 1,
-      title: I18n.t('your_qr_code'),
-      icon: require('../../assets/image/appIcon/qr.png'),
-    },
-    // {
-    //   id: 2,
-    //   title: I18n.t('personal_info'),
-    //   icon: require('../../assets/image/homeIcon/user.png'),
-    // },
-    {
-      id: 3,
-      title: I18n.t('notifications_email'),
-      icon: require('../../assets/image/homeIcon/bell.png'),
-    },
-    {
-      id: 4,
-      title: I18n.t('about'),
-      icon: require('../../assets/image/appIcon/about.png'),
-    },
-    {
-      id: 5,
-      title: I18n.t('privacy_policy'),
-      icon: require('../../assets/image/appIcon/security.png'),
-    },
-    {
-      id: 6,
-      title: I18n.t('languages'),
-      icon: require('../../assets/image/appIcon/Language.png'),
-      action: 'language', // <-- Identify language item
-    },
-    {
-      id: 7,
-      title: I18n.t('logout'),
-      icon: require('../../assets/image/appIcon/logout.png'),
-      logout: true, // to identify logout
-    },
-  ];
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await getUserProfile();
+        if (response.status && response.data) {
+          const { user, bank_accounts } = response.data;
+          const primaryBank = bank_accounts?.find(acc => acc.is_primary === 1);
+
+          const displayName =
+            user.name && user.name.trim() !== ''
+              ? user.name
+              : primaryBank?.account_holder_name
+                ? primaryBank.account_holder_name
+                : 'Anonymous';
+
+          setUser({
+            name: displayName,
+            upiId: primaryBank?.upi_id || '',
+            upiNumber: user?.phone?.replace(/^\+91/, '') || '',
+          });
+
+          setBankAccounts(bank_accounts || []);
+        }
+      } catch (error) {
+        console.log('Error fetching profile:', error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const getInitial = name => name?.charAt(0)?.toUpperCase() || '';
 
@@ -135,9 +105,43 @@ const ProfileScreen = () => {
   const handleMenuPress = item => {
     if (item.logout) return handleLogout();
     if (item.action === 'language') return setLanguageModalVisible(true);
-    if (item.id === 1) return navigation.navigate('ReceiveMoneyScreen'); // Navigate to ReceiveMoneyScreen for QR menu item
-    // Add other actions here
+    if (item.id === 1) return navigation.navigate('ReceiveMoneyScreen');
   };
+
+  const menuItems = [
+    {
+      id: 1,
+      title: I18n.t('your_qr_code'),
+      icon: require('../../assets/image/appIcon/qr.png'),
+    },
+    {
+      id: 3,
+      title: I18n.t('notifications_email'),
+      icon: require('../../assets/image/homeIcon/bell.png'),
+    },
+    {
+      id: 4,
+      title: I18n.t('about'),
+      icon: require('../../assets/image/appIcon/about.png'),
+    },
+    {
+      id: 5,
+      title: I18n.t('privacy_policy'),
+      icon: require('../../assets/image/appIcon/security.png'),
+    },
+    {
+      id: 6,
+      title: I18n.t('languages'),
+      icon: require('../../assets/image/appIcon/Language.png'),
+      action: 'language',
+    },
+    {
+      id: 7,
+      title: I18n.t('logout'),
+      icon: require('../../assets/image/appIcon/logout.png'),
+      logout: true,
+    },
+  ];
 
   return (
     <SafeAreaView
@@ -149,24 +153,34 @@ const ProfileScreen = () => {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* User Info Card */}
         <LinearGradient
           colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
           style={styles.userCard}
         >
           <View style={styles.userRow}>
             <View style={{ flex: 1 }}>
-              <Text style={styles.userName}>{user.name}</Text>
-              <Text style={styles.upiId}>{user.upiId}</Text>
+              <Text
+                style={styles.userName}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {user.name}
+              </Text>
+
+              <Text style={styles.upiId} numberOfLines={1} ellipsizeMode="tail">
+                {user.upiId}
+              </Text>
               <View style={styles.upiRow}>
-                <Text style={styles.upiNumber}>{user.upiNumber}</Text>
+                <Text style={styles.upiNumber}>
+                  {user.upiNumber
+                    ? user.upiNumber
+                    : 'Savings • Current Account'}
+                </Text>
               </View>
             </View>
 
-            {/* Avatar with QR badge clickable */}
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>{getInitial(user.name)}</Text>
-
               <TouchableOpacity
                 style={styles.qrBadge}
                 onPress={() => navigation.navigate('ReceiveMoneyScreen')}
@@ -180,13 +194,12 @@ const ProfileScreen = () => {
           </View>
         </LinearGradient>
 
-        {/* Payment Methods */}
         <View style={styles.paymentCard}>
           <Text style={[styles.paymentTitle, { color: themeColors.text }]}>
             {I18n.t('bank_accounts_cards')}
           </Text>
 
-          {banks.map(bank => (
+          {bankAccounts.map(bank => (
             <View key={bank.id} style={styles.bankContainer}>
               <View style={styles.bankInfo}>
                 <View
@@ -195,7 +208,10 @@ const ProfileScreen = () => {
                     { backgroundColor: themeColors.iconBox },
                   ]}
                 >
-                  <Image source={bank.logo} style={styles.bankLogo} />
+                  <Image
+                    source={{ uri: `${IMAGE_BASE_URL}${bank.bank.logo}` }}
+                    style={styles.bankLogo}
+                  />
                 </View>
                 <View style={{ marginLeft: scaleUtils.scaleWidth(8) }}>
                   <View
@@ -208,7 +224,7 @@ const ProfileScreen = () => {
                     <Text
                       style={[styles.bankName, { color: themeColors.text }]}
                     >
-                      {bank.name}
+                      {bank.bank.name}
                     </Text>
                     <Text
                       style={[
@@ -216,7 +232,7 @@ const ProfileScreen = () => {
                         { color: themeColors.placeholder },
                       ]}
                     >
-                      {bank.accountNumber}
+                      •••• {bank.account_number.slice(-4)}
                     </Text>
                   </View>
                   <Text
@@ -225,14 +241,15 @@ const ProfileScreen = () => {
                       { color: themeColors.placeholder },
                     ]}
                   >
-                    {bank.type}
+                    {bank.is_primary
+                      ? 'Savings • Primary Account'
+                      : 'Current Account'}
                   </Text>
                 </View>
               </View>
             </View>
           ))}
 
-          {/* Add Bank Account */}
           <TouchableOpacity
             style={[
               styles.paymentOption,
@@ -265,7 +282,6 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Menu List */}
         <View style={{ marginVertical: scaleUtils.scaleHeight(6) }}>
           {menuItems.map(item => (
             <TouchableOpacity
@@ -288,7 +304,6 @@ const ProfileScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Language Modal */}
       <LanguageModal
         visible={languageModalVisible}
         onClose={() => setLanguageModalVisible(false)}
@@ -300,8 +315,6 @@ const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContainer: { padding: scaleUtils.scaleWidth(16) },
-
-  // User Card
   userCard: {
     paddingHorizontal: scaleUtils.scaleWidth(16),
     paddingVertical: scaleUtils.scaleWidth(20),
@@ -337,11 +350,13 @@ const styles = StyleSheet.create({
     tintColor: Colors.white,
   },
   userName: {
+    width: '95%',
     fontSize: scaleUtils.scaleFont(16),
     fontFamily: 'Poppins-Bold',
     color: Colors.white,
   },
   upiId: {
+    width: '95%',
     fontSize: scaleUtils.scaleFont(14),
     color: Colors.white,
     fontFamily: 'Poppins-Regular',
@@ -352,8 +367,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
     color: Colors.white,
   },
-
-  // Payment Methods
   paymentCard: { marginBottom: scaleUtils.scaleHeight(20) },
   paymentTitle: {
     fontSize: scaleUtils.scaleFont(15),
@@ -418,8 +431,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Poppins-Regular',
   },
-
-  // Menu List
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',

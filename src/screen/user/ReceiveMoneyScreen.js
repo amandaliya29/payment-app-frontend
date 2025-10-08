@@ -12,16 +12,17 @@ import {
   ToastAndroid,
   Alert,
   Platform,
+  PanResponder,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
-import { useNavigation } from '@react-navigation/native';
 import QRCode from 'react-native-qrcode-svg';
 import Clipboard from '@react-native-clipboard/clipboard';
 import I18n from '../../utils/language/i18n';
+import { useNavigation } from '@react-navigation/native';
 
 const ReceiveMoneyScreen = () => {
   const navigation = useNavigation();
@@ -58,6 +59,7 @@ const ReceiveMoneyScreen = () => {
   ];
 
   const [selectedBank, setSelectedBank] = useState(banks[0]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
 
   const copyUPI = () => {
@@ -72,9 +74,32 @@ const ReceiveMoneyScreen = () => {
   const getInitial = name => name?.charAt(0)?.toUpperCase() || '';
 
   const handleBankSelect = bank => {
+    const index = banks.findIndex(b => b.id === bank.id);
+    setCurrentIndex(index);
     setSelectedBank(bank);
     setModalVisible(false);
   };
+
+  // 👉 Swipe gesture handling
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gestureState) => {
+      return Math.abs(gestureState.dx) > 20;
+    },
+    onPanResponderRelease: (_, gestureState) => {
+      if (gestureState.dx > 50) {
+        // Swipe right → previous QR
+        const prevIndex =
+          currentIndex === 0 ? banks.length - 1 : currentIndex - 1;
+        setCurrentIndex(prevIndex);
+        setSelectedBank(banks[prevIndex]);
+      } else if (gestureState.dx < -50) {
+        // Swipe left → next QR
+        const nextIndex = (currentIndex + 1) % banks.length;
+        setCurrentIndex(nextIndex);
+        setSelectedBank(banks[nextIndex]);
+      }
+    },
+  });
 
   return (
     <SafeAreaView
@@ -86,66 +111,71 @@ const ReceiveMoneyScreen = () => {
       />
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <LinearGradient
-          colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
-          style={styles.qrCard}
-        >
-          <View
-            style={[
-              styles.avatarWrapper,
-              { backgroundColor: themeColors.background },
-            ]}
+        {/* Wrap LinearGradient with swipe handler */}
+        <View {...panResponder.panHandlers}>
+          <LinearGradient
+            colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
+            style={styles.qrCard}
           >
-            <Text style={[styles.avatarText, { color: themeColors.text }]}>
-              {getInitial(selectedBank.name)}
-            </Text>
-          </View>
+            <View
+              style={[
+                styles.avatarWrapper,
+                { backgroundColor: themeColors.background },
+              ]}
+            >
+              <Text style={[styles.avatarText, { color: themeColors.text }]}>
+                {getInitial(selectedBank.name)}
+              </Text>
+            </View>
 
-          <Text style={styles.userName}>{selectedBank.name}</Text>
+            <Text style={styles.userName}>{selectedBank.name}</Text>
 
-          <View style={styles.qrWrapper}>
-            <QRCode
-              value={selectedBank.upiId}
-              size={scaleUtils.scaleWidth(220)}
-              color={Colors.black}
-              backgroundColor={Colors.white}
-            />
-          </View>
+            <View style={styles.qrWrapper}>
+              <QRCode
+                value={selectedBank.upiId}
+                size={scaleUtils.scaleWidth(220)}
+                color={Colors.black}
+                backgroundColor={Colors.white}
+              />
+            </View>
 
-          {/* <Text style={styles.upiId}>{I18n.t('upi_id_label')}</Text> */}
+            <View style={styles.upiContainer}>
+              <Text style={styles.upiId}>{selectedBank.upiId}</Text>
+              <TouchableOpacity
+                onPress={copyUPI}
+                style={styles.copyIconWrapper}
+              >
+                <Image
+                  source={require('../../assets/image/appIcon/copy.png')}
+                  style={styles.copyIcon}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            </View>
 
-          <View style={styles.upiContainer}>
-            <Text style={styles.upiId}>{selectedBank.upiId}</Text>
-            <TouchableOpacity onPress={copyUPI} style={styles.copyIconWrapper}>
+            <TouchableOpacity
+              style={styles.bankSelector}
+              onPress={() => setModalVisible(true)}
+            >
+              <View style={styles.bankIconWrapper}>
+                <Image
+                  source={selectedBank.logo}
+                  style={styles.bankIcon}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text style={styles.bankName}>{selectedBank.bankName}</Text>
               <Image
-                source={require('../../assets/image/appIcon/copy.png')}
-                style={styles.copyIcon}
+                source={require('../../assets/image/appIcon/right.png')}
+                style={styles.rightIcon}
                 resizeMode="contain"
               />
             </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            style={styles.bankSelector}
-            onPress={() => setModalVisible(true)}
-          >
-            <View style={styles.bankIconWrapper}>
-              <Image
-                source={selectedBank.logo}
-                style={styles.bankIcon}
-                resizeMode="contain"
-              />
-            </View>
-            <Text style={styles.bankName}>{selectedBank.bankName}</Text>
-            <Image
-              source={require('../../assets/image/appIcon/right.png')}
-              style={styles.rightIcon}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        </LinearGradient>
+          </LinearGradient>
+        </View>
       </ScrollView>
 
+      {/* Bank selection modal */}
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View

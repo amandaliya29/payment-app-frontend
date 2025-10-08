@@ -17,7 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import I18n from '../../utils/language/i18n';
 import { BankList } from '../../utils/apiHelper/Axios';
 
-const IMAGE_BASE_URL = 'https://cyapay.ddns.net'; // 👈 Dynamic images
+const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
 
 const BankLinkScreen = () => {
   const navigation = useNavigation();

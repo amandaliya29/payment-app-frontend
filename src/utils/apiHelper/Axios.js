@@ -67,3 +67,12 @@ export const saveBankDetails = async ({
     throw error.response?.data || { message: 'Failed to save bank details' };
   }
 };
+
+export const getUserProfile = async () => {
+  try {
+    const response = await axiosInstance.get('/user/profile');
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to fetch user profile' };
+  }
+};
