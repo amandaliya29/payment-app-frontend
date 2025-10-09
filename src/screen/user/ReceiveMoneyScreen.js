@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -23,11 +23,14 @@ import QRCode from 'react-native-qrcode-svg';
 import Clipboard from '@react-native-clipboard/clipboard';
 import I18n from '../../utils/language/i18n';
 import { useNavigation } from '@react-navigation/native';
+import ViewShot from 'react-native-view-shot';
+import Share from 'react-native-share';
 
 const ReceiveMoneyScreen = () => {
   const navigation = useNavigation();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const viewShotRef = useRef(null);
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -37,21 +40,21 @@ const ReceiveMoneyScreen = () => {
   const banks = [
     {
       id: 1,
-      name: 'Nikhil kumar',
+      name: 'Nikhil Kumar',
       upiId: 'nikhilkumar123@sbi',
       logo: require('../../assets/image/bankIcon/sbi.png'),
       bankName: 'State Bank of India',
     },
     {
       id: 2,
-      name: 'Nikhil kumar',
+      name: 'Nikhil Kumar',
       upiId: 'nikhilkumar456@hdfcbank',
       logo: require('../../assets/image/bankIcon/hdfc.png'),
       bankName: 'HDFC Bank',
     },
     {
       id: 3,
-      name: 'Nikhil kumar',
+      name: 'Nikhil Kumar',
       upiId: 'nikhilkumar789@icici',
       logo: require('../../assets/image/bankIcon/icici.png'),
       bankName: 'ICICI Bank',
@@ -80,26 +83,45 @@ const ReceiveMoneyScreen = () => {
     setModalVisible(false);
   };
 
-  // 👉 Swipe gesture handling
+  // 👉 Swipe left/right to switch banks
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: (_, gestureState) => {
       return Math.abs(gestureState.dx) > 20;
     },
     onPanResponderRelease: (_, gestureState) => {
       if (gestureState.dx > 50) {
-        // Swipe right → previous QR
         const prevIndex =
           currentIndex === 0 ? banks.length - 1 : currentIndex - 1;
         setCurrentIndex(prevIndex);
         setSelectedBank(banks[prevIndex]);
       } else if (gestureState.dx < -50) {
-        // Swipe left → next QR
         const nextIndex = (currentIndex + 1) % banks.length;
         setCurrentIndex(nextIndex);
         setSelectedBank(banks[nextIndex]);
       }
     },
   });
+
+  const getUpiLink = bank =>
+    `upi://pay?pa=${bank.upiId}&pn=${encodeURIComponent(bank.name)}&cu=INR`;
+
+  const handleShare = async () => {
+    try {
+      const uri = await viewShotRef.current.capture();
+      const upiLink = getUpiLink(selectedBank);
+
+      await Share.open({
+        url: uri,
+        type: 'image/png',
+      });
+    } catch (error) {
+      console.log('Share Error:', error);
+    }
+  };
+
+  const handleScan = () => {
+    navigation.navigate('QrPage');
+  };
 
   return (
     <SafeAreaView
@@ -111,69 +133,132 @@ const ReceiveMoneyScreen = () => {
       />
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Wrap LinearGradient with swipe handler */}
         <View {...panResponder.panHandlers}>
-          <LinearGradient
-            colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
-            style={styles.qrCard}
+          {/* 👇 Wrap QR inside ViewShot for sharing */}
+          <ViewShot
+            style={{
+              position: 'absolute',
+              top: -1000, // move it off-screen
+              left: -1000,
+            }}
+            ref={viewShotRef}
+            options={{ format: 'png', quality: 1 }}
           >
-            <View
-              style={[
-                styles.avatarWrapper,
-                { backgroundColor: themeColors.background },
-              ]}
+            <LinearGradient
+              colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
+              style={styles.qrCard}
             >
-              <Text style={[styles.avatarText, { color: themeColors.text }]}>
-                {getInitial(selectedBank.name)}
-              </Text>
-            </View>
-
-            <Text style={styles.userName}>{selectedBank.name}</Text>
-
-            <View style={styles.qrWrapper}>
-              <QRCode
-                value={selectedBank.upiId}
-                size={scaleUtils.scaleWidth(220)}
-                color={Colors.black}
-                backgroundColor={Colors.white}
-              />
-            </View>
-
-            <View style={styles.upiContainer}>
-              <Text style={styles.upiId}>{selectedBank.upiId}</Text>
-              <TouchableOpacity
-                onPress={copyUPI}
-                style={styles.copyIconWrapper}
+              <View
+                style={[
+                  styles.avatarWrapper,
+                  { backgroundColor: themeColors.background },
+                ]}
               >
+                <Text style={[styles.avatarText, { color: themeColors.text }]}>
+                  {getInitial(selectedBank.name)}
+                </Text>
+              </View>
+
+              <Text style={styles.userNameImage}>{selectedBank.name}</Text>
+              <Text style={styles.upiIdImage}>{selectedBank.upiId}</Text>
+
+              <View style={styles.qrWrapper}>
+                <QRCode
+                  value={getUpiLink(selectedBank)} // 👈 Use UPI URI, not just ID
+                  size={scaleUtils.scaleWidth(220)}
+                  color={Colors.black}
+                  backgroundColor={Colors.white}
+                />
+              </View>
+            </LinearGradient>
+            <Text style={[styles.receiver, { color: themeColors.text }]}>
+              Receiver money from any UPI app
+            </Text>
+          </ViewShot>
+
+          <View>
+            <LinearGradient
+              colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
+              style={styles.qrCard}
+            >
+              <View
+                style={[
+                  styles.avatarWrapper,
+                  { backgroundColor: themeColors.background },
+                ]}
+              >
+                <Text style={[styles.avatarText, { color: themeColors.text }]}>
+                  {getInitial(selectedBank.name)}
+                </Text>
+              </View>
+
+              <Text style={styles.userName}>{selectedBank.name}</Text>
+
+              <View style={styles.qrWrapper}>
+                <QRCode
+                  value={getUpiLink(selectedBank)} // 👈 Use UPI URI, not just ID
+                  size={scaleUtils.scaleWidth(220)}
+                  color={Colors.black}
+                  backgroundColor={Colors.white}
+                />
+              </View>
+
+              <View style={styles.upiContainer}>
+                <Text style={styles.upiId}>{selectedBank.upiId}</Text>
+                <TouchableOpacity
+                  onPress={copyUPI}
+                  style={styles.copyIconWrapper}
+                >
+                  <Image
+                    source={require('../../assets/image/appIcon/copy.png')}
+                    style={styles.copyIcon}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity
+                style={styles.bankSelector}
+                onPress={() => setModalVisible(true)}
+              >
+                <View style={styles.bankIconWrapper}>
+                  <Image
+                    source={selectedBank.logo}
+                    style={styles.bankIcon}
+                    resizeMode="contain"
+                  />
+                </View>
+                <Text style={styles.bankName}>{selectedBank.bankName}</Text>
                 <Image
-                  source={require('../../assets/image/appIcon/copy.png')}
-                  style={styles.copyIcon}
+                  source={require('../../assets/image/appIcon/right.png')}
+                  style={styles.rightIcon}
                   resizeMode="contain"
                 />
               </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity
-              style={styles.bankSelector}
-              onPress={() => setModalVisible(true)}
-            >
-              <View style={styles.bankIconWrapper}>
-                <Image
-                  source={selectedBank.logo}
-                  style={styles.bankIcon}
-                  resizeMode="contain"
-                />
-              </View>
-              <Text style={styles.bankName}>{selectedBank.bankName}</Text>
-              <Image
-                source={require('../../assets/image/appIcon/right.png')}
-                style={styles.rightIcon}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-          </LinearGradient>
+            </LinearGradient>
+          </View>
         </View>
       </ScrollView>
+
+      {/* Bottom Buttons */}
+      <View style={styles.bottomButtonsContainer}>
+        <TouchableOpacity style={styles.bottomButton} onPress={handleScan}>
+          <Image
+            source={require('../../assets/image/homeIcon/scan.png')}
+            style={styles.bottomIcon}
+            resizeMode="contain"
+          />
+          <Text style={styles.bottomButtonText}>Scan QR</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.bottomButton} onPress={handleShare}>
+          <Image
+            source={require('../../assets/image/appIcon/share.png')}
+            style={styles.bottomIcon}
+            resizeMode="contain"
+          />
+          <Text style={styles.bottomButtonText}>Share QR</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Bank selection modal */}
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
@@ -209,6 +294,7 @@ const ReceiveMoneyScreen = () => {
   );
 };
 
+// 🎨 Styles remain same as your original code
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContainer: { padding: scaleUtils.scaleWidth(16) },
@@ -238,21 +324,32 @@ const styles = StyleSheet.create({
     borderWidth: scaleUtils.scaleWidth(3),
     borderColor: Colors.gradientPrimary,
   },
-  avatarText: {
-    fontSize: scaleUtils.scaleFont(24),
-    fontWeight: 'bold',
-  },
+  avatarText: { fontSize: scaleUtils.scaleFont(24), fontWeight: 'bold' },
   userName: {
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Bold',
     color: Colors.white,
     marginVertical: scaleUtils.scaleHeight(20),
   },
+  userNameImage: {
+    fontSize: scaleUtils.scaleFont(14),
+    fontFamily: 'Poppins-Bold',
+    color: Colors.white,
+    marginVertical: scaleUtils.scaleHeight(20),
+    marginBottom: scaleUtils.scaleHeight(6),
+  },
   upiId: {
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
     color: Colors.white,
   },
+  upiIdImage: {
+    fontSize: scaleUtils.scaleFont(12),
+    fontFamily: 'Poppins-Regular',
+    color: Colors.white,
+    marginBottom: scaleUtils.scaleHeight(16),
+  },
+
   qrWrapper: {
     backgroundColor: Colors.white,
     padding: scaleUtils.scaleWidth(10),
@@ -268,24 +365,24 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   copyIconWrapper: {
-    width: scaleUtils.scaleWidth(30),
-    height: scaleUtils.scaleWidth(30),
+    width: scaleUtils.scaleWidth(26),
+    height: scaleUtils.scaleWidth(26),
     backgroundColor: Colors.white,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: scaleUtils.scaleWidth(30),
   },
   copyIcon: {
-    width: scaleUtils.scaleWidth(18),
-    height: scaleUtils.scaleWidth(18),
-    tintColor: Colors.gradientPrimary,
+    width: scaleUtils.scaleWidth(14),
+    height: scaleUtils.scaleWidth(14),
+    tintColor: Colors.black,
   },
   upiContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     columnGap: scaleUtils.scaleWidth(10),
-    marginBottom: scaleUtils.scaleHeight(20),
+    marginBottom: scaleUtils.scaleHeight(10),
     marginTop: scaleUtils.scaleHeight(10),
   },
   bankSelector: {
@@ -343,17 +440,38 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     color: Colors.black,
   },
-  closeButton: {
-    marginTop: scaleUtils.scaleHeight(10),
-    alignSelf: 'center',
-    padding: scaleUtils.scaleWidth(8),
-    backgroundColor: Colors.gradientSecondary,
-    borderRadius: scaleUtils.scaleWidth(10),
+  bottomButtonsContainer: {
+    flexDirection: 'row',
+    columnGap: scaleUtils.scaleWidth(16),
+    justifyContent: 'center',
+    paddingVertical: scaleUtils.scaleHeight(10),
   },
-  closeText: {
+  bottomButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.gradientSecondary,
+    width: scaleUtils.scaleWidth(130),
+    height: scaleUtils.scaleHeight(40),
+    justifyContent: 'center',
+    borderRadius: scaleUtils.scaleWidth(12),
+  },
+  bottomIcon: {
+    width: scaleUtils.scaleWidth(18),
+    height: scaleUtils.scaleWidth(18),
+    tintColor: Colors.white,
+    marginRight: scaleUtils.scaleWidth(8),
+  },
+  bottomButtonText: {
     color: Colors.white,
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Medium',
+  },
+  receiver: {
+    color: Colors.white,
+    fontSize: scaleUtils.scaleFont(11),
+    fontFamily: 'Poppins-Medium',
+    alignSelf: 'center',
+    marginVertical: scaleUtils.scaleHeight(20),
   },
 });
 
