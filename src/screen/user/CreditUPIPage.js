@@ -7,6 +7,7 @@ import {
   Image,
   useColorScheme,
   FlatList,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -58,47 +59,54 @@ const CreditUPIPage = () => {
     >
       <Header title={I18n.t('credit_upi')} onBack={() => navigation.goBack()} />
 
-      {/* Credit UPI Status */}
       <View style={{ flex: 1, paddingHorizontal: scaleUtils.scaleWidth(14) }}>
-        <LinearGradient
-          colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
-          style={styles.statusBox}
-        >
-          <Text style={styles.statusTitle}>{I18n.t('credit_upi_status')}</Text>
-          <Text style={styles.statusSub}>
-            {I18n.t('credit_upi_status_subtitle')}
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginTop: scaleUtils.scaleHeight(6),
-            }}
+        {/* Credit UPI Status */}
+        <ScrollView>
+          <LinearGradient
+            colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
+            style={styles.statusBox}
           >
-            <Text style={styles.activeText}>🟢 {I18n.t('one_active')}</Text>
-            <Text style={styles.inactiveBankText}>
-              🔴 {I18n.t('one_inactive')}
+            <Text style={styles.statusTitle}>
+              {I18n.t('credit_upi_status')}
             </Text>
-          </View>
-        </LinearGradient>
+            <Text style={styles.statusSub}>
+              {I18n.t('credit_upi_status_subtitle')}
+            </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: scaleUtils.scaleHeight(6),
+              }}
+            >
+              <Text style={styles.activeText}>🟢 {I18n.t('one_active')}</Text>
+              <Text style={styles.inactiveBankText}>
+                🔴 {I18n.t('one_inactive')}
+              </Text>
+            </View>
+          </LinearGradient>
 
-        {/* Bank Accounts */}
-        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
-          {I18n.t('your_bank_accounts')}
-        </Text>
+          {/* Bank Accounts */}
+          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
+            {I18n.t('your_bank_accounts')}
+          </Text>
 
-        <FlatList
-          data={bankAccounts}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <BankCard {...item} themeColors={themeColors} />
-          )}
-          contentContainerStyle={{ paddingBottom: scaleUtils.scaleHeight(20) }}
-          showsVerticalScrollIndicator={false}
-        />
+          <FlatList
+            data={bankAccounts}
+            keyExtractor={item => item.id}
+            scrollEnabled={false}
+            renderItem={({ item }) => (
+              <BankCard {...item} themeColors={themeColors} />
+            )}
+            contentContainerStyle={{
+              paddingBottom: scaleUtils.scaleHeight(20),
+            }}
+            showsVerticalScrollIndicator={false}
+          />
 
-        {/* Bottom Buttons */}
+          {/* Bottom Buttons */}
+        </ScrollView>
         <View style={styles.bottomRow}>
           <View style={{ flex: 1 }}>
             <Button
@@ -377,6 +385,10 @@ const styles = StyleSheet.create({
     marginBottom: scaleUtils.scaleHeight(10),
     columnGap: scaleUtils.scaleWidth(12),
     alignItems: 'center',
+    position: 'absolute',
+    bottom: scaleUtils.scaleHeight(0),
+    left: scaleUtils.scaleWidth(16),
+    right: scaleUtils.scaleWidth(16),
   },
   inactiveBankText: {
     fontSize: scaleUtils.scaleFont(13),
