@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import {
   Alert,
   Platform,
   PanResponder,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -22,9 +23,10 @@ import Header from '../../component/Header';
 import QRCode from 'react-native-qrcode-svg';
 import Clipboard from '@react-native-clipboard/clipboard';
 import I18n from '../../utils/language/i18n';
-import { useNavigation } from '@react-navigation/native';
 import ViewShot from 'react-native-view-shot';
 import Share from 'react-native-share';
+import { getBankAccountList } from '../../utils/apiHelper/Axios';
+import { useNavigation } from '@react-navigation/native';
 
 const ReceiveMoneyScreen = () => {
   const navigation = useNavigation();
@@ -37,35 +39,46 @@ const ReceiveMoneyScreen = () => {
     text: isDark ? Colors.white : Colors.black,
   };
 
-  const banks = [
-    {
-      id: 1,
-      name: 'Nikhil Kumar',
-      upiId: 'nikhilkumar123@sbi',
-      logo: require('../../assets/image/bankIcon/sbi.png'),
-      bankName: 'State Bank of India',
-    },
-    {
-      id: 2,
-      name: 'Nikhil Kumar',
-      upiId: 'nikhilkumar456@hdfcbank',
-      logo: require('../../assets/image/bankIcon/hdfc.png'),
-      bankName: 'HDFC Bank',
-    },
-    {
-      id: 3,
-      name: 'Nikhil Kumar',
-      upiId: 'nikhilkumar789@icici',
-      logo: require('../../assets/image/bankIcon/icici.png'),
-      bankName: 'ICICI Bank',
-    },
-  ];
-
-  const [selectedBank, setSelectedBank] = useState(banks[0]);
+  const [banks, setBanks] = useState([]);
+  const [selectedBank, setSelectedBank] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // 🔹 Fetch banks on first load
+
+  const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
+
+  useEffect(() => {
+    const fetchBanks = async () => {
+      try {
+        const res = await getBankAccountList();
+        if (res.status && res.data.length > 0) {
+          const bankData = res.data.map(account => ({
+            id: account.id,
+            name: account.account_holder_name,
+            upiId: account.upi_id,
+            logo: account.bank?.logo
+              ? { uri: `${IMAGE_BASE_URL}/${account.bank.logo}` } // load from API
+              : require('../../assets/image/bankIcon/sbi.png'),
+            bankName: account.bank?.name || '',
+          }));
+          setBanks(bankData);
+          setSelectedBank(bankData[0]);
+        }
+      } catch (error) {
+        console.log('Error fetching banks:', error);
+        Alert.alert(I18n.t('error'), I18n.t('failed_fetch_banks'));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBanks();
+  }, []);
 
   const copyUPI = () => {
+    if (!selectedBank) return;
     Clipboard.setString(selectedBank.upiId);
     if (Platform.OS === 'android') {
       ToastAndroid.show(I18n.t('upi_id_copied'), ToastAndroid.SHORT);
@@ -89,6 +102,7 @@ const ReceiveMoneyScreen = () => {
       return Math.abs(gestureState.dx) > 20;
     },
     onPanResponderRelease: (_, gestureState) => {
+      if (!banks.length) return;
       if (gestureState.dx > 50) {
         const prevIndex =
           currentIndex === 0 ? banks.length - 1 : currentIndex - 1;
@@ -106,10 +120,9 @@ const ReceiveMoneyScreen = () => {
     `upi://pay?pa=${bank.upiId}&pn=${encodeURIComponent(bank.name)}&cu=INR`;
 
   const handleShare = async () => {
+    if (!selectedBank) return;
     try {
       const uri = await viewShotRef.current.capture();
-      const upiLink = getUpiLink(selectedBank);
-
       await Share.open({
         url: uri,
         type: 'image/png',
@@ -122,6 +135,41 @@ const ReceiveMoneyScreen = () => {
   const handleScan = () => {
     navigation.navigate('QrPage');
   };
+
+  // 🔹 Loading indicator while fetching banks
+  if (loading) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: themeColors.background }]}
+      >
+        <ActivityIndicator
+          size="large"
+          color={Colors.gradientPrimary}
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  if (!banks.length) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: themeColors.background }]}
+      >
+        <Header
+          title={I18n.t('receive_money_title')}
+          onBack={() => navigation.goBack()}
+        />
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <Text style={{ color: themeColors.text, fontSize: 16 }}>
+            {I18n.t('no_bank_accounts')}
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView
@@ -136,44 +184,92 @@ const ReceiveMoneyScreen = () => {
         <View {...panResponder.panHandlers}>
           {/* 👇 Wrap QR inside ViewShot for sharing */}
           <ViewShot
-            style={{
-              position: 'absolute',
-              top: -1000, // move it off-screen
-              left: -1000,
-            }}
             ref={viewShotRef}
             options={{ format: 'png', quality: 1 }}
+            style={{
+              position: 'absolute',
+              top: -9999, // still off-screen
+              left: 0,
+              right: 0,
+              backgroundColor: Colors.bg,
+            }}
           >
-            <LinearGradient
-              colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
-              style={styles.qrCard}
+            <View
+              style={{
+                flex: 1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
-              <View
+              <LinearGradient
+                colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
                 style={[
-                  styles.avatarWrapper,
-                  { backgroundColor: themeColors.background },
+                  styles.qrCard,
+                  {
+                    width: '80%',
+                    alignSelf: 'center',
+                    borderRadius: scaleUtils.scaleWidth(12),
+                    padding: scaleUtils.scaleWidth(20),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  },
                 ]}
               >
-                <Text style={[styles.avatarText, { color: themeColors.text }]}>
-                  {getInitial(selectedBank.name)}
-                </Text>
-              </View>
+                <View
+                  style={[
+                    styles.avatarWrapper,
+                    { backgroundColor: themeColors.background },
+                  ]}
+                >
+                  <Text
+                    style={[styles.avatarText, { color: themeColors.text }]}
+                  >
+                    {getInitial(selectedBank.name)}
+                  </Text>
+                </View>
 
-              <Text style={styles.userNameImage}>{selectedBank.name}</Text>
-              <Text style={styles.upiIdImage}>{selectedBank.upiId}</Text>
+                <Text style={styles.userNameImage}>{selectedBank.name}</Text>
+                <Text style={styles.upiIdImage}>{selectedBank.upiId}</Text>
 
-              <View style={styles.qrWrapper}>
-                <QRCode
-                  value={getUpiLink(selectedBank)} // 👈 Use UPI URI, not just ID
-                  size={scaleUtils.scaleWidth(220)}
-                  color={Colors.black}
-                  backgroundColor={Colors.white}
+                <View style={styles.qrWrapper}>
+                  <QRCode
+                    value={getUpiLink(selectedBank)}
+                    size={scaleUtils.scaleWidth(190)}
+                    color={Colors.black}
+                    backgroundColor={Colors.white}
+                  />
+                </View>
+              </LinearGradient>
+              <Text
+                style={{
+                  color: Colors.white,
+                  fontSize: scaleUtils.scaleFont(11),
+                  fontFamily: 'Poppins-Medium',
+                  alignSelf: 'center',
+                  marginTop: scaleUtils.scaleHeight(20),
+                }}
+              >
+                Receiver money from any UPI app
+              </Text>
+              <View style={styles.iconContainer}>
+                <Image
+                  source={require('../../assets/image/bankIcon/phonePe.png')}
+                  style={styles.phonePeIconStyle}
+                />
+                <Image
+                  source={require('../../assets/image/bankIcon/bhim.png')}
+                  style={styles.bhimIconStyle}
+                />
+                <Image
+                  source={require('../../assets/image/bankIcon/gpay.png')}
+                  style={styles.iconStyle}
+                />
+                <Image
+                  source={require('../../assets/image/bankIcon/paytm.png')}
+                  style={styles.iconStyle}
                 />
               </View>
-            </LinearGradient>
-            <Text style={[styles.receiver, { color: themeColors.text }]}>
-              Receiver money from any UPI app
-            </Text>
+            </View>
           </ViewShot>
 
           <View>
@@ -196,7 +292,7 @@ const ReceiveMoneyScreen = () => {
 
               <View style={styles.qrWrapper}>
                 <QRCode
-                  value={getUpiLink(selectedBank)} // 👈 Use UPI URI, not just ID
+                  value={getUpiLink(selectedBank)}
                   size={scaleUtils.scaleWidth(220)}
                   color={Colors.black}
                   backgroundColor={Colors.white}
@@ -228,7 +324,10 @@ const ReceiveMoneyScreen = () => {
                     resizeMode="contain"
                   />
                 </View>
-                <Text style={styles.bankName}>{selectedBank.bankName}</Text>
+                <View style={styles.textContainer}>
+                  <Text style={styles.bankName}>{selectedBank.bankName}</Text>
+                  <Text style={styles.savingTxt}>Saving</Text>
+                </View>
                 <Image
                   source={require('../../assets/image/appIcon/right.png')}
                   style={styles.rightIcon}
@@ -294,7 +393,7 @@ const ReceiveMoneyScreen = () => {
   );
 };
 
-// 🎨 Styles remain same as your original code
+// 🎨 Styles remain the same
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContainer: { padding: scaleUtils.scaleWidth(16) },
@@ -406,6 +505,14 @@ const styles = StyleSheet.create({
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Medium',
     color: Colors.white,
+    lineHeight: scaleUtils.scaleHeight(15),
+  },
+  textContainer: {},
+  savingTxt: {
+    fontSize: scaleUtils.scaleFont(11),
+    fontFamily: 'Poppins-Medium',
+    color: Colors.white,
+    lineHeight: scaleUtils.scaleHeight(15),
   },
   modalOverlay: {
     flex: 1,
@@ -472,6 +579,33 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     alignSelf: 'center',
     marginVertical: scaleUtils.scaleHeight(20),
+  },
+  iconStyle: {
+    width: scaleUtils.scaleWidth(30),
+    // height: scaleUtils.scaleWidth(26),
+    aspectRatio: 1 / 1,
+    resizeMode: 'contain',
+    tintColor: Colors.white,
+  },
+  phonePeIconStyle: {
+    width: scaleUtils.scaleWidth(45),
+    // height: scaleUtils.scaleWidth(26),
+    aspectRatio: 1 / 1,
+    resizeMode: 'contain',
+    tintColor: Colors.white,
+  },
+  bhimIconStyle: {
+    width: scaleUtils.scaleWidth(35),
+    // height: scaleUtils.scaleWidth(26),
+    aspectRatio: 1 / 1,
+    resizeMode: 'contain',
+    tintColor: Colors.white,
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    columnGap: scaleUtils.scaleWidth(10),
+    alignItems: 'center',
+    marginTop: scaleUtils.scaleHeight(2),
   },
 });
 

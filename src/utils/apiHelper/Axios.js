@@ -76,3 +76,16 @@ export const getUserProfile = async () => {
     throw error.response?.data || { message: 'Failed to fetch user profile' };
   }
 };
+
+export const getBankAccountList = async () => {
+  try {
+    const response = await axiosInstance.get('/bank/account/list');
+    // optional: you can log it for debugging
+    console.log('Bank Account List:', response.data);
+    return response.data; // returns object with status, data[], messages
+  } catch (error) {
+    throw (
+      error.response?.data || { message: 'Failed to fetch bank account list' }
+    );
+  }
+};
