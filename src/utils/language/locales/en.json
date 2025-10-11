@@ -292,5 +292,28 @@
   "languages": "Languages",
   "logout": "Logout",
   "add_bank_account": "Add Bank Account",
-  "bank_accounts_cards": "Bank accounts & Cards"
+  "bank_accounts_cards": "Bank accounts & Cards",
+
+  "bank_transfer_title": "Bank Transfer",
+  "receiver_bank_details": "Receiver Bank Details",
+  "bank_account_number_label": "Bank Account Number",
+  "bank_account_number_placeholder": "Enter bank account number",
+  "invalid_account_number": "Enter a valid bank account number",
+  "ifsc_code_label": "IFSC Code",
+  "ifsc_code_placeholder": "Enter IFSC code",
+  "invalid_ifsc_code": "Enter a valid IFSC code",
+  "search_for_ifsc": "Search for IFSC",
+  "recent_transfers": "Recent Transfers",
+
+  "bank_branch": "Bank Branch",
+  "select_branch": "Select Branch",
+  "cancel": "Cancel",
+
+  "transfer_to_mobile": "Transfer to Mobile",
+  "select_transfer_method": "Select Transfer Method",
+  "via_phone_number": "Via Phone Number",
+  "via_upi_id": "Via UPI ID",
+  "enter_phone_number": "Enter Phone Number",
+  "enter_upi_id": "Enter UPI ID",
+  "example_upi": "example@upi"
 }

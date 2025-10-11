@@ -118,11 +118,13 @@ const HomePage = () => {
             themeColors={themeColors}
           />
           <ActionButton3
+            onPress={() => navigation.navigate('ToMobileScreen')}
             title={i18n.t('to_mobile')}
             image={require('../../assets/image/homeIcon/mobile.png')}
             themeColors={themeColors}
           />
           <ActionButton3
+            onPress={() => navigation.navigate('ToBank')}
             title={i18n.t('to_bank')}
             image={require('../../assets/image/homeIcon/bank.png')}
             themeColors={themeColors}

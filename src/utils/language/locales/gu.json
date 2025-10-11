@@ -304,5 +304,27 @@
   "languages": "ભાષાઓ",
   "logout": "લૉગ આઉટ",
   "add_bank_account": "બેંક ખાતું ઉમેરો",
-  "bank_accounts_cards": "બેંક ખાતાઓ અને કાર્ડ"
+  "bank_accounts_cards": "બેંક ખાતાઓ અને કાર્ડ",
+
+  "bank_transfer_title": "બેંક ટ્રાન્સફર",
+  "receiver_bank_details": "પ્રાપ્તકર્તા બેંક વિગતો",
+  "bank_account_number_label": "બેંક એકાઉન્ટ નંબર",
+  "bank_account_number_placeholder": "બેંક એકાઉન્ટ નંબર દાખલ કરો",
+  "invalid_account_number": "માન્ય એકાઉન્ટ નંબર દાખલ કરો",
+  "ifsc_code_label": "IFSC કોડ",
+  "ifsc_code_placeholder": "IFSC કોડ દાખલ કરો",
+  "invalid_ifsc_code": "માન્ય IFSC કોડ દાખલ કરો",
+  "search_for_ifsc": "IFSC શોધો",
+  "recent_transfers": "તાજેતરના ટ્રાન્સફર",
+  "bank_branch": "બેંક શાખા",
+  "select_branch": "શાખા પસંદ કરો",
+  "cancel": "રદ કરો",
+
+  "transfer_to_mobile": "મોબાઇલ પર પૈસા મોકલો",
+  "select_transfer_method": "ટ્રાન્સફર પદ્ધતિ પસંદ કરો",
+  "via_phone_number": "ફોન નંબર દ્વારા",
+  "via_upi_id": "યુપીઆઈ આઈડી દ્વારા",
+  "enter_phone_number": "ફોન નંબર દાખલ કરો",
+  "enter_upi_id": "યુપીઆઈ આઈડી દાખલ કરો",
+  "example_upi": "ઉદાહરણ@upi"
 }
