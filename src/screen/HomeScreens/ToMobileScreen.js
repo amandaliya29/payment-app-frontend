@@ -3,17 +3,17 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   useColorScheme,
   KeyboardAvoidingView,
   Platform,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import Button from '../../component/Button';
-import Input from '../../component/Input'; // ✅ using your custom Input
+import Input from '../../component/Input';
 import I18n from '../../utils/language/i18n';
 import { useNavigation } from '@react-navigation/native';
 
@@ -39,7 +39,7 @@ const ToMobileScreen = () => {
         : { method: 'upi', value: upiId };
 
     console.log('Transfer Data:', data);
-    navigation.goBack(); // returning to previous screen
+    navigation.goBack();
   };
 
   return (
@@ -51,79 +51,66 @@ const ToMobileScreen = () => {
         onBack={() => navigation.goBack()}
       />
 
+      {/* 🔹 Top Tab Bar */}
+      <View style={[styles.tabBar]}>
+        <TouchableOpacity
+          style={[
+            styles.tabItem,
+            selectedOption === 'phone' && styles.activeTab,
+          ]}
+          onPress={() => setSelectedOption('phone')}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              {
+                color:
+                  selectedOption === 'phone'
+                    ? Colors.gradientPrimary
+                    : themeColors.text,
+              },
+            ]}
+          >
+            {I18n.t('via_phone_number')}
+          </Text>
+          {selectedOption === 'phone' && (
+            <View style={styles.activeIndicator} />
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.tabItem, selectedOption === 'upi' && styles.activeTab]}
+          onPress={() => setSelectedOption('upi')}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              {
+                color:
+                  selectedOption === 'upi'
+                    ? Colors.gradientPrimary
+                    : themeColors.text,
+              },
+            ]}
+          >
+            {I18n.t('via_upi_id')}
+          </Text>
+          {selectedOption === 'upi' && <View style={styles.activeIndicator} />}
+        </TouchableOpacity>
+      </View>
+
       <KeyboardAvoidingView
         style={styles.content}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {/* Select transfer method */}
-        <Text style={[styles.label, { color: themeColors.text }]}>
-          {I18n.t('select_transfer_method')}
-        </Text>
-
-        <View style={styles.optionContainer}>
-          <TouchableOpacity
-            style={[
-              styles.optionButton,
-              {
-                borderColor:
-                  selectedOption === 'phone'
-                    ? Colors.gradientPrimary
-                    : themeColors.border,
-              },
-            ]}
-            onPress={() => setSelectedOption('phone')}
-          >
-            <Text
-              style={[
-                styles.optionText,
-                {
-                  color:
-                    selectedOption === 'phone'
-                      ? Colors.gradientPrimary
-                      : themeColors.text,
-                },
-              ]}
-            >
-              {I18n.t('via_phone_number')}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.optionButton,
-              {
-                borderColor:
-                  selectedOption === 'upi'
-                    ? Colors.gradientPrimary
-                    : themeColors.border,
-              },
-            ]}
-            onPress={() => setSelectedOption('upi')}
-          >
-            <Text
-              style={[
-                styles.optionText,
-                {
-                  color:
-                    selectedOption === 'upi'
-                      ? Colors.gradientPrimary
-                      : themeColors.text,
-                },
-              ]}
-            >
-              {I18n.t('via_upi_id')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Input fields */}
+        {/* 🔹 Input Fields */}
         {selectedOption === 'phone' ? (
           <Input
-            label={I18n.t('enter_phone_number')}
+            label={I18n.t('mobile_number_label')}
             value={phoneNumber}
             onChange={setPhoneNumber}
-            placeholder={'+91-1234567891'}
-            keyboardType="number-pad"
+            placeholder={I18n.t('mobile_number_placeholder')}
+            keyboardType="phone-pad"
             maxLength={10}
           />
         ) : (
@@ -137,26 +124,30 @@ const ToMobileScreen = () => {
         )}
       </KeyboardAvoidingView>
 
-      {/* Buttons */}
+      {/* 🔹 Buttons */}
       <View style={styles.buttonContainer}>
-        <Button
-          title={I18n.t('cancel')}
-          style={[
-            styles.cancelButton,
-            { backgroundColor: themeColors.background },
-          ]}
-          textStyle={{ color: themeColors.text }}
-          onPress={() => navigation.goBack()}
-        />
-        <Button
-          title={I18n.t('continue')}
-          style={styles.continueButton}
-          disabled={
-            (selectedOption === 'phone' && !phoneNumber) ||
-            (selectedOption === 'upi' && !upiId)
-          }
-          onPress={handleContinue}
-        />
+        <View style={{ flex: 1 }}>
+          <Button
+            title={I18n.t('cancel')}
+            style={[
+              styles.cancelButton,
+              { backgroundColor: themeColors.background },
+            ]}
+            textStyle={{ color: themeColors.text }}
+            onPress={() => navigation.goBack()}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Button
+            title={I18n.t('continue')}
+            style={styles.continueButton}
+            disabled={
+              (selectedOption === 'phone' && !phoneNumber) ||
+              (selectedOption === 'upi' && !upiId)
+            }
+            onPress={handleContinue}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -164,33 +155,40 @@ const ToMobileScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+
+  /* 🔹 Top Tab Bar */
+  tabBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: scaleUtils.scaleHeight(16),
+    marginTop: scaleUtils.scaleHeight(10),
+  },
+  tabItem: {
+    alignItems: 'center',
+    paddingVertical: scaleUtils.scaleHeight(10),
+    flex: 1,
+  },
+  tabText: {
+    fontFamily: 'Poppins-Medium',
+    fontSize: scaleUtils.scaleFont(14),
+  },
+  activeTab: {},
+  activeIndicator: {
+    marginTop: scaleUtils.scaleHeight(4),
+    height: scaleUtils.scaleHeight(2),
+    width: '90%',
+    backgroundColor: Colors.gradientPrimary,
+    borderRadius: scaleUtils.scaleHeight(2),
+  },
+
   content: {
     flex: 1,
-    padding: scaleUtils.scaleWidth(16),
+    paddingHorizontal: scaleUtils.scaleWidth(16),
   },
-  label: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: scaleUtils.scaleFont(14),
-    marginBottom: scaleUtils.scaleHeight(8),
-  },
-  optionContainer: {
+
+  buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: scaleUtils.scaleHeight(20),
-  },
-  optionButton: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: scaleUtils.scaleWidth(8),
-    paddingVertical: scaleUtils.scaleHeight(12),
-    marginHorizontal: scaleUtils.scaleWidth(5),
-    alignItems: 'center',
-  },
-  optionText: {
-    fontFamily: 'Poppins-Medium',
-    fontSize: scaleUtils.scaleFont(14),
-  },
-  buttonContainer: {
     margin: scaleUtils.scaleWidth(16),
     marginTop: scaleUtils.scaleHeight(20),
     columnGap: scaleUtils.scaleWidth(10),

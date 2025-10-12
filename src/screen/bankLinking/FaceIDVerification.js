@@ -44,48 +44,9 @@ const FaceIDVerification = () => {
     card: isDark ? Colors.secondaryBg : Colors.cardGrey,
   };
 
-  // Generate random account number (10-12 digits)
-  const generateAccountNumber = () => {
-    let acc = '';
-    for (let i = 0; i < 12; i++) {
-      acc += Math.floor(Math.random() * 10); // random digit 0-9
-    }
-    return acc;
-  };
-
-  // Generate random IFSC code (e.g., HDFC0001234 format)
-  const generateIFSC = () => {
-    const banks = ['HDFC', 'ICIC', 'SBI', 'PNB', 'AXIS'];
-    const bankCode = banks[Math.floor(Math.random() * banks.length)]; // random bank prefix
-    const branchCode = String(Math.floor(100000 + Math.random() * 900000)); // 6-digit branch code
-    return `${bankCode}0${branchCode}`; // e.g. HDFC0123456
-  };
-
-  const handleSaveBank = async () => {
-    try {
-      const account_number = generateAccountNumber();
-      const ifsc_code = generateIFSC();
-
-      const cleanedAadhaar = (aadhaar || '').replace(/\s+/g, '');
-
-      const result = await saveBankDetails({
-        bank_id: Itemid,
-        aadhaar_number: cleanedAadhaar, // from route params
-        pan_number: panNumber,
-        account_holder_name: name,
-        account_number,
-        ifsc_code,
-      });
-
-      showToast('Bank Details Saved');
-      // console.log('Bank Details Saved:', result);
-
-      // ✅ Navigate after success
-      navigation.navigate('UPIPinSetup');
-    } catch (error) {
-      console.log('Error Saving Bank:', error);
-      showToast('Failed to Save Bank Details');
-    }
+  const handleSaveBank = () => {
+    // ✅ Navigate after success
+    navigation.navigate('UPIPinSetup', aadhaar, panNumber, name, Itemid);
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,7 @@ import {
   useColorScheme,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Header from '../../component/Header';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
@@ -16,10 +16,42 @@ import I18n from '../../utils/language/i18n';
 
 const UPIPinSetup = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const [selectedPin, setSelectedPin] = useState(4);
-
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+
+  const {
+    aadhaar = '',
+    panNumber = '',
+    name = '',
+    Itemid,
+  } = route?.params || {};
+
+  const generateAccount_Number = () => {
+    let acc = '';
+    for (let i = 0; i < 12; i++) {
+      acc += Math.floor(Math.random() * 10);
+    }
+    return acc;
+  };
+
+  const generate_IFSC = () => {
+    const banks = ['HDFC', 'ICIC', 'SBI', 'PNB', 'AXIS'];
+    const bankCode = banks[Math.floor(Math.random() * banks.length)];
+    const branchCode = String(Math.floor(100000 + Math.random() * 900000));
+    return `${bankCode}0${branchCode}`;
+  };
+
+  // console.log(
+  //   aadhaar,
+  //   panNumber,
+  //   name,
+  //   Itemid,
+  //   generate_IFSC(),
+  //   generateAccount_Number(),
+  // );
+
   const themeColors = {
     background: isDark ? Colors.bg : Colors.lightBg,
     text: isDark ? Colors.white : Colors.black,
@@ -31,9 +63,28 @@ const UPIPinSetup = () => {
 
   const handleSelectPin = length => {
     setSelectedPin(length);
-    navigation.navigate('SetPinPage', { pinLength: length });
+    const ifscCode = generate_IFSC();
+    const account_number = generateAccount_Number();
+    navigation.navigate('SetPinPage', {
+      pinLength: length,
+      aadhaar,
+      panNumber,
+      name,
+      Itemid,
+      ifscCode,
+      account_number,
+    });
   };
 
+  const getOptionStyle = pin => [
+    styles.optionBox,
+    { backgroundColor: themeColors.card, borderColor: themeColors.border },
+    selectedPin === pin && {
+      borderColor: Colors.primary,
+      backgroundColor: themeColors.selectedBg,
+      borderWidth: 3,
+    },
+  ];
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
@@ -58,18 +109,7 @@ const UPIPinSetup = () => {
         {/* PIN Options */}
         <View style={styles.optionContainer}>
           <TouchableOpacity
-            style={[
-              styles.optionBox,
-              {
-                backgroundColor: themeColors.card,
-                borderColor: themeColors.border,
-              },
-              selectedPin === 4 && {
-                borderColor: Colors.primary,
-                backgroundColor: themeColors.selectedBg,
-                borderWidth: 3,
-              },
-            ]}
+            style={getOptionStyle(4)}
             onPress={() => handleSelectPin(4)}
           >
             <Text style={[styles.optionTitle, { color: themeColors.text }]}>
@@ -81,18 +121,7 @@ const UPIPinSetup = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.optionBox,
-              {
-                backgroundColor: themeColors.card,
-                borderColor: themeColors.border,
-              },
-              selectedPin === 6 && {
-                borderColor: Colors.primary,
-                backgroundColor: themeColors.selectedBg,
-                borderWidth: 3,
-              },
-            ]}
+            style={getOptionStyle(6)}
             onPress={() => handleSelectPin(6)}
           >
             <Text style={[styles.optionTitle, { color: themeColors.text }]}>
@@ -108,6 +137,7 @@ const UPIPinSetup = () => {
   );
 };
 
+// ------------------- Styles -------------------
 const styles = StyleSheet.create({
   container: {
     flex: 1,

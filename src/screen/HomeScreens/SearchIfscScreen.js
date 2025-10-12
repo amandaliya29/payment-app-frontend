@@ -200,21 +200,25 @@ const SearchIfscScreen = () => {
 
       {/* Buttons */}
       <View style={styles.buttonContainer}>
-        <Button
-          title={I18n.t('cancel')}
-          style={[
-            styles.cancelButton,
-            { backgroundColor: themeColors.background },
-          ]}
-          textStyle={{ color: themeColors.text }}
-          onPress={() => navigation.goBack()}
-        />
-        <Button
-          title={I18n.t('continue')}
-          disabled={!ifscCode}
-          style={[styles.continueButton]}
-          onPress={handleContinue}
-        />
+        <View style={{ flex: 1 }}>
+          <Button
+            title={I18n.t('cancel')}
+            style={[
+              styles.cancelButton,
+              { backgroundColor: themeColors.background },
+            ]}
+            textStyle={{ color: themeColors.text }}
+            onPress={() => navigation.goBack()}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Button
+            title={I18n.t('continue')}
+            disabled={!ifscCode}
+            style={[styles.continueButton]}
+            onPress={handleContinue}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -272,6 +276,8 @@ const styles = StyleSheet.create({
     color: Colors.black,
   },
   buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     margin: scaleUtils.scaleWidth(16),
     marginTop: scaleUtils.scaleHeight(20),
     columnGap: scaleUtils.scaleWidth(10),

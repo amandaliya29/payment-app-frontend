@@ -8,6 +8,7 @@ import {
   Image,
   useColorScheme,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -15,9 +16,8 @@ import I18n from '../../utils/language/i18n';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
-import { logoutUser } from '../../utils/apiHelper/Axios';
+import { logoutUser, getUserProfile } from '../../utils/apiHelper/Axios';
 import LanguageModal from '../../component/LanguageModal';
-import { getUserProfile } from '../../utils/apiHelper/Axios'; // added import
 import { useNavigation } from '@react-navigation/native';
 
 const ProfileScreen = () => {
@@ -38,15 +38,13 @@ const ProfileScreen = () => {
     bankIcon: isDark ? Colors.cardGrey : Colors.darkGrey,
   };
 
-  const [user, setUser] = useState({
-    name: '',
-    upiId: '',
-    upiNumber: '',
-  });
-
+  // State variables
+  const [user, setUser] = useState(null);
   const [bankAccounts, setBankAccounts] = useState([]);
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
 
+  // Fetch data only once (on first load)
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -72,6 +70,9 @@ const ProfileScreen = () => {
         }
       } catch (error) {
         console.log('Error fetching profile:', error);
+      } finally {
+        // Hide loader once data is loaded
+        setLoading(false);
       }
     };
 
@@ -143,6 +144,19 @@ const ProfileScreen = () => {
     },
   ];
 
+  // ✅ Show Loader Screen while fetching data initially
+  if (loading) {
+    console.log();
+
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+        {/* <Text style={styles.loaderText}>{I18n.t('loading_profile')}...</Text> */}
+      </View>
+    );
+  }
+
+  // ✅ Once loaded, render the actual profile UI
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
@@ -153,6 +167,7 @@ const ProfileScreen = () => {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
+        {/* User Info Card */}
         <LinearGradient
           colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
           style={styles.userCard}
@@ -164,15 +179,14 @@ const ProfileScreen = () => {
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                {user.name}
+                {user?.name}
               </Text>
-
               <Text style={styles.upiId} numberOfLines={1} ellipsizeMode="tail">
-                {user.upiId}
+                {user?.upiId}
               </Text>
               <View style={styles.upiRow}>
                 <Text style={styles.upiNumber}>
-                  {user.upiNumber
+                  {user?.upiNumber
                     ? user.upiNumber
                     : 'Savings • Current Account'}
                 </Text>
@@ -180,7 +194,7 @@ const ProfileScreen = () => {
             </View>
 
             <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{getInitial(user.name)}</Text>
+              <Text style={styles.avatarText}>{getInitial(user?.name)}</Text>
               <TouchableOpacity
                 style={styles.qrBadge}
                 onPress={() => navigation.navigate('ReceiveMoneyScreen')}
@@ -194,6 +208,7 @@ const ProfileScreen = () => {
           </View>
         </LinearGradient>
 
+        {/* Bank Accounts Section */}
         <View style={styles.paymentCard}>
           <Text style={[styles.paymentTitle, { color: themeColors.text }]}>
             {I18n.t('bank_accounts_cards')}
@@ -250,6 +265,7 @@ const ProfileScreen = () => {
             </View>
           ))}
 
+          {/* Add Bank Account */}
           <TouchableOpacity
             style={[
               styles.paymentOption,
@@ -282,6 +298,7 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </View>
 
+        {/* Menu Section */}
         <View style={{ marginVertical: scaleUtils.scaleHeight(6) }}>
           {menuItems.map(item => (
             <TouchableOpacity
@@ -304,6 +321,7 @@ const ProfileScreen = () => {
         </View>
       </ScrollView>
 
+      {/* Language Modal */}
       <LanguageModal
         visible={languageModalVisible}
         onClose={() => setLanguageModalVisible(false)}
@@ -312,9 +330,22 @@ const ProfileScreen = () => {
   );
 };
 
+// ✅ Styles
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContainer: { padding: scaleUtils.scaleWidth(16) },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.bg,
+  },
+  loaderText: {
+    marginTop: scaleUtils.scaleHeight(10),
+    fontSize: scaleUtils.scaleFont(14),
+    color: Colors.primary,
+    fontFamily: 'Poppins-Medium',
+  },
   userCard: {
     paddingHorizontal: scaleUtils.scaleWidth(16),
     paddingVertical: scaleUtils.scaleWidth(20),

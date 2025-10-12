@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   StyleSheet,
   ScrollView,
   Image,
+  FlatList,
+  ActivityIndicator,
   useColorScheme,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,14 +19,16 @@ import i18n from '../../utils/language/i18n';
 import Input from '../../component/Input';
 import { useNavigation } from '@react-navigation/native';
 import { LanguageContext } from '../../utils/language/LanguageContext';
+import axiosInstance, { BASE_URL } from '../../utils/apiHelper/axiosInstance';
 
-const HomePage = () => {
+const HomeScreen = () => {
   const scheme = useColorScheme();
   const navigation = useNavigation();
   const isDark = scheme === 'dark';
   const [search, setSearch] = useState('');
+  const [banks, setBanks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Get language context to re-render on change
   const { language } = useContext(LanguageContext);
 
   const themeColors = {
@@ -35,32 +39,77 @@ const HomePage = () => {
     card: isDark ? Colors.card : Colors.cardGrey,
   };
 
-  const banks = [
-    {
-      id: 1,
-      name: 'State Bank of India',
-      balance: '2,50,000',
-      accountNumber: 'XXXX XXXX XXXX 1234',
-      type: 'Savings',
-      logo: require('../../assets/image/bankIcon/sbi.png'),
-    },
-    {
-      id: 2,
-      name: 'HDFC Bank',
-      balance: '1,10,500',
-      accountNumber: 'XXXX XXXX XXXX 5678',
-      type: 'Current',
-      logo: require('../../assets/image/bankIcon/hdfc.png'),
-    },
-    {
-      id: 3,
-      name: 'ICICI Bank',
-      balance: '95,000',
-      accountNumber: 'XXXX XXXX XXXX 9012',
-      type: 'Savings',
-      logo: require('../../assets/image/bankIcon/icici.png'),
-    },
-  ];
+  useEffect(() => {
+    fetchBanks();
+  }, []);
+
+  const fetchBanks = async () => {
+    try {
+      const res = await axiosInstance.get('/bank/account/list');
+      if (res.data?.status) {
+        setBanks(res.data.data || []);
+      }
+    } catch (err) {
+      console.log('Fetch Banks Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
+    );
+  }
+
+  const ActionButton3 = ({ title, image, themeColors, onPress }) => (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={onPress}
+      style={[styles.actionBtn3, { backgroundColor: themeColors.secondaryBg }]}
+    >
+      <Image source={image} style={styles.actionIcon} resizeMode="contain" />
+      <Text
+        style={[styles.actionText, { color: themeColors.text }]}
+        numberOfLines={2}
+      >
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const ActionButton2 = ({ title, image, themeColors, onPress }) => (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      style={[styles.actionBtn2, { backgroundColor: themeColors.secondaryBg }]}
+    >
+      <Image source={image} style={styles.action2Icon} resizeMode="contain" />
+      <Text
+        style={[styles.actionText, { color: themeColors.text }]}
+        numberOfLines={2}
+      >
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
+
+  const SmallButton = ({ title, image, themeColors }) => (
+    <TouchableOpacity
+      activeOpacity={0.8}
+      style={[styles.smallBtn, { backgroundColor: themeColors.secondaryBg }]}
+    >
+      <Image source={image} style={styles.smallIcon} />
+      <Text
+        style={[styles.smallText, { color: themeColors.text }]}
+        numberOfLines={2}
+      >
+        {title}
+      </Text>
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView
@@ -152,7 +201,6 @@ const HomePage = () => {
           {i18n.t('credit_loans')}
         </Text>
         <View style={styles.creditRow}>
-          {/* Left Big Card */}
           <TouchableOpacity
             activeOpacity={0.8}
             style={{ flex: 1 }}
@@ -177,7 +225,6 @@ const HomePage = () => {
             </LinearGradient>
           </TouchableOpacity>
 
-          {/* Right Column (stacked small buttons) */}
           <View style={styles.rightColumn}>
             <SmallButton
               title={i18n.t('add_credit_card')}
@@ -213,11 +260,17 @@ const HomePage = () => {
             themeColors={themeColors}
           />
         </View>
+
         <View style={styles.bottomRow}>
+          <ActionButton2
+            title={i18n.t('linked_account')}
+            image={require('../../assets/image/homeIcon/link.png')}
+            themeColors={themeColors}
+          />
           <ActionButton2
             onPress={() => {
               if (banks.length === 1) {
-                navigation.navigate('BankBalanceScreen', { bank: banks[0] });
+                navigation.navigate('EnterPinScreen', { bank: banks[0] });
               } else {
                 navigation.navigate('SelectBankScreen', { banks });
               }
@@ -226,81 +279,18 @@ const HomePage = () => {
             image={require('../../assets/image/homeIcon/balance.png')}
             themeColors={themeColors}
           />
-          <ActionButton2
-            title={i18n.t('linked_account')}
-            image={require('../../assets/image/homeIcon/link.png')}
-            themeColors={themeColors}
-          />
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-/* 🔘 Action Button for 3 per row */
-const ActionButton3 = ({ title, image, themeColors, onPress }) => (
-  <TouchableOpacity
-    activeOpacity={0.8}
-    onPress={onPress}
-    style={[styles.actionBtn3, { backgroundColor: themeColors.secondaryBg }]}
-  >
-    <Image source={image} style={styles.actionIcon} resizeMode="contain" />
-    <Text
-      style={[styles.actionText, { color: themeColors.text }]}
-      numberOfLines={2}
-    >
-      {title}
-    </Text>
-  </TouchableOpacity>
-);
-
-/* 🔘 Action Button for 2 per row */
-const ActionButton2 = ({ title, image, themeColors, onPress }) => (
-  <TouchableOpacity
-    onPress={onPress}
-    activeOpacity={0.8}
-    style={[styles.actionBtn2, { backgroundColor: themeColors.secondaryBg }]}
-  >
-    <Image source={image} style={styles.action2Icon} resizeMode="contain" />
-    <Text
-      style={[styles.actionText, { color: themeColors.text }]}
-      numberOfLines={2}
-    >
-      {title}
-    </Text>
-  </TouchableOpacity>
-);
-
-/* 📌 Small Button inside Credit & Loans */
-const SmallButton = ({ title, image, themeColors }) => (
-  <TouchableOpacity
-    activeOpacity={0.8}
-    style={[styles.smallBtn, { backgroundColor: themeColors.secondaryBg }]}
-  >
-    <Image source={image} style={styles.smallIcon} />
-    <Text
-      style={[styles.smallText, { color: themeColors.text }]}
-      numberOfLines={2}
-    >
-      {title}
-    </Text>
-  </TouchableOpacity>
-);
-
-export default HomePage;
+export default HomeScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.bg,
-  },
-  scroll: {
-    paddingHorizontal: scaleUtils.scaleWidth(14),
-  },
-  topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  container: { flex: 1, backgroundColor: Colors.bg },
+  scroll: { paddingHorizontal: scaleUtils.scaleWidth(14) },
+  topBar: { flexDirection: 'row', alignItems: 'center' },
   notifyButton: {
     backgroundColor: Colors.primary,
     padding: scaleUtils.scaleWidth(10),
@@ -320,7 +310,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: scaleUtils.scaleWidth(14),
   },
   bannerText: {
-    color: Colors.white,
     fontSize: scaleUtils.scaleFont(16),
     fontFamily: 'Poppins-Bold',
     textAlign: 'center',
@@ -329,7 +318,8 @@ const styles = StyleSheet.create({
     fontSize: scaleUtils.scaleFont(16),
     fontFamily: 'Poppins-SemiBold',
     color: Colors.white,
-    marginBottom: scaleUtils.scaleHeight(12),
+    marginBottom: scaleUtils.scaleHeight(16),
+    marginTop: scaleUtils.scaleHeight(4),
   },
   grid: {
     flexDirection: 'row',
@@ -339,7 +329,6 @@ const styles = StyleSheet.create({
   actionBtn3: {
     width: '30%',
     height: scaleUtils.scaleHeight(120),
-    backgroundColor: Colors.secondaryBg,
     paddingVertical: scaleUtils.scaleHeight(16),
     borderRadius: scaleUtils.scaleWidth(12),
     alignItems: 'center',
@@ -351,7 +340,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     columnGap: scaleUtils.scaleWidth(10),
     height: scaleUtils.scaleHeight(60),
-    backgroundColor: Colors.secondaryBg,
     paddingVertical: scaleUtils.scaleHeight(18),
     borderRadius: scaleUtils.scaleWidth(12),
     alignItems: 'center',
@@ -370,7 +358,6 @@ const styles = StyleSheet.create({
     tintColor: Colors.primary,
   },
   actionText: {
-    color: Colors.white,
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Medium',
     textAlign: 'center',
@@ -403,12 +390,8 @@ const styles = StyleSheet.create({
     color: Colors.white,
     opacity: 0.8,
   },
-  rightColumn: {
-    width: '30%',
-    rowGap: scaleUtils.scaleHeight(10),
-  },
+  rightColumn: { width: '30%', rowGap: scaleUtils.scaleHeight(10) },
   smallBtn: {
-    backgroundColor: Colors.secondaryBg,
     borderRadius: scaleUtils.scaleWidth(12),
     paddingVertical: scaleUtils.scaleHeight(12),
     paddingHorizontal: scaleUtils.scaleWidth(6),
@@ -421,7 +404,6 @@ const styles = StyleSheet.create({
     marginBottom: scaleUtils.scaleHeight(6),
   },
   smallText: {
-    color: Colors.white,
     fontSize: scaleUtils.scaleFont(11),
     textAlign: 'center',
     fontFamily: 'Poppins-Medium',
@@ -432,4 +414,5 @@ const styles = StyleSheet.create({
     marginTop: scaleUtils.scaleHeight(10),
     marginBottom: scaleUtils.scaleHeight(10),
   },
+  loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
 });

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -16,52 +16,78 @@ import Input from '../../component/Input';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import I18n from '../../utils/language/i18n';
 import { BankList } from '../../utils/apiHelper/Axios';
+import { getUserData } from '../../utils/async/storage';
 
 const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
 
 const BankLinkScreen = () => {
+  // ✅ All hooks must stay at the top level
   const navigation = useNavigation();
   const { colors, dark } = useTheme();
+
   const [search, setSearch] = useState('');
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isChecking, setIsChecking] = useState(false);
 
-  // Fetch bank list from API
-  const fetchBankList = async () => {
-    try {
-      const res = await BankList();
-      setData(res.data || []); // API should return array of banks
-    } catch (error) {
-      console.log('Bank List Error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // ✅ Fetch bank list from API
   useEffect(() => {
+    const fetchBankList = async () => {
+      try {
+        const res = await BankList();
+        setData(res.data || []);
+      } catch (error) {
+        console.log('Bank List Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchBankList();
   }, []);
 
-  // Filter banks based on search text
-  const filteredBanks = data.filter(bank =>
-    bank.name.toLowerCase().includes(search.toLowerCase()),
+  // ✅ Function to handle bank selection (wrapped in useCallback for stability)
+  const handleBankPress = useCallback(
+    async item => {
+      try {
+        setIsChecking(true);
+        const userData = await getUserData();
+        console.log('User Data:', userData);
+
+        if (userData?.user?.has_bank_accounts) {
+          navigation.navigate('UPIPinSetup', {
+            token: userData.token,
+            Itemid: item.id,
+          });
+        } else {
+          navigation.navigate('AadhaarVerification', { Itemid: item.id });
+        }
+      } catch (error) {
+        console.log('Bank selection error:', error);
+      } finally {
+        setIsChecking(false);
+      }
+    },
+    [navigation],
   );
 
-  // Render each bank item
+  // ✅ Filter banks
+  const filteredBanks = data.filter(bank =>
+    bank.name?.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  // ✅ Render each bank
   const renderBank = ({ item }) => (
     <TouchableOpacity
       style={[
         styles.bankItem,
         { backgroundColor: dark ? Colors.secondaryBg : Colors.cardGrey },
       ]}
-      onPress={() => {
-        console.log('Selected:', item.id);
-        const Itemid = item.id;
-        navigation.navigate('AadhaarVerification', { Itemid });
-      }}
+      disabled={isChecking}
+      onPress={() => handleBankPress(item)}
     >
       <Image
-        source={{ uri: `${IMAGE_BASE_URL}/${item.logo}` }} // 👈 dynamic logo
+        source={{ uri: `${IMAGE_BASE_URL}/${item.logo}` }}
         style={styles.bankLogo}
       />
       <View style={styles.bankInfo}>
@@ -79,6 +105,7 @@ const BankLinkScreen = () => {
     </TouchableOpacity>
   );
 
+  // ✅ UI
   return (
     <SafeAreaView
       style={[
@@ -99,7 +126,6 @@ const BankLinkScreen = () => {
         showsVerticalScrollIndicator={false}
         style={{ padding: scaleUtils.scaleWidth(20) }}
       >
-        {/* Title */}
         <Text style={[styles.title, { color: colors.text }]}>
           {I18n.t('link_bank_title')}
         </Text>
@@ -116,7 +142,6 @@ const BankLinkScreen = () => {
           onSearchPress={() => console.log('Search Pressed:', search)}
         />
 
-        {/* Popular Banks */}
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
           {I18n.t('popular_banks')}
         </Text>
@@ -137,6 +162,14 @@ const BankLinkScreen = () => {
             ListFooterComponent={
               <View style={{ marginBottom: scaleUtils.scaleHeight(40) }} />
             }
+          />
+        )}
+
+        {isChecking && (
+          <ActivityIndicator
+            size="large"
+            color={Colors.primary}
+            style={{ marginTop: 20 }}
           />
         )}
       </ScrollView>
