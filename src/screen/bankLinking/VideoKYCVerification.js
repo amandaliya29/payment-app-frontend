@@ -22,7 +22,7 @@ const VideoKYCVerification = () => {
   const route = useRoute();
   const { aadhaar, panNumber, name, Itemid } = route?.params || {};
 
-  // console.log(aadhaar, panNumber, name);
+  // console.log(aadhaar, panNumber, name, Itemid);
 
   const documents = [
     { key: 'aadhaar', label: I18n.t('aadhaar_card') },

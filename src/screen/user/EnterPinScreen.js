@@ -22,7 +22,7 @@ import { Toast } from '../../utils/Toast';
 const EnterPinScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { selectedBank } = route.params || {};
+  const { banks } = route.params || {};
 
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
@@ -37,8 +37,8 @@ const EnterPinScreen = () => {
     subText: isDark ? Colors.grey : Colors.darkGrey,
   };
 
-  const pinLength = selectedBank.pin_code_length;
-  console.log(selectedBank);
+  const pinLength = banks.pin_code_length;
+  console.log(banks);
 
   const showToast = message => {
     setToastMessage(message);
@@ -49,12 +49,12 @@ const EnterPinScreen = () => {
     setLoading(true);
     try {
       // Make API call with bank_id and pin
-      const response = await getBankBalance(selectedBank.id, pin);
+      const response = await getBankBalance(banks.id, pin);
 
       if (response.status) {
         // Success: navigate to BankBalanceScreen
         navigation.replace('BankBalanceScreen', {
-          selectedBank,
+          selectedBank: banks,
           balance: response.data.amount,
         });
       } else {

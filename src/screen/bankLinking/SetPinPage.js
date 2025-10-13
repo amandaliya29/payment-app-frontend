@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import Button from '../../component/Button';
 import OTPInput from '../../component/OTPInput';
 import { saveBankDetails } from '../../utils/apiHelper/Axios';
 import { Toast } from '../../utils/Toast'; // import your Toast
+import { getUserData, saveUserData } from '../../utils/async/storage';
 
 const SetPinPage = () => {
   const navigation = useNavigation();
@@ -33,8 +34,21 @@ const SetPinPage = () => {
     Itemid,
     ifscCode,
     account_number,
-    bank_id,
   } = route.params;
+
+  console.log(
+    'data',
+    pinLength,
+    'aadhaar',
+    aadhaar,
+    'panNumber',
+    panNumber,
+    'name',
+    name,
+    Itemid,
+    ifscCode,
+    account_number,
+  );
 
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
@@ -59,7 +73,7 @@ const SetPinPage = () => {
   };
 
   const generateAccountType = () => {
-    const types = ['saving', 'current', 'salary', 'fixed deposit'];
+    const types = ['saving', 'current', 'salary', 'fixed_deposit'];
     return types[Math.floor(Math.random() * types.length)];
   };
 
@@ -92,12 +106,22 @@ const SetPinPage = () => {
       account_type: generateAccountType(),
     };
 
-    if (aadhaar) payload.aadhaar_number = aadhaar;
+    if (aadhaar) payload.aadhaar_number = aadhaar.replace(/\s+/g, '');
     if (panNumber) payload.pan_number = panNumber;
     if (name) payload.account_holder_name = name;
 
     try {
-      await saveBankDetails(payload);
+      const response = await saveBankDetails(payload);
+      console.log('Save Bank Response:', response);
+
+      // ✅ Update has_bank_accounts = true locally
+      const userData = await getUserData();
+      const updatedUser = {
+        ...userData.user,
+        has_bank_accounts: true,
+      };
+      await saveUserData({ ...userData, user: updatedUser });
+
       showToast(I18n.t('upi_setup_success'));
       setTimeout(() => {
         resetToSingleScreen(navigation);

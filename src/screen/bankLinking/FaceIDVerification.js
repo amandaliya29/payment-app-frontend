@@ -45,8 +45,14 @@ const FaceIDVerification = () => {
   };
 
   const handleSaveBank = () => {
-    // ✅ Navigate after success
-    navigation.navigate('UPIPinSetup', aadhaar, panNumber, name, Itemid);
+    // console.log('UPIPinSetup', aadhaar, panNumber, name);
+
+    navigation.navigate('UPIPinSetup', {
+      aadhaar,
+      panNumber,
+      name,
+      Itemid,
+    });
   };
 
   return (

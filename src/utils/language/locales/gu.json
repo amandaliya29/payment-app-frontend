@@ -326,5 +326,10 @@
   "via_upi_id": "યુપીઆઈ આઈડી દ્વારા",
   "enter_phone_number": "ફોન નંબર દાખલ કરો",
   "enter_upi_id": "યુપીઆઈ આઈડી દાખલ કરો",
-  "example_upi": "ઉદાહરણ@upi"
+  "example_upi": "ઉદાહરણ@upi",
+
+  "self_transfer_title": "સ્વ-ટ્રાન્સફર",
+  "linked_bank_accounts": "લિંક કરેલ બેંક ખાતાઓ",
+  "no_linked_account": "હજી કોઈ લિંક કરેલ ખાતા નથી",
+  "primary": "પ્રાથમિક"
 }

@@ -2,14 +2,13 @@ import React, { useEffect, useState, useContext } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
   Image,
-  FlatList,
   ActivityIndicator,
   useColorScheme,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -19,7 +18,7 @@ import i18n from '../../utils/language/i18n';
 import Input from '../../component/Input';
 import { useNavigation } from '@react-navigation/native';
 import { LanguageContext } from '../../utils/language/LanguageContext';
-import axiosInstance, { BASE_URL } from '../../utils/apiHelper/axiosInstance';
+import { getBankAccountList } from '../../utils/apiHelper/Axios';
 
 const HomeScreen = () => {
   const scheme = useColorScheme();
@@ -39,23 +38,47 @@ const HomeScreen = () => {
     card: isDark ? Colors.card : Colors.cardGrey,
   };
 
+  // 🔹 Fetch Banks on Mount
   useEffect(() => {
     fetchBanks();
   }, []);
 
   const fetchBanks = async () => {
     try {
-      const res = await axiosInstance.get('/bank/account/list');
-      if (res.data?.status) {
-        setBanks(res.data.data || []);
+      setLoading(true);
+      const res = await getBankAccountList();
+
+      // The response structure is { status: true, data: [...] }
+      if (res?.status) {
+        setBanks(res.data || []);
+      } else {
+        setBanks([]);
       }
     } catch (err) {
       console.log('Fetch Banks Error:', err);
+      Alert.alert('Error', 'Failed to load bank accounts');
     } finally {
       setLoading(false);
     }
   };
 
+  // 🔹 Navigate based on number of linked banks
+  const handleCheckBalance = () => {
+    if (banks.length === 0) {
+      Alert.alert(i18n.t('no_banks_linked'), i18n.t('please_add_a_bank_first'));
+      return;
+    }
+
+    if (banks.length === 1) {
+      // Go directly to EnterPinScreen with single bank
+      navigation.navigate('EnterPinScreen', { banks: banks[0] });
+    } else {
+      // Go to SelectBankScreen with all banks
+      navigation.navigate('SelectBankScreen', { banks });
+    }
+  };
+
+  // 🔹 Loader
   if (loading) {
     return (
       <View style={styles.loaderContainer}>
@@ -64,7 +87,8 @@ const HomeScreen = () => {
     );
   }
 
-  const ActionButton3 = ({ title, image, themeColors, onPress }) => (
+  // 🔹 Reusable Buttons
+  const ActionButton3 = ({ title, image, onPress }) => (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
@@ -80,7 +104,7 @@ const HomeScreen = () => {
     </TouchableOpacity>
   );
 
-  const ActionButton2 = ({ title, image, themeColors, onPress }) => (
+  const ActionButton2 = ({ title, image, onPress }) => (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
@@ -96,7 +120,7 @@ const HomeScreen = () => {
     </TouchableOpacity>
   );
 
-  const SmallButton = ({ title, image, themeColors }) => (
+  const SmallButton = ({ title, image }) => (
     <TouchableOpacity
       activeOpacity={0.8}
       style={[styles.smallBtn, { backgroundColor: themeColors.secondaryBg }]}
@@ -111,12 +135,14 @@ const HomeScreen = () => {
     </TouchableOpacity>
   );
 
+  // 🔹 UI
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
+      {/* {console.log('dattaaaa', banks)} */}
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* 🔎 Top Search & Notification */}
+        {/* 🔍 Search Bar */}
         <View style={styles.topBar}>
           <View style={{ flex: 1, marginRight: scaleUtils.scaleWidth(10) }}>
             <Input
@@ -124,26 +150,25 @@ const HomeScreen = () => {
               value={search}
               onChange={setSearch}
               placeholder={i18n.t('search')}
-              onSearchPress={() => console.log('Search Pressed:', search)}
+              onSearchPress={() => console.log('Search:', search)}
             />
           </View>
+
           <TouchableOpacity
             style={styles.notifyButton}
             onPress={() => navigation.navigate('ProfileScreen')}
           >
             <Image
               source={require('../../assets/image/homeIcon/user.png')}
-              style={[styles.notifyIcon]}
+              style={styles.notifyIcon}
             />
           </TouchableOpacity>
         </View>
 
+        {/* 🏦 Banner */}
         <TouchableOpacity
           activeOpacity={0.8}
-          style={{ flex: 1 }}
-          onPress={() => {
-            navigation.navigate('HbfcCraditUpi');
-          }}
+          onPress={() => navigation.navigate('HbfcCraditUpi')}
         >
           <LinearGradient
             colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
@@ -155,7 +180,7 @@ const HomeScreen = () => {
           </LinearGradient>
         </TouchableOpacity>
 
-        {/* ⚡ Quick Actions (3 per row) */}
+        {/* ⚡ Quick Actions */}
         <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
           {i18n.t('quick_actions')}
         </Text>
@@ -164,35 +189,30 @@ const HomeScreen = () => {
             onPress={() => navigation.navigate('QrPage')}
             title={i18n.t('scan_pay')}
             image={require('../../assets/image/homeIcon/scan.png')}
-            themeColors={themeColors}
           />
           <ActionButton3
             onPress={() => navigation.navigate('ToMobileScreen')}
             title={i18n.t('to_mobile')}
             image={require('../../assets/image/homeIcon/mobile.png')}
-            themeColors={themeColors}
           />
           <ActionButton3
             onPress={() => navigation.navigate('ToBank')}
             title={i18n.t('to_bank')}
             image={require('../../assets/image/homeIcon/bank.png')}
-            themeColors={themeColors}
           />
           <ActionButton3
             onPress={() => navigation.navigate('ReceiveMoneyScreen')}
             title={i18n.t('receive')}
             image={require('../../assets/image/homeIcon/receive.png')}
-            themeColors={themeColors}
           />
           <ActionButton3
             title={i18n.t('self_transfer')}
             image={require('../../assets/image/homeIcon/transfer.png')}
-            themeColors={themeColors}
+            onPress={() => navigation.navigate('SelfTransfer')}
           />
           <ActionButton3
             title={i18n.t('transaction_history')}
             image={require('../../assets/image/homeIcon/history.png')}
-            themeColors={themeColors}
           />
         </View>
 
@@ -204,9 +224,7 @@ const HomeScreen = () => {
           <TouchableOpacity
             activeOpacity={0.8}
             style={{ flex: 1 }}
-            onPress={() => {
-              navigation.navigate('CreditUPIPage');
-            }}
+            onPress={() => navigation.navigate('CreditUPIPage')}
           >
             <LinearGradient
               colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
@@ -229,12 +247,10 @@ const HomeScreen = () => {
             <SmallButton
               title={i18n.t('add_credit_card')}
               image={require('../../assets/image/homeIcon/card.png')}
-              themeColors={themeColors}
             />
             <SmallButton
               title={i18n.t('loan_offers')}
               image={require('../../assets/image/homeIcon/loan.png')}
-              themeColors={themeColors}
             />
           </View>
         </View>
@@ -247,37 +263,28 @@ const HomeScreen = () => {
           <ActionButton3
             title={i18n.t('mobile_recharge')}
             image={require('../../assets/image/homeIcon/mobile.png')}
-            themeColors={themeColors}
           />
           <ActionButton3
             title={i18n.t('electricity_bill')}
             image={require('../../assets/image/homeIcon/electricity.png')}
-            themeColors={themeColors}
           />
           <ActionButton3
             title={i18n.t('fastag_recharge')}
             image={require('../../assets/image/homeIcon/fastag.png')}
-            themeColors={themeColors}
           />
         </View>
 
+        {/* ⚙️ Bottom Row */}
         <View style={styles.bottomRow}>
           <ActionButton2
             title={i18n.t('linked_account')}
             image={require('../../assets/image/homeIcon/link.png')}
-            themeColors={themeColors}
+            onPress={() => console.log('Linked Accounts')}
           />
           <ActionButton2
-            onPress={() => {
-              if (banks.length === 1) {
-                navigation.navigate('EnterPinScreen', { bank: banks[0] });
-              } else {
-                navigation.navigate('SelectBankScreen', { banks });
-              }
-            }}
             title={i18n.t('check_balance')}
             image={require('../../assets/image/homeIcon/balance.png')}
-            themeColors={themeColors}
+            onPress={handleCheckBalance}
           />
         </View>
       </ScrollView>
@@ -288,7 +295,7 @@ const HomeScreen = () => {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.bg },
+  container: { flex: 1 },
   scroll: { paddingHorizontal: scaleUtils.scaleWidth(14) },
   topBar: { flexDirection: 'row', alignItems: 'center' },
   notifyButton: {
@@ -317,7 +324,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: scaleUtils.scaleFont(16),
     fontFamily: 'Poppins-SemiBold',
-    color: Colors.white,
     marginBottom: scaleUtils.scaleHeight(16),
     marginTop: scaleUtils.scaleHeight(4),
   },
@@ -381,13 +387,11 @@ const styles = StyleSheet.create({
   creditTitle: {
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-SemiBold',
-    color: Colors.white,
     marginBottom: scaleUtils.scaleHeight(4),
   },
   creditSub: {
     fontSize: scaleUtils.scaleFont(11),
     fontFamily: 'Poppins-Regular',
-    color: Colors.white,
     opacity: 0.8,
   },
   rightColumn: { width: '30%', rowGap: scaleUtils.scaleHeight(10) },

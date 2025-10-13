@@ -21,12 +21,7 @@ const UPIPinSetup = () => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
-  const {
-    aadhaar = '',
-    panNumber = '',
-    name = '',
-    Itemid,
-  } = route?.params || {};
+  const { aadhaar, panNumber, name, Itemid } = route?.params || {};
 
   const generateAccount_Number = () => {
     let acc = '';
@@ -43,14 +38,15 @@ const UPIPinSetup = () => {
     return `${bankCode}0${branchCode}`;
   };
 
-  // console.log(
-  //   aadhaar,
-  //   panNumber,
-  //   name,
-  //   Itemid,
-  //   generate_IFSC(),
-  //   generateAccount_Number(),
-  // );
+  console.log(
+    'UPI',
+    aadhaar,
+    panNumber,
+    name,
+    Itemid,
+    generate_IFSC(),
+    generateAccount_Number(),
+  );
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.lightBg,

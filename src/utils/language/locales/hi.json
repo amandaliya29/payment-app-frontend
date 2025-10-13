@@ -315,5 +315,10 @@
   "via_upi_id": "यूपीआई आईडी से",
   "enter_phone_number": "फोन नंबर दर्ज करें",
   "enter_upi_id": "यूपीआई आईडी दर्ज करें",
-  "example_upi": "उदाहरण@upi"
+  "example_upi": "उदाहरण@upi",
+
+  "self_transfer_title": "स्वयं स्थानांतरण",
+  "linked_bank_accounts": "लिंक किए गए बैंक खाते",
+  "no_linked_account": "अभी कोई लिंक किए गए खाते नहीं हैं",
+  "primary": "मुख्य"
 }

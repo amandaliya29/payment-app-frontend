@@ -36,7 +36,7 @@ const SelectBankScreen = () => {
 
   const handleBankSelect = bank => {
     navigation.navigate('EnterPinScreen', {
-      selectedBank: bank,
+      banks: bank,
     });
   };
 
