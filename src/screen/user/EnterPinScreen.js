@@ -6,6 +6,7 @@ import {
   ScrollView,
   useColorScheme,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -15,14 +16,18 @@ import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
 import Button from '../../component/Button';
 import OTPInput from '../../component/OTPInput';
+import { getBankBalance } from '../../utils/apiHelper/Axios';
+import { Toast } from '../../utils/Toast';
 
 const EnterPinScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { selectedBank } = route.params || {};
+  const { banks } = route.params || {};
 
   const [pin, setPin] = useState('');
-  const pinLength = 4;
+  const [loading, setLoading] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
@@ -32,8 +37,37 @@ const EnterPinScreen = () => {
     subText: isDark ? Colors.grey : Colors.darkGrey,
   };
 
-  const handleContinue = () => {
-    navigation.replace('BankBalanceScreen', { selectedBank });
+  const pinLength = banks.pin_code_length;
+  console.log(banks);
+
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+  };
+
+  const handleContinue = async () => {
+    setLoading(true);
+    try {
+      // Make API call with bank_id and pin
+      const response = await getBankBalance(banks.id, pin);
+
+      if (response.status) {
+        // Success: navigate to BankBalanceScreen
+        navigation.replace('BankBalanceScreen', {
+          selectedBank: banks,
+          balance: response.data.amount,
+        });
+      } else {
+        showToast(response.messages);
+        setPin('');
+      }
+    } catch (error) {
+      console.log(error);
+      showToast(error?.response?.data?.messages || 'Invalid PIN');
+      setPin('');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,7 +79,7 @@ const EnterPinScreen = () => {
         onBack={() => navigation.goBack()}
       />
 
-      {/* PIN Image below header */}
+      {/* PIN Image */}
       <View style={styles.imageContainer}>
         <Image
           source={require('../../assets/image/appIcon/pin-lock.png')}
@@ -65,7 +99,7 @@ const EnterPinScreen = () => {
           {I18n.t('enter_pin_to_continue')}
         </Text>
 
-        {/* Enter PIN */}
+        {/* PIN Input */}
         <Text style={[styles.label, { color: themeColors.text }]}>
           {I18n.t('enter_your_pin')}
         </Text>
@@ -78,15 +112,22 @@ const EnterPinScreen = () => {
           />
         </View>
 
-        {/* Continue Button */}
+        {/* Continue Button or Loader */}
         <View style={{ marginVertical: scaleUtils.scaleHeight(20) }}>
-          <Button
-            title={I18n.t('continue')}
-            onPress={handleContinue}
-            disabled={pin.length !== pinLength}
-          />
+          {loading ? (
+            <ActivityIndicator size="large" color={Colors.primary} />
+          ) : (
+            <Button
+              title={I18n.t('continue')}
+              onPress={handleContinue}
+              disabled={pin.length !== pinLength}
+            />
+          )}
         </View>
       </ScrollView>
+
+      {/* Custom Toast */}
+      <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
 };

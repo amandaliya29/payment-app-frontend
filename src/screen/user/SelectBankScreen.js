@@ -2,27 +2,29 @@ import React, { useEffect } from 'react';
 import {
   View,
   Text,
-  StyleSheet,
-  TouchableOpacity,
   Image,
+  TouchableOpacity,
   FlatList,
+  StyleSheet,
   useColorScheme,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Header from '../../component/Header';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
-import I18n from '../../utils/language/i18n';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import Header from '../../component/Header';
+import i18n from '../../utils/language/i18n';
 
 const SelectBankScreen = () => {
+  const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
   const navigation = useNavigation();
   const route = useRoute();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
-  // Banks passed from HomePage
   const banks = route.params?.banks || [];
+
+  // console.log(banks);
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -33,14 +35,13 @@ const SelectBankScreen = () => {
   };
 
   const handleBankSelect = bank => {
-    navigation.navigate('EnterPinScreen', { selectedBank: bank });
+    navigation.navigate('EnterPinScreen', {
+      banks: bank,
+    });
   };
 
-  // Auto navigate if only one bank exists
   useEffect(() => {
-    if (banks.length === 1) {
-      handleBankSelect(banks[0]);
-    }
+    if (banks.length === 1) handleBankSelect(banks[0]);
   }, [banks]);
 
   const renderItem = ({ item, index }) => (
@@ -50,12 +51,12 @@ const SelectBankScreen = () => {
         onPress={() => handleBankSelect(item)}
       >
         <Image
-          source={item.logo}
+          source={{ uri: `${IMAGE_BASE_URL}${item.bank.logo}` }}
           style={styles.bankLogo}
           resizeMode="contain"
         />
         <Text style={[styles.bankName, { color: themeColors.text }]}>
-          {item.name}
+          {item.bank.name}
         </Text>
       </TouchableOpacity>
       {index < banks.length - 1 && (
@@ -70,36 +71,36 @@ const SelectBankScreen = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
-      {banks.length > 1 && (
-        <>
-          <Header
-            title={I18n.t('select_bank')}
-            onBack={() => navigation.goBack()}
-          />
-          <FlatList
-            data={banks}
-            keyExtractor={item => item.id.toString()}
-            contentContainerStyle={styles.listContainer}
-            renderItem={renderItem}
-          />
-        </>
-      )}
+      <Header
+        title={i18n.t('select_bank')}
+        onBack={() => navigation.goBack()}
+      />
+
+      <FlatList
+        data={banks}
+        keyExtractor={(item, index) => String(index)}
+        renderItem={renderItem}
+        contentContainerStyle={{ padding: scaleUtils.scaleWidth(16) }}
+        showsVerticalScrollIndicator={false}
+      />
     </SafeAreaView>
   );
 };
 
+export default SelectBankScreen;
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  listContainer: { paddingHorizontal: scaleUtils.scaleWidth(20) },
   bankRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: scaleUtils.scaleHeight(14),
+    paddingVertical: scaleUtils.scaleHeight(12),
+    paddingHorizontal: scaleUtils.scaleWidth(12),
   },
   bankLogo: {
-    width: scaleUtils.scaleWidth(32),
-    height: scaleUtils.scaleWidth(32),
-    marginRight: scaleUtils.scaleWidth(14),
+    width: scaleUtils.scaleWidth(24),
+    height: scaleUtils.scaleWidth(24),
+    marginRight: scaleUtils.scaleWidth(16),
   },
   bankName: {
     fontSize: scaleUtils.scaleFont(14),
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
+    width: '100%',
+    marginVertical: scaleUtils.scaleHeight(4),
   },
 });
-
-export default SelectBankScreen;

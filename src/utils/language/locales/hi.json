@@ -292,5 +292,33 @@
   "languages": "भाषाएँ",
   "logout": "लॉग आउट",
   "add_bank_account": "बैंक खाता जोड़ें",
-  "bank_accounts_cards": "बैंक खाते और कार्ड"
+  "bank_accounts_cards": "बैंक खाते और कार्ड",
+
+  "bank_transfer_title": "बैंक ट्रांसफर",
+  "receiver_bank_details": "प्राप्तकर्ता बैंक विवरण",
+  "bank_account_number_label": "बैंक खाता संख्या",
+  "bank_account_number_placeholder": "बैंक खाता संख्या दर्ज करें",
+  "invalid_account_number": "मान्य बैंक खाता संख्या दर्ज करें",
+  "ifsc_code_label": "आईएफएससी कोड",
+  "ifsc_code_placeholder": "आईएफएससी कोड दर्ज करें",
+  "invalid_ifsc_code": "मान्य आईएफएससी कोड दर्ज करें",
+  "search_for_ifsc": "आईएफएससी खोजें",
+  "recent_transfers": "हाल के ट्रांसफर",
+
+  "bank_branch": "बैंक शाखा",
+  "select_branch": "शाखा चुनें",
+  "cancel": "रद्द करें",
+
+  "transfer_to_mobile": "मोबाइल पर पैसे भेजें",
+  "select_transfer_method": "ट्रांसफर विधि चुनें",
+  "via_phone_number": "फोन नंबर से",
+  "via_upi_id": "यूपीआई आईडी से",
+  "enter_phone_number": "फोन नंबर दर्ज करें",
+  "enter_upi_id": "यूपीआई आईडी दर्ज करें",
+  "example_upi": "उदाहरण@upi",
+
+  "self_transfer_title": "स्वयं स्थानांतरण",
+  "linked_bank_accounts": "लिंक किए गए बैंक खाते",
+  "no_linked_account": "अभी कोई लिंक किए गए खाते नहीं हैं",
+  "primary": "मुख्य"
 }

@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { getUserData, removeUserData } from '../async/storage';
 
+export const BASE_URL = 'https://cyapay.ddns.net/api';
+
 const axiosInstance = axios.create({
-  baseURL: 'https://cyapay.ddns.net/api',
+  baseURL: BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',

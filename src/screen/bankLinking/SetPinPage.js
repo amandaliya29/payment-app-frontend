@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,22 +7,53 @@ import {
   useColorScheme,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import {
+  useNavigation,
+  useRoute,
+  StackActions,
+  CommonActions,
+} from '@react-navigation/native';
 import Header from '../../component/Header';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
 import Button from '../../component/Button';
 import OTPInput from '../../component/OTPInput';
+import { saveBankDetails } from '../../utils/apiHelper/Axios';
+import { Toast } from '../../utils/Toast'; // import your Toast
+import { getUserData, saveUserData } from '../../utils/async/storage';
 
 const SetPinPage = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { pinLength } = route.params;
+  const {
+    pinLength,
+    aadhaar,
+    panNumber,
+    name,
+    Itemid,
+    ifscCode,
+    account_number,
+  } = route.params;
+
+  console.log(
+    'data',
+    pinLength,
+    'aadhaar',
+    aadhaar,
+    'panNumber',
+    panNumber,
+    'name',
+    name,
+    Itemid,
+    ifscCode,
+    account_number,
+  );
 
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
-
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const confirmPinRef = useRef(null);
 
   const scheme = useColorScheme();
@@ -34,14 +65,70 @@ const SetPinPage = () => {
     tipBox: isDark ? Colors.secondary : Colors.cardGrey,
   };
 
-  const handleSetup = () => {
-    navigation.navigate('HomePage');
-  };
-
   const handlePinChange = value => {
     setPin(value);
     if (value.length === parseInt(pinLength)) {
-      confirmPinRef.current?.focus(); // Focus Confirm PIN when Set PIN is full
+      confirmPinRef.current?.focus();
+    }
+  };
+
+  const generateAccountType = () => {
+    const types = ['saving', 'current', 'salary', 'fixed_deposit'];
+    return types[Math.floor(Math.random() * types.length)];
+  };
+
+  const resetToSingleScreen = navigation => {
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'HomePage' }], // your home screen
+      }),
+    );
+  };
+
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+  };
+
+  const handleSetup = async () => {
+    if (pin !== confirmPin) {
+      showToast(I18n.t('pin_mismatch'));
+      return;
+    }
+
+    const payload = {
+      bank_id: Itemid,
+      account_number: account_number,
+      ifsc_code: ifscCode,
+      pin_code: pin,
+      pin_code_confirmation: confirmPin,
+      account_type: generateAccountType(),
+    };
+
+    if (aadhaar) payload.aadhaar_number = aadhaar.replace(/\s+/g, '');
+    if (panNumber) payload.pan_number = panNumber;
+    if (name) payload.account_holder_name = name;
+
+    try {
+      const response = await saveBankDetails(payload);
+      console.log('Save Bank Response:', response);
+
+      // ✅ Update has_bank_accounts = true locally
+      const userData = await getUserData();
+      const updatedUser = {
+        ...userData.user,
+        has_bank_accounts: true,
+      };
+      await saveUserData({ ...userData, user: updatedUser });
+
+      showToast(I18n.t('upi_setup_success'));
+      setTimeout(() => {
+        resetToSingleScreen(navigation);
+      }, 1000);
+    } catch (error) {
+      console.error('Error saving bank details:', error);
+      showToast(error.message || I18n.t('failed_save'));
     }
   };
 
@@ -111,23 +198,21 @@ const SetPinPage = () => {
             onPress={handleSetup}
             disabled={
               pin.length !== parseInt(pinLength) ||
-              confirmPin.length !== parseInt(pinLength) ||
-              pin !== confirmPin
+              confirmPin.length !== parseInt(pinLength)
             }
           />
         </View>
       </ScrollView>
+
+      {/* Toast */}
+      <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollContent: {
-    padding: scaleUtils.scaleWidth(20),
-  },
+  container: { flex: 1 },
+  scrollContent: { padding: scaleUtils.scaleWidth(20) },
   title: {
     fontSize: scaleUtils.scaleFont(22),
     fontFamily: 'Poppins-Bold',

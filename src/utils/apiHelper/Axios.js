@@ -37,7 +37,7 @@ export const updateFcmToken = async fcm_token => {
 export const BankList = async () => {
   try {
     const response = await axiosInstance.get('/bank/list');
-    console.log(response.data);
+    // console.log(response.data);
 
     return response.data;
   } catch (error) {
@@ -45,23 +45,9 @@ export const BankList = async () => {
   }
 };
 
-export const saveBankDetails = async ({
-  bank_id,
-  aadhaar_number,
-  pan_number,
-  account_holder_name,
-  account_number,
-  ifsc_code,
-}) => {
+export const saveBankDetails = async payload => {
   try {
-    const response = await axiosInstance.post('/bank/details', {
-      bank_id,
-      aadhaar_number,
-      pan_number,
-      account_holder_name,
-      account_number,
-      ifsc_code,
-    });
+    const response = await axiosInstance.post('/bank/details', payload);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Failed to save bank details' };
@@ -87,5 +73,18 @@ export const getBankAccountList = async () => {
     throw (
       error.response?.data || { message: 'Failed to fetch bank account list' }
     );
+  }
+};
+
+export const getBankBalance = async (bank_id, pin_code) => {
+  try {
+    const response = await axiosInstance.post('/bank/balance', {
+      account_id: bank_id,
+      pin_code,
+    });
+    // response example: { status: true, data: { amount: "0.00" }, messages: "Fetch successfully" }
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to fetch bank balance' };
   }
 };

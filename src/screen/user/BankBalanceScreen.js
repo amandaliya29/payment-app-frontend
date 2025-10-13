@@ -22,6 +22,8 @@ const BankBalanceScreen = () => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
+  const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
+
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
     text: Colors.white,
@@ -32,16 +34,15 @@ const BankBalanceScreen = () => {
   const defaultBank = {
     id: 1,
     name: 'State Bank of India',
-    balance: '2,50,000',
     accountNumber: 'XXXX XXXX XXXX 1234',
     type: 'Savings',
     logo: require('../../assets/image/bankIcon/sbi.png'),
   };
 
+  // Use bank data from route.params if available
   const [selectedBank, setSelectedBank] = useState(
     route.params?.selectedBank || defaultBank,
   );
-  const [showBalance, setShowBalance] = useState(true); // Always show balance
 
   // Animation
   const cardScale = useRef(new Animated.Value(0.9)).current;
@@ -62,8 +63,21 @@ const BankBalanceScreen = () => {
     ]).start();
   };
 
+  // console.log(route.params.balance);
+
   useEffect(() => {
-    if (route.params?.selectedBank) setSelectedBank(route.params.selectedBank);
+    if (route.params?.selectedBank) {
+      const bank = route.params.selectedBank;
+
+      const logoUrl = `${IMAGE_BASE_URL}${bank.bank.logo}`;
+
+      setSelectedBank({
+        ...bank,
+        logo: logoUrl,
+        accountNumber: `${bank.account_number}`,
+        type: bank.account_type || 'saving',
+      });
+    }
     animateCard();
   }, [route.params?.selectedBank]);
 
@@ -71,6 +85,7 @@ const BankBalanceScreen = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
+      {/* {console.log(route.params.selectedBank.bank.logo)} */}
       <Header
         title={I18n.t('bank_balance_title')}
         onBack={() => navigation.goBack()}
@@ -89,28 +104,21 @@ const BankBalanceScreen = () => {
             </Text>
 
             <View style={styles.balanceRow}>
-              <Text style={styles.balance}>
-                ₹{' '}
-                {Number(selectedBank.balance.replace(/,/g, '')).toLocaleString(
-                  'en-IN',
-                  {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  },
-                )}
-              </Text>
+              <Text style={styles.balance}>₹ {route.params.balance}</Text>
             </View>
 
             <View style={styles.divider} />
 
             <View style={styles.bankRow}>
-              <Image
-                source={selectedBank.logo}
-                style={styles.bankLogo}
-                resizeMode="contain"
-              />
+              <View style={styles.bankLogoContainer}>
+                <Image
+                  source={{ uri: selectedBank.logo }}
+                  style={styles.bankLogo}
+                  resizeMode="contain"
+                />
+              </View>
               <View style={styles.bankInfo}>
-                <Text style={styles.bankName}>{selectedBank.name}</Text>
+                <Text style={styles.bankName}>{selectedBank.bank.name}</Text>
                 <Text style={styles.bankDetails}>
                   {selectedBank.accountNumber}
                 </Text>
@@ -156,11 +164,20 @@ const styles = StyleSheet.create({
   },
   bankRow: { flexDirection: 'row' },
   bankLogo: {
+    width: scaleUtils.scaleWidth(35),
+    height: scaleUtils.scaleWidth(35),
+    borderRadius: scaleUtils.scaleWidth(22),
+    resizeMode: 'contain',
+  },
+  bankLogoContainer: {
     width: scaleUtils.scaleWidth(36),
     height: scaleUtils.scaleWidth(36),
     marginRight: scaleUtils.scaleWidth(14),
-    borderRadius: scaleUtils.scaleWidth(22),
+    borderRadius: scaleUtils.scaleWidth(24),
     backgroundColor: Colors.white,
+    resizeMode: 'contain',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   bankInfo: { flex: 1 },
   bankName: {
