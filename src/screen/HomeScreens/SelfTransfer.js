@@ -10,12 +10,12 @@ import {
   useColorScheme,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
 import Header from '../../component/Header';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
-import { getUserProfile } from '../../utils/apiHelper/Axios';
+import { getBankAccountList } from '../../utils/apiHelper/Axios';
+import { useNavigation } from '@react-navigation/native';
 
 const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
 
@@ -24,7 +24,6 @@ const SelfTransfer = () => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
-  const [user, setUser] = useState(null);
   const [bankAccounts, setBankAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,29 +40,22 @@ const SelfTransfer = () => {
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const response = await getUserProfile();
-        if (response.status && response.data) {
-          const { user, bank_accounts } = response.data;
-          const primaryBank = bank_accounts?.find(acc => acc.is_primary === 1);
+        const response = await getBankAccountList();
+        console.log('Bank List API Response:', response);
 
-          const displayName =
-            user.name?.trim() !== ''
-              ? user.name
-              : primaryBank?.account_holder_name || 'Anonymous';
-
-          setUser({
-            name: displayName,
-            upiId: primaryBank?.upi_id || '',
-            upiNumber: user?.phone?.replace(/^\+91/, '') || '',
-          });
-          setBankAccounts(bank_accounts || []);
+        if (response.status && Array.isArray(response.data)) {
+          setBankAccounts(response.data);
+        } else {
+          setBankAccounts([]);
         }
       } catch (error) {
-        console.log('Error fetching accounts:', error);
+        console.log('Error fetching bank accounts:', error);
+        setBankAccounts([]);
       } finally {
         setLoading(false);
       }
     };
+
     fetchAccounts();
   }, []);
 
@@ -80,24 +72,21 @@ const SelfTransfer = () => {
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
       <Header
-        title={I18n.t('self_transfer_title') || 'Self Transfer'}
+        title={I18n.t('self_transfer_title')}
         onBack={() => navigation.goBack()}
       />
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.bankSection}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
-            {I18n.t('linked_bank_accounts') || 'Linked Bank Accounts'}
-          </Text>
+        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
+          {I18n.t('manage_money')}
+        </Text>
 
+        <View style={styles.bankSection}>
           {bankAccounts.length > 0 ? (
             bankAccounts.map(bank => (
-              <TouchableOpacity
-                key={bank.id}
-                style={[styles.bankCard, { backgroundColor: themeColors.card }]}
-              >
+              <TouchableOpacity key={bank.id} style={[styles.bankCard]}>
                 <View
                   style={[
                     styles.bankIconBox,
@@ -119,8 +108,8 @@ const SelfTransfer = () => {
                       { color: themeColors.placeholder },
                     ]}
                   >
-                    •••• {bank.account_number.slice(-4)}{' '}
-                    {bank.is_primary ? '• Primary' : ''}
+                    {bank.account_number}
+                    {' • ' + bank.account_type}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -129,7 +118,7 @@ const SelfTransfer = () => {
             <Text
               style={[styles.noAccountText, { color: themeColors.placeholder }]}
             >
-              {I18n.t('no_linked_account') || 'No linked accounts yet'}
+              {I18n.t('no_linked_account')}
             </Text>
           )}
 
@@ -178,34 +167,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.bg,
   },
-  bankSection: { marginBottom: scaleUtils.scaleHeight(20) },
+  bankSection: {
+    marginBottom: scaleUtils.scaleHeight(20),
+  },
   sectionTitle: {
-    fontSize: scaleUtils.scaleFont(15),
-    fontFamily: 'Poppins-SemiBold',
-    marginBottom: scaleUtils.scaleHeight(16),
+    fontSize: scaleUtils.scaleFont(14),
+    fontFamily: 'Poppins-Regular',
+    marginBottom: scaleUtils.scaleHeight(26),
     alignSelf: 'center',
   },
   bankCard: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: scaleUtils.scaleWidth(10),
-    // padding: scaleUtils.scaleWidth(10),
     marginBottom: scaleUtils.scaleHeight(10),
-    elevation: 2,
   },
   bankIconBox: {
-    width: scaleUtils.scaleWidth(55),
-    height: scaleUtils.scaleWidth(40),
     borderRadius: scaleUtils.scaleWidth(8),
     alignItems: 'center',
     justifyContent: 'center',
+    width: scaleUtils.scaleWidth(60),
+    height: scaleUtils.scaleWidth(40),
   },
   bankLogo: {
     width: scaleUtils.scaleWidth(24),
     height: scaleUtils.scaleWidth(24),
     resizeMode: 'contain',
   },
-  bankInfo: { marginLeft: scaleUtils.scaleWidth(12) },
+  bankInfo: { marginLeft: scaleUtils.scaleWidth(16) },
   bankName: {
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Medium',
@@ -219,8 +208,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: scaleUtils.scaleHeight(10),
   },
-
-  // New Add Bank Styles
   paymentOption: {
     flexDirection: 'row',
     alignItems: 'center',

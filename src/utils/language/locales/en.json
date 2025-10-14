@@ -320,5 +320,9 @@
   "self_transfer_title": "Self Transfer",
   "linked_bank_accounts": "Linked Bank Accounts",
   "no_linked_account": "No linked accounts yet",
-  "primary": "Primary"
+  "primary": "Primary",
+  "manage_money": "Manage your money better by adding another account to make self transfers",
+
+  "account_active": "Account active",
+  "account_inactive": "Account inactive"
 }

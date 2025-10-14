@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -17,12 +17,18 @@ import I18n from '../../utils/language/i18n';
 import Header from '../../component/Header';
 import Button from '../../component/Button';
 import LineButton from '../../component/LineButton';
+import moment from 'moment';
+import { CreditUpiBankList } from '../../utils/apiHelper/Axios'; // ✅ import API
 import { useNavigation } from '@react-navigation/native';
 
+const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
 const CreditUPIPage = () => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
   const navigation = useNavigation();
+  const [bankAccounts, setBankAccounts] = useState([]);
+  const [activeCount, setActiveCount] = useState(0);
+  const [inactiveCount, setInactiveCount] = useState(0);
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -32,26 +38,60 @@ const CreditUPIPage = () => {
     divider: isDark ? Colors.darkGrey : Colors.grey,
   };
 
-  const bankAccounts = [
-    {
-      id: '1',
-      bankLogo: require('../../assets/image/bankIcon/sbi.png'),
-      bankName: 'State Bank of India',
-      account: '**** **** 2847',
-      limit: '₹50,000',
-      available: '₹47,250',
-      used: '₹2,750',
-      lastUsed: '2 days ago',
-      status: 'active',
-    },
-    {
-      id: '2',
-      bankLogo: require('../../assets/image/bankIcon/hdfc.png'),
-      bankName: 'HDFC Bank',
-      account: '**** **** 9134',
-      status: 'inactive',
-    },
-  ];
+  // ✅ Fetch data dynamically
+  useEffect(() => {
+    const fetchCreditUpiBanks = async () => {
+      try {
+        const res = await CreditUpiBankList();
+        if (res?.status && Array.isArray(res.data)) {
+          const formattedData = res.data.map(item => {
+            const isActive = !!item.bank_credit_upi;
+            const creditLimit = item.bank_credit_upi
+              ? parseFloat(item.bank_credit_upi.credit_limit)
+              : 0;
+            const availableCredit = item.bank_credit_upi
+              ? parseFloat(item.bank_credit_upi.available_credit)
+              : 0;
+            const usedCredit = creditLimit - availableCredit;
+
+            return {
+              id: item.id.toString(),
+              bankLogo: { uri: `${IMAGE_BASE_URL}${item.bank.logo}` },
+              bankName: item.bank.name,
+              account: item.account_number,
+              limit: item.bank_credit_upi
+                ? `₹${creditLimit.toLocaleString('en-IN')}`
+                : null,
+              available: item.bank_credit_upi
+                ? `₹${availableCredit.toLocaleString('en-IN')}`
+                : null,
+              used: item.bank_credit_upi
+                ? `₹${usedCredit.toLocaleString('en-IN')}`
+                : null,
+              lastUsed: item.bank_credit_upi
+                ? moment(item.bank_credit_upi.updated_at).fromNow()
+                : null,
+              status: isActive ? 'active' : 'inactive',
+            };
+          });
+
+          setBankAccounts(formattedData);
+          const active = formattedData.filter(
+            i => i.status === 'active',
+          ).length;
+          const inactive = formattedData.filter(
+            i => i.status === 'inactive',
+          ).length;
+          setActiveCount(active);
+          setInactiveCount(inactive);
+        }
+      } catch (error) {
+        console.log('Error fetching Credit/UPI bank list:', error);
+      }
+    };
+
+    fetchCreditUpiBanks();
+  }, []);
 
   return (
     <SafeAreaView
@@ -60,8 +100,11 @@ const CreditUPIPage = () => {
       <Header title={I18n.t('credit_upi')} onBack={() => navigation.goBack()} />
 
       <View style={{ flex: 1, paddingHorizontal: scaleUtils.scaleWidth(14) }}>
-        {/* Credit UPI Status */}
-        <ScrollView>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          style={{ marginBottom: scaleUtils.scaleHeight(50) }}
+        >
+          {/* ✅ Dynamic Credit UPI Status */}
           <LinearGradient
             colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
             style={styles.statusBox}
@@ -80,14 +123,16 @@ const CreditUPIPage = () => {
                 marginTop: scaleUtils.scaleHeight(6),
               }}
             >
-              <Text style={styles.activeText}>🟢 {I18n.t('one_active')}</Text>
+              <Text style={styles.activeText}>
+                🟢 {activeCount} {I18n.t('account_active')}
+              </Text>
               <Text style={styles.inactiveBankText}>
-                🔴 {I18n.t('one_inactive')}
+                🔴 {inactiveCount} {I18n.t('account_inactive')}
               </Text>
             </View>
           </LinearGradient>
 
-          {/* Bank Accounts */}
+          {/* ✅ Dynamic Bank Accounts */}
           <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
             {I18n.t('your_bank_accounts')}
           </Text>
@@ -104,10 +149,15 @@ const CreditUPIPage = () => {
             }}
             showsVerticalScrollIndicator={false}
           />
-
-          {/* Bottom Buttons */}
         </ScrollView>
-        <View style={styles.bottomRow}>
+
+        {/* Bottom Buttons (unchanged) */}
+        <View
+          style={[
+            styles.bottomRow,
+            { backgroundColor: themeColors.background },
+          ]}
+        >
           <View style={{ flex: 1 }}>
             <Button
               title={I18n.t('add_new_bank')}
@@ -164,7 +214,6 @@ const BankCard = ({
       onPress={handlePress}
       style={[styles.bankCard, { backgroundColor: themeColors.secondaryBg }]}
     >
-      {/* Bank Header */}
       <View style={styles.bankHeader}>
         <View style={styles.bankInfo}>
           <Image source={bankLogo} style={styles.bankIcon} />
@@ -189,7 +238,6 @@ const BankCard = ({
         )}
       </View>
 
-      {/* Credit Info */}
       {limit && (
         <>
           <View
@@ -205,10 +253,20 @@ const BankCard = ({
               </Text>
             </View>
             <View>
-              <Text style={[styles.label, { color: themeColors.subText }]}>
+              <Text
+                style={[
+                  styles.label,
+                  { color: themeColors.subText, textAlign: 'right' },
+                ]}
+              >
                 {I18n.t('last_used')}:
               </Text>
-              <Text style={[styles.value, { color: themeColors.subText }]}>
+              <Text
+                style={[
+                  styles.value,
+                  { color: themeColors.subText, textAlign: 'right' },
+                ]}
+              >
                 {lastUsed}
               </Text>
             </View>
@@ -229,10 +287,22 @@ const BankCard = ({
             </Text>
           </View>
           <View>
-            <Text style={[styles.label, { color: themeColors.subText }]}>
+            <Text
+              style={[
+                styles.label,
+                { color: themeColors.subText, textAlign: 'right' },
+              ]}
+            >
               {I18n.t('used_credit')}:
             </Text>
-            <Text style={[styles.value, { color: Colors.error }]}>{used}</Text>
+            <Text
+              style={[
+                styles.value,
+                { color: Colors.error, textAlign: 'right' },
+              ]}
+            >
+              {used}
+            </Text>
           </View>
         </View>
       )}
@@ -382,13 +452,15 @@ const styles = StyleSheet.create({
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: scaleUtils.scaleHeight(10),
+    // marginBottom: scaleUtils.scaleHeight(10),
+    paddingVertical: scaleUtils.scaleHeight(6),
+    paddingHorizontal: scaleUtils.scaleWidth(16),
     columnGap: scaleUtils.scaleWidth(12),
     alignItems: 'center',
     position: 'absolute',
     bottom: scaleUtils.scaleHeight(0),
-    left: scaleUtils.scaleWidth(16),
-    right: scaleUtils.scaleWidth(16),
+    left: scaleUtils.scaleWidth(0),
+    right: scaleUtils.scaleWidth(0),
   },
   inactiveBankText: {
     fontSize: scaleUtils.scaleFont(13),
