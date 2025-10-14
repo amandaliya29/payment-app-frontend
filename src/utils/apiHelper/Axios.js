@@ -88,3 +88,18 @@ export const getBankBalance = async (bank_id, pin_code) => {
     throw error.response?.data || { message: 'Failed to fetch bank balance' };
   }
 };
+
+export const CreditUpiBankList = async () => {
+  try {
+    const response = await axiosInstance.get('/credit-upi/bank/list');
+    // optional: log for debugging
+    console.log('Credit/UPI Bank List:', response.data);
+    return response.data;
+  } catch (error) {
+    throw (
+      error.response?.data || {
+        message: 'Failed to fetch credit/UPI bank list',
+      }
+    );
+  }
+};

@@ -256,9 +256,8 @@ const ProfileScreen = () => {
                       { color: themeColors.placeholder },
                     ]}
                   >
-                    {bank.is_primary
-                      ? 'Savings • Primary Account'
-                      : 'Current Account'}
+                    {bank.account_type}
+                    {bank.is_primary ? ' • Primary Account' : ''}
                   </Text>
                 </View>
               </View>
