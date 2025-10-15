@@ -103,3 +103,26 @@ export const CreditUpiBankList = async () => {
     );
   }
 };
+
+export const scanBankQr = async image => {
+  try {
+    // Create form data for the image upload
+    const formData = new FormData();
+    formData.append('image', {
+      uri: image.uri,
+      name: image.fileName || 'qr_image.jpg',
+      type: image.type || 'image/jpeg',
+    });
+
+    const response = await axiosInstance.post('/bank/qr/scan', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data; // expected { status: true, data: { code: 'https://...' }, messages: 'Fetch successfully' }
+  } catch (error) {
+    console.log('QR Scan Error:', error);
+    throw error.response?.data || { message: 'Failed to scan QR code' };
+  }
+};

@@ -324,5 +324,12 @@
   "manage_money": "अपना पैसा बेहतर तरीके से प्रबंधित करें एक और खाता जोड़कर ताकि स्वयं ट्रांसफर कर सकें",
 
   "account_active": "खाता सक्रिय है",
-  "account_inactive": "खाता निष्क्रिय है"
+  "account_inactive": "खाता निष्क्रिय है",
+
+  "enter_amount": "राशि दर्ज करें",
+  "enter_amount_placeholder": "0",
+  "add_note": "नोट जोड़ें (वैकल्पिक)",
+  "proceed_to_pay": "भुगतान के लिए आगे बढ़ें",
+  "enter_valid_amount": "कृपया मान्य राशि दर्ज करें",
+  "unknown_user": "अज्ञात उपयोगकर्ता"
 }

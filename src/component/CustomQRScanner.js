@@ -3,22 +3,24 @@ import {
   View,
   Text,
   StyleSheet,
-  Alert,
   Image,
   TouchableOpacity,
   useColorScheme,
+  ActivityIndicator,
 } from 'react-native';
 import { Camera } from 'react-native-camera-kit';
 import * as ImagePicker from 'react-native-image-picker';
+import { useNavigation } from '@react-navigation/native'; // ✅ added
 import { Colors } from '../themes/Colors';
 import scaleUtils from '../utils/Responsive';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import I18n from '../utils/language/i18n';
-import Button from './Button';
+import { scanBankQr } from '../utils/apiHelper/Axios';
+import { Toast } from '../utils/Toast';
 
-const CustomQRScanner = ({ navigation }) => {
+const CustomQRScanner = () => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const navigation = useNavigation(); // ✅ added
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -31,10 +33,49 @@ const CustomQRScanner = ({ navigation }) => {
   const cameraRef = useRef(null);
   const [qrValue, setQrValue] = useState('');
   const [torchOn, setTorchOn] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+  };
+
+  // ✅ Navigate after scan success
+  const navigateToEnterAmount = code => {
+    setQrValue(code);
+    showToast(`${I18n.t('qr_found')}: ${code}`);
+
+    // Add slight delay so toast is visible before navigating
+    setTimeout(() => {
+      navigation.navigate('EnterAmountScreen', {
+        user: { name: 'Rahul Mehta', upiCode: code }, // static user
+      });
+    }, 800);
+  };
+
+  const handleScan = async image => {
+    try {
+      setLoading(true);
+      const res = await scanBankQr(image);
+      setLoading(false);
+
+      if (res?.status) {
+        const code = res.data?.code;
+        navigateToEnterAmount(code);
+      } else {
+        showToast(res?.messages || 'QR scan failed');
+      }
+    } catch (error) {
+      setLoading(false);
+      showToast(error?.message || 'Failed to scan QR');
+    }
+  };
 
   const handleReadCode = event => {
-    setQrValue(event.nativeEvent.codeStringValue);
-    Alert.alert(I18n.t('qr_found'), event.nativeEvent.codeStringValue);
+    const code = event.nativeEvent.codeStringValue;
+    navigateToEnterAmount(code);
   };
 
   const toggleTorch = () => setTorchOn(prev => !prev);
@@ -42,7 +83,8 @@ const CustomQRScanner = ({ navigation }) => {
   const openGallery = () => {
     ImagePicker.launchImageLibrary({ mediaType: 'photo' }, response => {
       if (!response.didCancel && response.assets?.length > 0) {
-        Alert.alert(I18n.t('gallery_selected'), I18n.t('processing_pending'));
+        const image = response.assets[0];
+        handleScan(image);
       }
     });
   };
@@ -51,6 +93,15 @@ const CustomQRScanner = ({ navigation }) => {
     <View
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
+      {loading && (
+        <View style={styles.loader}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+          <Text style={{ color: Colors.white, marginTop: 10 }}>
+            {I18n.t('processing_pending')}
+          </Text>
+        </View>
+      )}
+
       {!qrValue ? (
         <>
           <View style={styles.cameraWrapper}>
@@ -63,7 +114,6 @@ const CustomQRScanner = ({ navigation }) => {
               torchMode={torchOn ? 'on' : 'off'}
             />
 
-            {/* Blurred Overlay */}
             <View style={styles.overlay}>
               <View style={styles.topOverlay} />
               <View style={styles.centerRow}>
@@ -79,7 +129,6 @@ const CustomQRScanner = ({ navigation }) => {
               <View style={styles.bottomOverlay} />
             </View>
 
-            {/* Torch & Gallery Buttons */}
             <View style={styles.actionButtons}>
               <TouchableOpacity
                 onPress={openGallery}
@@ -91,6 +140,7 @@ const CustomQRScanner = ({ navigation }) => {
                 />
                 <Text style={styles.galleryText}>{I18n.t('gallery')}</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.iconWrapper}
                 onPress={toggleTorch}
@@ -98,8 +148,8 @@ const CustomQRScanner = ({ navigation }) => {
                 <Image
                   source={
                     torchOn
-                      ? require('../assets/image/appIcon/tourch_on.png') // ON image
-                      : require('../assets/image/appIcon/tourch_off.png') // OFF image
+                      ? require('../assets/image/appIcon/tourch_on.png')
+                      : require('../assets/image/appIcon/tourch_off.png')
                   }
                   style={styles.iconButton}
                 />
@@ -114,6 +164,8 @@ const CustomQRScanner = ({ navigation }) => {
           </Text>
         </View>
       )}
+
+      <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </View>
   );
 };
@@ -126,22 +178,24 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   cameraWrapper: { flex: 1 },
   camera: { flex: 1, width: '100%' },
-
-  overlay: {
+  loader: {
     ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
   },
+  overlay: { ...StyleSheet.absoluteFillObject },
   topOverlay: { paddingTop: '25%', backgroundColor: 'rgba(0,0,0,0.6)' },
   centerRow: { flexDirection: 'row' },
   sideOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' },
   bottomOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)' },
-
   scanBox: {
     width: BOX_SIZE,
     height: BOX_SIZE,
     alignSelf: 'center',
     position: 'relative',
   },
-
   corner: {
     position: 'absolute',
     width: scaleUtils.scaleWidth(35),
@@ -208,17 +262,6 @@ const styles = StyleSheet.create({
     height: scaleUtils.scaleWidth(18),
     tintColor: Colors.white,
   },
-  resultBox: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#000',
-  },
-  resultText: {
-    fontSize: scaleUtils.scaleFont(14),
-    color: Colors.white,
-    fontFamily: 'Poppins-SemiBold',
-  },
   galleryButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -229,10 +272,19 @@ const styles = StyleSheet.create({
     width: '54%',
     columnGap: scaleUtils.scaleWidth(10),
   },
-
   galleryText: {
     fontSize: scaleUtils.scaleFont(14),
     color: Colors.white,
-    // fontFamily: 'Poppins-SemiBold',
+  },
+  resultBox: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
+  },
+  resultText: {
+    fontSize: scaleUtils.scaleFont(14),
+    color: Colors.white,
+    fontFamily: 'Poppins-SemiBold',
   },
 });
