@@ -13,17 +13,30 @@ import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import I18n from '../../utils/language/i18n';
 import OTPInput from '../../component/OTPInput';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Button from '../../component/Button';
+import auth from '@react-native-firebase/auth';
+import { Toast } from '../../utils/Toast';
+import { useDispatch } from 'react-redux';
+import { setToken } from '../../utils/redux/UserSlice'; // make sure this is correct
 
 const CreditOTPVerification = () => {
   const navigation = useNavigation();
-  const [otp, setOtp] = useState('');
-  const [timer, setTimer] = useState(45);
+  const route = useRoute();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const dispatch = useDispatch();
 
-  // Theme colors
+  const { phone, verificationId: initialVerificationId } = route.params || {};
+
+  const [otp, setOtp] = useState('');
+  const [timer, setTimer] = useState(45);
+  const [loading, setLoading] = useState(false);
+  const [verificationId, setVerificationId] = useState(
+    initialVerificationId || '',
+  );
+  const [toast, setToast] = useState({ visible: false, message: '' });
+
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
     text: isDark ? Colors.white : Colors.black,
@@ -33,17 +46,75 @@ const CreditOTPVerification = () => {
     primary: Colors.primary,
   };
 
-  // Timer logic
+  // Timer countdown for resend
   useEffect(() => {
     if (timer === 0) return;
     const interval = setInterval(() => setTimer(prev => prev - 1), 1000);
     return () => clearInterval(interval);
   }, [timer]);
 
-  const handleResend = useCallback(() => {
+  // Function to show toast with auto hide
+  const showToast = message => {
+    setToast({ visible: true, message });
+    setTimeout(() => setToast({ visible: false, message: '' }), 3000);
+  };
+
+  // OTP verification
+  const handleVerify = async () => {
+    if (otp.length !== 6) {
+      showToast('Please enter a valid 6-digit OTP.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      if (!verificationId) {
+        showToast('Verification ID missing. Please resend OTP.');
+        setLoading(false);
+        return;
+      }
+
+      const credential = auth.PhoneAuthProvider.credential(verificationId, otp);
+      await auth().signInWithCredential(credential);
+
+      const idToken = await auth().currentUser.getIdToken();
+      dispatch(setToken(idToken));
+      // console.log('OTP Verified, idToken:', idToken);
+
+      showToast('OTP verified successfully!');
+      setLoading(false);
+      navigation.navigate('CreditUPILoadingScreen');
+    } catch (error) {
+      console.log('OTP Verification Error:', error);
+      setLoading(false);
+      setOtp('');
+      showToast('Invalid OTP. Please try again.');
+    }
+  };
+
+  // Resend OTP
+  const handleResend = useCallback(async () => {
+    if (!phone) {
+      showToast('Phone number missing.');
+      return;
+    }
+
     setTimer(45);
-    // Call your resend API here
-  }, []);
+
+    try {
+      const confirmation = await auth().signInWithPhoneNumber(phone);
+      setVerificationId(confirmation.verificationId);
+      showToast('A new OTP has been sent to your phone.');
+      console.log(
+        'Resent OTP, new verificationId:',
+        confirmation.verificationId,
+      );
+    } catch (error) {
+      console.log('Resend OTP Error:', error);
+      showToast('Failed to resend OTP. Try again later.');
+    }
+  }, [phone]);
 
   return (
     <SafeAreaView
@@ -58,7 +129,6 @@ const CreditOTPVerification = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Icon Section */}
         <View style={styles.content}>
           <View
             style={[
@@ -79,12 +149,10 @@ const CreditOTPVerification = () => {
           </Text>
         </View>
 
-        {/* OTP Input */}
         <View style={styles.otpContainer}>
           <OTPInput code={otp} setCode={setOtp} length={6} />
         </View>
 
-        {/* Resend OTP */}
         <View style={styles.resendContainer}>
           <Text style={[styles.resendText, { color: themeColors.subText }]}>
             {I18n.t('didnt_receive')}
@@ -103,20 +171,21 @@ const CreditOTPVerification = () => {
           )}
         </View>
 
-        {/* Verify Button */}
         <Button
           title={I18n.t('verify_activate')}
-          disabled={otp.length !== 6}
-          onPress={() => navigation.navigate('CreditUPILoadingScreen')}
+          disabled={otp.length !== 6 || loading}
+          onPress={handleVerify}
         />
 
-        {/* Push Terms & Conditions to bottom */}
         <View style={styles.bottomContainer}>
           <Text style={[styles.bottomText, { color: themeColors.subText }]}>
             {I18n.t('terms_condition')}
           </Text>
         </View>
       </ScrollView>
+
+      {/* ✅ Custom Toast */}
+      <Toast visible={toast.visible} message={toast.message} isDark={isDark} />
     </SafeAreaView>
   );
 };
@@ -124,9 +193,7 @@ const CreditOTPVerification = () => {
 export default CreditOTPVerification;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'space-between',
@@ -160,9 +227,7 @@ const styles = StyleSheet.create({
     marginBottom: scaleUtils.scaleHeight(20),
     paddingHorizontal: scaleUtils.scaleWidth(20),
   },
-  otpContainer: {
-    alignSelf: 'center',
-  },
+  otpContainer: { alignSelf: 'center' },
   resendContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -185,7 +250,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   bottomContainer: {
-    marginTop: 'auto', // pushes to bottom
+    marginTop: 'auto',
     alignItems: 'center',
   },
   bottomText: {

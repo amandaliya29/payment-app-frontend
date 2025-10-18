@@ -7,18 +7,25 @@ import {
   useColorScheme,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Header from '../../component/Header';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
 import Button from '../../component/Button';
 import OTPInput from '../../component/OTPInput';
+import { Toast } from '../../utils/Toast';
+import { saveCreditUpiPin } from '../../utils/apiHelper/Axios';
 
 const SetPinPage = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+
+  // --- Hooks at the top ---
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const pinLength = 4;
   const confirmPinRef = useRef(null);
 
@@ -31,19 +38,48 @@ const SetPinPage = () => {
     tipBox: isDark ? Colors.secondary : Colors.cardGrey,
   };
 
-  // When PIN is completed, focus on Confirm PIN
+  // --- Handlers ---
   const handlePinChange = val => {
     setPin(val);
     if (val.length === pinLength) {
-      confirmPinRef.current?.focus(); // Auto focus confirm PIN field
+      confirmPinRef.current?.focus();
     }
   };
 
-  const handleSetup = () => {
-    navigation.reset({
-      index: 1,
-      routes: [{ name: 'HomePage' }, { name: 'CreditUPIPage' }],
-    });
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 2000);
+  };
+
+  const handleSetup = async () => {
+    const bankCreditUpiId = route.params?.bankCreditUpiId;
+    if (!bankCreditUpiId) {
+      showToast('Missing Bank Credit UPI ID');
+      return;
+    }
+
+    if (pin !== confirmPin) {
+      showToast('PIN and Confirm PIN do not match');
+      return;
+    }
+
+    try {
+      const response = await saveCreditUpiPin(bankCreditUpiId, pin, confirmPin);
+      if (response?.status) {
+        showToast('PIN set successfully');
+        setTimeout(() => {
+          navigation.reset({
+            index: 1,
+            routes: [{ name: 'HomePage' }, { name: 'CreditUPIPage' }],
+          });
+        }, 1000);
+      } else {
+        showToast(response?.messages || 'Failed to set PIN');
+      }
+    } catch (error) {
+      showToast(error.message || 'Something went wrong');
+    }
   };
 
   return (
@@ -66,7 +102,6 @@ const SetPinPage = () => {
           {I18n.t('upi_pin_description')}
         </Text>
 
-        {/* Enter PIN */}
         <Text style={[styles.label, { color: themeColors.text }]}>
           {I18n.t('enter_credit_upi_pin')}
         </Text>
@@ -79,7 +114,6 @@ const SetPinPage = () => {
           />
         </View>
 
-        {/* Confirm PIN */}
         <Text style={[styles.label, { color: themeColors.text }]}>
           {I18n.t('confirm_credit_upi_pin')}
         </Text>
@@ -93,7 +127,6 @@ const SetPinPage = () => {
           />
         </View>
 
-        {/* Button */}
         <View style={{ marginVertical: scaleUtils.scaleHeight(20) }}>
           <Button
             title={I18n.t('set_pin_continue')}
@@ -106,6 +139,8 @@ const SetPinPage = () => {
           />
         </View>
       </ScrollView>
+
+      <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
 };

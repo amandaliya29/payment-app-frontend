@@ -126,3 +126,40 @@ export const scanBankQr = async image => {
     throw error.response?.data || { message: 'Failed to scan QR code' };
   }
 };
+
+export const activateCreditUpi = async (token, bank_account) => {
+  try {
+    const response = await axiosInstance.post('/credit-upi/activate', {
+      token,
+      bank_account,
+    });
+    console.log('Credit UPI Activation Response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.log('Full Axios Error:', error.toJSON ? error.toJSON() : error);
+    throw error.response?.data || { message: 'Failed to activate credit UPI' };
+  }
+};
+
+export const saveCreditUpiPin = async (
+  bank_credit_upi,
+  pin_code,
+  pin_code_confirmation,
+) => {
+  try {
+    const response = await axiosInstance.post('/credit-upi/save/pin', {
+      bank_credit_upi,
+      pin_code,
+      pin_code_confirmation,
+    });
+    console.log('Save Credit UPI Pin Response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.log('Save Credit UPI Pin Error:', error);
+    throw (
+      error.response?.data || {
+        message: 'Failed to save credit UPI pin',
+      }
+    );
+  }
+};

@@ -18,10 +18,13 @@ import Header from '../../component/Header';
 import Button from '../../component/Button';
 import LineButton from '../../component/LineButton';
 import moment from 'moment';
-import { CreditUpiBankList } from '../../utils/apiHelper/Axios'; // ✅ import API
+import { CreditUpiBankList } from '../../utils/apiHelper/Axios';
 import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { setSelectedBank } from '../../utils/redux/UserSlice';
 
 const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
+
 const CreditUPIPage = () => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
@@ -38,18 +41,22 @@ const CreditUPIPage = () => {
     divider: isDark ? Colors.darkGrey : Colors.grey,
   };
 
-  // ✅ Fetch data dynamically
+  // Fetch Credit/UPI banks
   useEffect(() => {
     const fetchCreditUpiBanks = async () => {
       try {
         const res = await CreditUpiBankList();
         if (res?.status && Array.isArray(res.data)) {
           const formattedData = res.data.map(item => {
-            const isActive = !!item.bank_credit_upi;
-            const creditLimit = item.bank_credit_upi
+            const hasCreditUpi = !!item.bank_credit_upi;
+            const isActive =
+              hasCreditUpi && item.bank_credit_upi.status === 'active';
+            const isInactive =
+              hasCreditUpi && item.bank_credit_upi.status === 'inactive';
+            const creditLimit = hasCreditUpi
               ? parseFloat(item.bank_credit_upi.credit_limit)
               : 0;
-            const availableCredit = item.bank_credit_upi
+            const availableCredit = hasCreditUpi
               ? parseFloat(item.bank_credit_upi.available_credit)
               : 0;
             const usedCredit = creditLimit - availableCredit;
@@ -59,19 +66,20 @@ const CreditUPIPage = () => {
               bankLogo: { uri: `${IMAGE_BASE_URL}${item.bank.logo}` },
               bankName: item.bank.name,
               account: item.account_number,
-              limit: item.bank_credit_upi
+              limit: hasCreditUpi
                 ? `₹${creditLimit.toLocaleString('en-IN')}`
                 : null,
-              available: item.bank_credit_upi
+              available: hasCreditUpi
                 ? `₹${availableCredit.toLocaleString('en-IN')}`
                 : null,
-              used: item.bank_credit_upi
+              used: hasCreditUpi
                 ? `₹${usedCredit.toLocaleString('en-IN')}`
                 : null,
-              lastUsed: item.bank_credit_upi
+              lastUsed: hasCreditUpi
                 ? moment(item.bank_credit_upi.updated_at).fromNow()
                 : null,
-              status: isActive ? 'active' : 'inactive',
+              status: isActive ? 'active' : isInactive ? 'inactive' : 'no_upi',
+              bank_credit_upi: item.bank_credit_upi || null, // pass for navigation
             };
           });
 
@@ -104,7 +112,6 @@ const CreditUPIPage = () => {
           showsVerticalScrollIndicator={false}
           style={{ marginBottom: scaleUtils.scaleHeight(50) }}
         >
-          {/* ✅ Dynamic Credit UPI Status */}
           <LinearGradient
             colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
             style={styles.statusBox}
@@ -127,12 +134,12 @@ const CreditUPIPage = () => {
                 🟢 {activeCount} {I18n.t('account_active')}
               </Text>
               <Text style={styles.inactiveBankText}>
-                🔴 {inactiveCount} {I18n.t('account_inactive')}
+                🔴 {bankAccounts.length - activeCount}{' '}
+                {I18n.t('account_inactive')}
               </Text>
             </View>
           </LinearGradient>
 
-          {/* ✅ Dynamic Bank Accounts */}
           <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
             {I18n.t('your_bank_accounts')}
           </Text>
@@ -151,7 +158,6 @@ const CreditUPIPage = () => {
           />
         </ScrollView>
 
-        {/* Bottom Buttons (unchanged) */}
         <View
           style={[
             styles.bottomRow,
@@ -185,11 +191,16 @@ const BankCard = ({
   used,
   lastUsed,
   status,
+  id,
   themeColors,
+  bank_credit_upi,
 }) => {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
   const isActive = status === 'active';
   const isInactive = status === 'inactive';
+  const hasNoUpi = status === 'no_upi';
 
   const handlePress = () => {
     if (isActive) {
@@ -202,9 +213,35 @@ const BankCard = ({
         used,
         lastUsed,
         status,
+        bankCreditUpiId: bank_credit_upi?.id || null,
       });
     } else {
       console.log('Bank is not active, navigation blocked');
+    }
+  };
+
+  const handleActivatePress = () => {
+    dispatch(
+      setSelectedBank({
+        id,
+        bankLogo,
+        bankName,
+        account,
+        limit,
+        available,
+        used,
+        lastUsed,
+        status,
+        bankCreditUpiId: bank_credit_upi?.id || null,
+      }),
+    );
+
+    if (hasNoUpi) {
+      navigation.navigate('CreditUPISetup');
+    } else {
+      navigation.navigate('CreditSetPinPage', {
+        bankCreditUpiId: bank_credit_upi?.id,
+      });
     }
   };
 
@@ -226,12 +263,14 @@ const BankCard = ({
             </Text>
           </View>
         </View>
+
         {isActive && (
           <View style={[styles.badge, { backgroundColor: Colors.green }]}>
             <Text style={styles.badgeText}>{I18n.t('active')}</Text>
           </View>
         )}
-        {isInactive && (
+
+        {isInactive && limit && (
           <View style={[styles.badge, { backgroundColor: Colors.error }]}>
             <Text style={styles.badgeText}>{I18n.t('inactive')}</Text>
           </View>
@@ -307,20 +346,24 @@ const BankCard = ({
         </View>
       )}
 
-      {isInactive && (
+      {(isInactive || hasNoUpi) && (
         <>
           <View
             style={[styles.divider, { backgroundColor: themeColors.divider }]}
           />
           <View style={styles.inactiveRow}>
             <Text style={styles.inactiveText}>
-              {I18n.t('credit_upi_not_activated')}
+              {hasNoUpi
+                ? I18n.t('credit_upi_not_activated')
+                : I18n.t('set_pin_to_activate')}
             </Text>
             <TouchableOpacity
               style={styles.activateBtn}
-              onPress={() => navigation.navigate('CreditUPISetup')}
+              onPress={handleActivatePress}
             >
-              <Text style={styles.activateText}>{I18n.t('activate')}</Text>
+              <Text style={styles.activateText}>
+                {hasNoUpi ? I18n.t('activate') : I18n.t('set_pin')}
+              </Text>
             </TouchableOpacity>
           </View>
         </>
@@ -330,12 +373,7 @@ const BankCard = ({
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    // paddingHorizontal: scaleUtils.scaleWidth(14),
-  },
-
-  // Credit UPI Status
+  container: { flex: 1 },
   statusBox: {
     borderRadius: scaleUtils.scaleWidth(12),
     marginVertical: scaleUtils.scaleHeight(20),
@@ -359,14 +397,16 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontFamily: 'Poppins-SemiBold',
   },
-
+  inactiveBankText: {
+    fontSize: scaleUtils.scaleFont(13),
+    color: Colors.white,
+    fontFamily: 'Poppins-SemiBold',
+  },
   sectionTitle: {
     fontSize: scaleUtils.scaleFont(16),
     fontFamily: 'Poppins-Bold',
     marginBottom: scaleUtils.scaleHeight(5),
   },
-
-  // Bank Card
   bankCard: {
     borderRadius: scaleUtils.scaleWidth(12),
     marginBottom: scaleUtils.scaleHeight(14),
@@ -404,27 +444,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     color: Colors.white,
   },
-
-  // Credit Rows
-  creditRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  label: {
-    fontSize: scaleUtils.scaleFont(12),
-    fontFamily: 'Poppins-Regular',
-  },
-  value: {
-    fontSize: scaleUtils.scaleFont(13),
-    fontFamily: 'Poppins-SemiBold',
-  },
-
+  creditRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  label: { fontSize: scaleUtils.scaleFont(12), fontFamily: 'Poppins-Regular' },
+  value: { fontSize: scaleUtils.scaleFont(13), fontFamily: 'Poppins-SemiBold' },
   divider: {
     height: scaleUtils.scaleHeight(1),
     marginVertical: scaleUtils.scaleHeight(8),
   },
-
-  // Inactive Section
   inactiveRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -434,6 +460,7 @@ const styles = StyleSheet.create({
     fontSize: scaleUtils.scaleFont(12),
     color: Colors.primary,
     width: '75%',
+    marginVertical: scaleUtils.scaleHeight(10),
   },
   activateBtn: {
     borderWidth: 1,
@@ -447,12 +474,9 @@ const styles = StyleSheet.create({
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Medium',
   },
-
-  // Bottom Row
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    // marginBottom: scaleUtils.scaleHeight(10),
     paddingVertical: scaleUtils.scaleHeight(6),
     paddingHorizontal: scaleUtils.scaleWidth(16),
     columnGap: scaleUtils.scaleWidth(12),
@@ -461,11 +485,6 @@ const styles = StyleSheet.create({
     bottom: scaleUtils.scaleHeight(0),
     left: scaleUtils.scaleWidth(0),
     right: scaleUtils.scaleWidth(0),
-  },
-  inactiveBankText: {
-    fontSize: scaleUtils.scaleFont(13),
-    color: Colors.white,
-    fontFamily: 'Poppins-SemiBold',
   },
 });
 

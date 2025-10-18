@@ -331,5 +331,8 @@
   "add_note": "Add a note (optional)",
   "proceed_to_pay": "Proceed to Pay",
   "enter_valid_amount": "Please enter a valid amount",
-  "unknown_user": "Unknown User"
+  "unknown_user": "Unknown User",
+
+  "set_pin_to_activate": "Set PIN to activate Credit UPI",
+  "set_pin": "Set PIN"
 }

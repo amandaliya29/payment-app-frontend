@@ -1,15 +1,22 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import I18n from '../../utils/language/i18n';
-import Button from '../../component/Button'; // ✅ Import custom button
+import Button from '../../component/Button';
+import { getUserData } from '../../utils/async/storage';
+import { useNavigation } from '@react-navigation/native';
+import auth from '@react-native-firebase/auth';
+import { Toast } from '../../utils/Toast'; // ✅ Import Toast
 
-const CreditUPISetup = ({ navigation }) => {
+const CreditUPISetup = () => {
   const scheme = useColorScheme();
+  const navigation = useNavigation();
   const isDark = scheme === 'dark';
+  const [phone, setPhone] = useState('');
+  const [toast, setToast] = useState({ visible: false, message: '' });
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -18,6 +25,39 @@ const CreditUPISetup = ({ navigation }) => {
     secondaryBg: isDark ? Colors.secondaryBg : Colors.cardGrey,
     divider: isDark ? Colors.darkGrey : Colors.grey,
     primary: Colors.primary,
+  };
+
+  const getStorageUserData = async () => {
+    const userData = await getUserData();
+    setPhone(userData?.user?.phone || '');
+  };
+
+  useEffect(() => {
+    getStorageUserData();
+  }, []);
+
+  const sendOtpToFirebase = async () => {
+    if (!phone) {
+      setToast({ visible: true, message: 'Phone number not found!' });
+      return;
+    }
+
+    try {
+      const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
+      setToast({ visible: true, message: `Sending OTP to ${formattedPhone}` });
+
+      const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
+
+      navigation.navigate('CreditOTPVerification', {
+        verificationId: confirmation.verificationId,
+        phone: formattedPhone,
+      });
+    } catch (error) {
+      setToast({
+        visible: true,
+        message: 'Failed to send OTP. Please try again.',
+      });
+    }
   };
 
   return (
@@ -46,12 +86,8 @@ const CreditUPISetup = ({ navigation }) => {
         </Text>
       </View>
 
-      {/* ✅ Using Custom Buttons */}
       <View style={styles.buttonContainer}>
-        <Button
-          title={I18n.t('yes_activate')}
-          onPress={() => navigation.navigate('CreditOTPVerification')}
-        />
+        <Button title={I18n.t('yes_activate')} onPress={sendOtpToFirebase} />
         <Button
           title={I18n.t('no_maybe')}
           onPress={() => navigation.goBack()}
@@ -62,6 +98,9 @@ const CreditUPISetup = ({ navigation }) => {
       <Text style={[styles.bottomText, { color: themeColors.subText }]}>
         {I18n.t('bottom_info')}
       </Text>
+
+      {/* ✅ Custom Toast */}
+      <Toast visible={toast.visible} message={toast.message} isDark={isDark} />
     </SafeAreaView>
   );
 };

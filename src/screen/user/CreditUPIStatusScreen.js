@@ -1,25 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   Image,
   useColorScheme,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import I18n from '../../utils/language/i18n';
-import { useNavigation } from '@react-navigation/native';
 import Button from '../../component/Button';
+import { useSelector } from 'react-redux';
+import { activateCreditUpi } from '../../utils/apiHelper/Axios';
+import { useNavigation } from '@react-navigation/native';
 
 const CreditUPIStatusScreen = () => {
   const navigation = useNavigation();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+
+  const selectedBank = useSelector(state => state.user.selectedBank);
+  const idToken = useSelector(state => state.user.token);
+
+  const [loading, setLoading] = useState(false);
+  const [upiData, setUpiData] = useState(null); // store dynamic data
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -28,6 +36,29 @@ const CreditUPIStatusScreen = () => {
     primary: Colors.primary,
     card: isDark ? Colors.secondaryBg : Colors.cardGrey,
   };
+
+  useEffect(() => {
+    const activateUpi = async () => {
+      // run always to keep hook order consistent
+      if (selectedBank && idToken) {
+        setLoading(true);
+        try {
+          const response = await activateCreditUpi(idToken, selectedBank.id);
+          // Expected response: { status: true, data: { upi_id, credit_limit }, messages: "Activate Successful" }
+          if (response?.status && response?.data) {
+            setUpiData(response.data);
+          }
+        } catch (error) {
+          console.log('Activation Error:', error);
+          alert(error.message || 'Failed to activate credit UPI');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    activateUpi();
+  }, [selectedBank, idToken, navigation]);
 
   return (
     <SafeAreaView
@@ -72,7 +103,7 @@ const CreditUPIStatusScreen = () => {
               {I18n.t('bank_name')}
             </Text>
             <Text style={[styles.value, { color: themeColors.text }]}>
-              HDFC Bank
+              {selectedBank?.bankName || '-'}
             </Text>
           </View>
 
@@ -81,7 +112,7 @@ const CreditUPIStatusScreen = () => {
               {I18n.t('credit_limit')}
             </Text>
             <Text style={[styles.value, { color: Colors.primary }]}>
-              ₹2,50,000
+              ₹{upiData?.credit_limit || '0'}
             </Text>
           </View>
 
@@ -90,16 +121,29 @@ const CreditUPIStatusScreen = () => {
               {I18n.t('upi_id')}
             </Text>
             <Text style={[styles.value, { color: Colors.primary }]}>
-              9876543210@hdfcbank
+              {upiData?.upi_id || '-'}
             </Text>
           </View>
         </View>
 
         {/* Button */}
         <Button
-          title={I18n.t('setup_upi_pin')}
-          onPress={() => navigation.navigate('CreditSetPinPage')}
+          title={loading ? I18n.t('loading') : I18n.t('setup_upi_pin')}
+          onPress={() =>
+            navigation.navigate('CreditSetPinPage', {
+              bankCreditUpiId: upiData.id,
+            })
+          }
+          disabled={loading}
         />
+
+        {loading && (
+          <ActivityIndicator
+            size="large"
+            color={Colors.primary}
+            style={{ marginTop: scaleUtils.scaleHeight(20) }}
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -171,34 +215,5 @@ const styles = StyleSheet.create({
   value: {
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Medium',
-  },
-  reminderCard: {
-    backgroundColor: '#2F2B4A',
-    borderRadius: scaleUtils.scaleWidth(12),
-    padding: scaleUtils.scaleWidth(14),
-    marginTop: scaleUtils.scaleHeight(20),
-  },
-  reminderTitle: {
-    fontSize: scaleUtils.scaleFont(14),
-    fontFamily: 'Poppins-SemiBold',
-    color: Colors.white,
-  },
-  reminderText: {
-    fontSize: scaleUtils.scaleFont(12),
-    fontFamily: 'Poppins-Regular',
-    color: Colors.white,
-    marginTop: scaleUtils.scaleHeight(5),
-  },
-  btn: {
-    backgroundColor: Colors.primary,
-    paddingVertical: scaleUtils.scaleHeight(14),
-    borderRadius: scaleUtils.scaleWidth(12),
-    marginTop: scaleUtils.scaleHeight(30),
-    alignItems: 'center',
-  },
-  btnText: {
-    color: Colors.white,
-    fontSize: scaleUtils.scaleFont(16),
-    fontFamily: 'Poppins-SemiBold',
   },
 });
