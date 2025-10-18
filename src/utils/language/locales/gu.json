@@ -335,5 +335,12 @@
   "manage_money": "તમારા પૈસાનો વધુ સારો રીતે વ્યવસ્થાપન કરો, સ્વ ટ્રાન્સફર કરવા માટે બીજુ એકાઉન્ટ ઉમેરો",
 
   "account_active": "ખાતા સક્રિય છે",
-  "account_inactive": "ખાતા સક્રિય નથી"
+  "account_inactive": "ખાતા સક્રિય નથી",
+
+  "enter_amount": "રકમ દાખલ કરો",
+  "enter_amount_placeholder": "0",
+  "add_note": "નોંધ ઉમેરો (વૈકલ્પિક)",
+  "proceed_to_pay": "ચુકવણી કરવા આગળ વધો",
+  "enter_valid_amount": "કૃપા કરીને માન્ય રકમ દાખલ કરો",
+  "unknown_user": "અજાણ્યો યુઝર"
 }
