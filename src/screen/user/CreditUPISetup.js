@@ -44,7 +44,7 @@ const CreditUPISetup = () => {
 
     try {
       const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
-      setToast({ visible: true, message: `Sending OTP to ${formattedPhone}` });
+      setToast({ visible: true, message: `OTP send successfully` });
 
       const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
 

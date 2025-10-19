@@ -334,5 +334,10 @@
   "unknown_user": "Unknown User",
 
   "set_pin_to_activate": "Set PIN to activate Credit UPI",
-  "set_pin": "Set PIN"
+  "set_pin": "Set PIN",
+
+  "search_name_or_number": "Search by name or number",
+  "recent_searches": "Recent Searches",
+  "people": "People",
+  "no_result_found": "No result found"
 }

@@ -39,6 +39,7 @@ import SearchIfscScreen from '../screen/HomeScreens/SearchIfscScreen';
 import ToMobileScreen from '../screen/HomeScreens/ToMobileScreen';
 import SelfTransfer from '../screen/HomeScreens/SelfTransfer';
 import EnterAmountScreen from '../screen/HomeScreens/EnterAmountScreen';
+import Search from '../screen/HomeScreens/Search';
 
 const Stack = createStackNavigator();
 
@@ -132,6 +133,7 @@ const StackNavigation = () => {
         <Stack.Screen name="ToMobileScreen" component={ToMobileScreen} />
         <Stack.Screen name="SelfTransfer" component={SelfTransfer} />
         <Stack.Screen name="EnterAmountScreen" component={EnterAmountScreen} />
+        <Stack.Screen name="Search" component={Search} />
       </Stack.Navigator>
     </>
   );

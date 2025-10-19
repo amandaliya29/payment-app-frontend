@@ -163,3 +163,12 @@ export const saveCreditUpiPin = async (
     );
   }
 };
+
+export const searchUser = async search => {
+  try {
+    const response = await axiosInstance.post('/user/search', { search });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to search user' };
+  }
+};

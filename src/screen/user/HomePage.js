@@ -140,19 +140,43 @@ const HomeScreen = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
-      {/* {console.log('dattaaaa', banks)} */}
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* 🔍 Search Bar */}
         <View style={styles.topBar}>
-          <View style={{ flex: 1, marginRight: scaleUtils.scaleWidth(10) }}>
-            <Input
-              isSearch
-              value={search}
-              onChange={setSearch}
-              placeholder={i18n.t('search')}
-              onSearchPress={() => console.log('Search:', search)}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => navigation.navigate('Search')}
+            style={{
+              flex: 1,
+              marginRight: scaleUtils.scaleWidth(10),
+              backgroundColor: themeColors.secondaryBg,
+              borderRadius: scaleUtils.scaleWidth(12),
+              paddingVertical: scaleUtils.scaleHeight(10),
+              paddingHorizontal: scaleUtils.scaleWidth(14),
+              flexDirection: 'row',
+              alignItems: 'center',
+              columnGap: scaleUtils.scaleWidth(8),
+            }}
+          >
+            <Image
+              source={require('../../assets/image/appIcon/search.png')}
+              style={{
+                width: scaleUtils.scaleWidth(16),
+                height: scaleUtils.scaleWidth(16),
+                tintColor: Colors.grey,
+                // marginRight: scaleUtils.scaleWidth(8),
+              }}
             />
-          </View>
+            <Text
+              style={{
+                color: themeColors.text,
+                fontSize: scaleUtils.scaleFont(13),
+                fontFamily: 'Poppins-Regular',
+                opacity: 0.8,
+              }}
+            >
+              {i18n.t('search')}
+            </Text>
+          </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.notifyButton}
@@ -297,7 +321,11 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { paddingHorizontal: scaleUtils.scaleWidth(14) },
-  topBar: { flexDirection: 'row', alignItems: 'center' },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: scaleUtils.scaleHeight(10),
+  },
   notifyButton: {
     backgroundColor: Colors.primary,
     padding: scaleUtils.scaleWidth(10),
