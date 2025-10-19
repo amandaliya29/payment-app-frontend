@@ -328,8 +328,16 @@
 
   "enter_amount": "राशि दर्ज करें",
   "enter_amount_placeholder": "0",
-  "add_note": "नोट जोड़ें (वैकल्पिक)",
+  "add_note": "नोट जोड़ें",
   "proceed_to_pay": "भुगतान के लिए आगे बढ़ें",
   "enter_valid_amount": "कृपया मान्य राशि दर्ज करें",
-  "unknown_user": "अज्ञात उपयोगकर्ता"
+  "unknown_user": "अज्ञात उपयोगकर्ता",
+
+  "set_pin_to_activate": "क्रेडिट यूपीआई सक्रिय करने के लिए पिन सेट करें",
+  "set_pin": "पिन सेट करें",
+
+  "search_name_or_number": "नाम या नंबर से खोजें",
+  "recent_searches": "हाल की खोजें",
+  "people": "लोग",
+  "no_result_found": "कोई परिणाम नहीं मिला"
 }

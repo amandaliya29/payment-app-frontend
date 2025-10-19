@@ -328,8 +328,16 @@
 
   "enter_amount": "Enter Amount",
   "enter_amount_placeholder": "0",
-  "add_note": "Add a note (optional)",
+  "add_note": "Add a note",
   "proceed_to_pay": "Proceed to Pay",
   "enter_valid_amount": "Please enter a valid amount",
-  "unknown_user": "Unknown User"
+  "unknown_user": "Unknown User",
+
+  "set_pin_to_activate": "Set PIN to activate Credit UPI",
+  "set_pin": "Set PIN",
+
+  "search_name_or_number": "Search by name or number",
+  "recent_searches": "Recent Searches",
+  "people": "People",
+  "no_result_found": "No result found"
 }

@@ -10,6 +10,7 @@ import {
   Keyboard,
   TouchableOpacity,
   Image,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from '../../component/Header';
@@ -23,6 +24,8 @@ const EnterAmountScreen = () => {
   const navigation = useNavigation();
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
+  const [inputHeight, setInputHeight] = useState(0);
+  const [isFocused, setIsFocused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -82,74 +85,105 @@ const EnterAmountScreen = () => {
         onBack={() => navigation.goBack()}
       />
 
-      <ScrollView
-        style={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        // behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={scaleUtils.scaleHeight(80)}
       >
-        {/* User Info */}
-        <View style={styles.userInfoContainer}>
-          <View style={styles.circle}>
-            <Text style={styles.initial}>
-              {user.name.charAt(0).toUpperCase()}
+        <ScrollView
+          style={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
+          {/* User Info */}
+          <View style={styles.userInfoContainer}>
+            <View style={styles.circle}>
+              <Text style={styles.initial}>
+                {user.name.charAt(0).toUpperCase()}
+              </Text>
+            </View>
+            <Text style={[styles.userName, { color: themeColors.text }]}>
+              Paying {user.name}
+            </Text>
+            <Text style={[styles.userBank, { color: themeColors.text }]}>
+              Banking name : {user.bank}
+            </Text>
+            <Text style={[styles.userPhone, { color: themeColors.text }]}>
+              {user.phone}
             </Text>
           </View>
-          <Text style={[styles.userName, { color: themeColors.text }]}>
-            Paying {user.name}
-          </Text>
-          <Text style={[styles.userBank, { color: themeColors.text }]}>
-            Banking name : {user.bank}
-          </Text>
-          <Text style={[styles.userPhone, { color: themeColors.text }]}>
-            {user.phone}
-          </Text>
-        </View>
 
-        {/* Amount Input */}
-        <View style={styles.amountWrapper}>
-          <TextInput
-            ref={amountRef}
-            style={[
-              styles.amountInput,
-              {
-                color: themeColors.text,
-                borderBottomColor: themeColors.subText,
-              },
-            ]}
-            placeholder="₹ 0"
-            placeholderTextColor={themeColors.subText}
-            keyboardType="numeric"
-            value={amount ? `₹ ${amount}` : ''}
-            onChangeText={handleAmountChange}
-          />
-        </View>
-
-        {/* Note Input */}
-        <TextInput
-          style={[
-            styles.noteInput,
-            { color: themeColors.text, borderColor: themeColors.subText },
-          ]}
-          placeholder={I18n.t('add_note')}
-          placeholderTextColor={themeColors.subText}
-          value={note}
-          onChangeText={setNote}
-        />
-      </ScrollView>
-
-      {/* Bottom Image Button */}
-      <View style={styles.bottomButtonContainer}>
-        {loading ? (
-          <ActivityIndicator size="large" color={Colors.primary} />
-        ) : (
-          <TouchableOpacity style={styles.arrowButton} onPress={handleProceed}>
-            <Image
-              source={require('../../assets/image/appIcon/right.png')} // <-- your arrow image
-              style={styles.arrowImage}
+          {/* Amount Input */}
+          <View style={styles.amountWrapper}>
+            <TextInput
+              ref={amountRef}
+              style={[
+                styles.amountInput,
+                {
+                  color: themeColors.text,
+                  borderBottomColor: themeColors.subText,
+                },
+              ]}
+              placeholder="₹ 0"
+              placeholderTextColor={themeColors.subText}
+              keyboardType="numeric"
+              value={amount ? `₹ ${amount}` : ''}
+              onChangeText={handleAmountChange}
+              returnKeyType="next"
             />
-          </TouchableOpacity>
-        )}
-      </View>
+          </View>
+
+          {/* Note Input */}
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center',
+            }}
+          >
+            <TextInput
+              style={[
+                styles.noteInput,
+                {
+                  color: themeColors.text,
+                  borderColor: themeColors.subText,
+                  height: Math.max(40, inputHeight),
+                },
+              ]}
+              placeholder={isFocused ? '' : I18n.t('add_note')}
+              placeholderTextColor={themeColors.subText}
+              value={note}
+              onChangeText={setNote}
+              returnKeyType="done"
+              numberOfLines={5}
+              multiline
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              onContentSizeChange={event => {
+                setInputHeight(event.nativeEvent.contentSize.height);
+              }}
+            />
+          </View>
+        </ScrollView>
+
+        {/* Bottom Image Button */}
+        <View style={styles.bottomButtonContainer}>
+          {loading ? (
+            <ActivityIndicator size="large" color={Colors.primary} />
+          ) : (
+            <TouchableOpacity
+              style={styles.arrowButton}
+              onPress={handleProceed}
+            >
+              <Image
+                source={require('../../assets/image/appIcon/right.png')}
+                style={styles.arrowImage}
+              />
+            </TouchableOpacity>
+          )}
+        </View>
+      </KeyboardAvoidingView>
 
       <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
@@ -206,15 +240,14 @@ const styles = StyleSheet.create({
   },
 
   noteInput: {
-    borderWidth: 1,
-    borderRadius: scaleUtils.scaleWidth(12),
-    paddingHorizontal: scaleUtils.scaleWidth(12),
+    flex: 1,
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Regular',
-    minHeight: scaleUtils.scaleHeight(25),
     height: scaleUtils.scaleHeight(40),
-    width: '55%',
-    alignSelf: 'center',
+    maxWidth: 'auto',
+    // textAlign: 'center',
+    textAlign: 'center',
+    textAlignVertical: 'top',
   },
 
   bottomButtonContainer: {

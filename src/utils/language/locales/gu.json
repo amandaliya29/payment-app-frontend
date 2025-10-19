@@ -339,8 +339,16 @@
 
   "enter_amount": "રકમ દાખલ કરો",
   "enter_amount_placeholder": "0",
-  "add_note": "નોંધ ઉમેરો (વૈકલ્પિક)",
+  "add_note": "નોંધ ઉમેરો",
   "proceed_to_pay": "ચુકવણી કરવા આગળ વધો",
   "enter_valid_amount": "કૃપા કરીને માન્ય રકમ દાખલ કરો",
-  "unknown_user": "અજાણ્યો યુઝર"
+  "unknown_user": "અજાણ્યો યુઝર",
+
+  "set_pin_to_activate": "ક્રેડિટ યુપીઆઈ સક્રિય કરવા માટે પિન સેટ કરો",
+  "set_pin": "પિન સેટ કરો",
+
+  "search_name_or_number": "નામ અથવા નંબર દ્વારા શોધો",
+  "recent_searches": "તાજેતરના શોધો",
+  "people": "લોકો",
+  "no_result_found": "કોઈ પરિણામ મળ્યું નથી"
 }

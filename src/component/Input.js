@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import {
   View,
   TextInput,
@@ -11,165 +11,169 @@ import {
 import scaleUtils from '../utils/Responsive';
 import { Colors } from '../themes/Colors';
 
-const Input = ({
-  label,
-  value,
-  secureTextEntry = false,
-  multiline = false,
-  placeholder,
-  placeholderTextColor,
-  onChange,
-  keyboardType,
-  returnKeyType,
-  onFocus,
-  editable = true,
-  maxLength,
-  isSecure,
-  setIsSecure,
-  errorText,
-  style,
-  isSearch = false,
-  onSearchPress,
-  uppercaseOnly = false,
-}) => {
-  const scheme = useColorScheme(); // 👈 detects dark / light
-  const isDark = scheme === 'dark';
+const Input = forwardRef(
+  (
+    {
+      label,
+      value,
+      secureTextEntry = false,
+      multiline = false,
+      placeholder,
+      placeholderTextColor,
+      onChange,
+      keyboardType,
+      returnKeyType,
+      onFocus,
+      editable = true,
+      maxLength,
+      isSecure,
+      setIsSecure,
+      errorText,
+      style,
+      isSearch = false,
+      onSearchPress,
+      uppercaseOnly = false,
+    },
+    ref,
+  ) => {
+    // 👈 forward ref here
+    const scheme = useColorScheme();
+    const isDark = scheme === 'dark';
 
-  const isPhoneInput = keyboardType === 'phone-pad';
+    const isPhoneInput = keyboardType === 'phone-pad';
 
-  // Aadhaar formatter
-  const handleAadhaarChange = text => {
-    let cleaned = text.replace(/\D/g, ''); // digits only
-    cleaned = cleaned.slice(0, 12); // max 12 digits
-    let formatted = cleaned.replace(/(\d{4})(?=\d)/g, '$1 '); // insert space
-    onChange(formatted);
-  };
-
-  // Universal handler with uppercase support
-  const handleChange = text => {
-    if (uppercaseOnly) {
-      const formatted = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const handleAadhaarChange = text => {
+      let cleaned = text.replace(/\D/g, '');
+      cleaned = cleaned.slice(0, 12);
+      let formatted = cleaned.replace(/(\d{4})(?=\d)/g, '$1 ');
       onChange(formatted);
-    } else if (keyboardType === 'numeric' && maxLength === 12) {
-      handleAadhaarChange(text);
-    } else {
-      onChange(text);
-    }
-  };
+    };
 
-  return (
-    <View style={{ marginBottom: scaleUtils.scaleHeight(16) }}>
-      {/* Label */}
-      {label ? (
-        <Text
-          style={[
-            styles.label,
-            { color: isDark ? Colors.white : Colors.black },
-          ]}
-        >
-          {label}
-        </Text>
-      ) : null}
+    const handleChange = text => {
+      if (uppercaseOnly) {
+        const formatted = text.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        onChange(formatted);
+      } else if (keyboardType === 'numeric' && maxLength === 12) {
+        handleAadhaarChange(text);
+      } else {
+        onChange(text);
+      }
+    };
 
-      {/* Search Input */}
-      {isSearch && (
-        <View
-          style={[
-            styles.inputContainer,
-            {
-              backgroundColor: isDark ? Colors.secondaryBg : Colors.white,
-              borderColor: isDark ? Colors.bg : Colors.greyLight,
-              marginTop: 20,
-            },
-          ]}
-        >
-          <TouchableOpacity onPress={onSearchPress} style={styles.eyeWrapper}>
-            <Image
-              source={require('../assets/image/appIcon/search.png')}
-              style={{
-                width: scaleUtils.scaleWidth(16),
-                height: scaleUtils.scaleWidth(16),
-                tintColor: isDark ? Colors.grey : Colors.black,
-              }}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-          <TextInput
-            value={value}
-            onChangeText={handleChange}
-            onFocus={onFocus}
+    return (
+      <View style={{ marginBottom: scaleUtils.scaleHeight(16) }}>
+        {label ? (
+          <Text
             style={[
-              styles.insideText,
-              style,
+              styles.label,
               { color: isDark ? Colors.white : Colors.black },
             ]}
-            keyboardType="default"
-            returnKeyType="search"
-            placeholder={placeholder || 'Search...'}
-            editable={editable}
-            maxLength={maxLength}
-            placeholderTextColor={
-              placeholderTextColor || (isDark ? Colors.grey : Colors.greyDark)
-            }
-            autoCapitalize={uppercaseOnly ? 'characters' : 'none'}
-          />
-        </View>
-      )}
+          >
+            {label}
+          </Text>
+        ) : null}
 
-      {/* Normal Input */}
-      {!secureTextEntry && !isSearch && (
-        <>
-          {isPhoneInput ? (
-            <View
+        {isSearch && (
+          <View
+            style={[
+              styles.inputContainer,
+              {
+                backgroundColor: isDark ? Colors.secondaryBg : Colors.white,
+                borderColor: isDark ? Colors.bg : Colors.greyLight,
+                marginTop: 20,
+              },
+            ]}
+          >
+            <TouchableOpacity onPress={onSearchPress} style={styles.eyeWrapper}>
+              <Image
+                source={require('../assets/image/appIcon/search.png')}
+                style={{
+                  width: scaleUtils.scaleWidth(16),
+                  height: scaleUtils.scaleWidth(16),
+                  tintColor: isDark ? Colors.grey : Colors.black,
+                }}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+            <TextInput
+              ref={ref} // ✅ attach forwarded ref here
+              value={value}
+              onChangeText={handleChange}
+              onFocus={onFocus}
               style={[
-                styles.phoneContainer,
-                {
-                  backgroundColor: isDark ? Colors.secondaryBg : Colors.lightBg,
-                  borderColor: isDark ? Colors.bg : Colors.greyLight,
-                },
+                styles.insideText,
+                style,
+                { color: isDark ? Colors.white : Colors.black },
               ]}
-            >
+              keyboardType="default"
+              returnKeyType="search"
+              placeholder={placeholder || 'Search...'}
+              editable={editable}
+              maxLength={maxLength}
+              placeholderTextColor={
+                placeholderTextColor || (isDark ? Colors.grey : Colors.greyDark)
+              }
+              autoCapitalize={uppercaseOnly ? 'characters' : 'none'}
+            />
+          </View>
+        )}
+
+        {!secureTextEntry && !isSearch && (
+          <>
+            {isPhoneInput ? (
               <View
                 style={[
-                  styles.replaceStyle,
+                  styles.phoneContainer,
                   {
                     backgroundColor: isDark
-                      ? Colors.secondary
-                      : Colors.secondary,
+                      ? Colors.secondaryBg
+                      : Colors.lightBg,
+                    borderColor: isDark ? Colors.bg : Colors.greyLight,
                   },
                 ]}
               >
-                <Text style={[styles.prefix, { color: Colors.white }]}>
-                  +91
-                </Text>
+                <View
+                  style={[
+                    styles.replaceStyle,
+                    {
+                      backgroundColor: isDark
+                        ? Colors.secondary
+                        : Colors.secondary,
+                    },
+                  ]}
+                >
+                  <Text style={[styles.prefix, { color: Colors.white }]}>
+                    +91
+                  </Text>
+                </View>
+                <View
+                  style={[styles.divider, { backgroundColor: Colors.grey }]}
+                />
+                <TextInput
+                  ref={ref} // ✅ attach ref here if needed for phone input too
+                  value={value}
+                  onChangeText={text => onChange(text.replace(/^(\+91)/, ''))}
+                  onFocus={onFocus}
+                  style={[
+                    styles.phoneTextInput,
+                    style,
+                    { color: isDark ? Colors.white : Colors.black },
+                  ]}
+                  keyboardType={'phone-pad'}
+                  returnKeyType={returnKeyType || 'default'}
+                  placeholder={placeholder || ''}
+                  editable={editable}
+                  maxLength={maxLength}
+                  textAlignVertical="center"
+                  placeholderTextColor={
+                    placeholderTextColor ||
+                    (isDark ? Colors.grey : Colors.greyDark)
+                  }
+                />
               </View>
-              <View
-                style={[styles.divider, { backgroundColor: Colors.grey }]}
-              />
+            ) : (
               <TextInput
-                value={value}
-                onChangeText={text => onChange(text.replace(/^(\+91)/, ''))}
-                onFocus={onFocus}
-                style={[
-                  styles.phoneTextInput,
-                  style,
-                  { color: isDark ? Colors.white : Colors.black },
-                ]}
-                keyboardType={'phone-pad'}
-                returnKeyType={returnKeyType || 'default'}
-                placeholder={placeholder || ''}
-                editable={editable}
-                maxLength={maxLength}
-                textAlignVertical="center"
-                placeholderTextColor={
-                  placeholderTextColor ||
-                  (isDark ? Colors.grey : Colors.greyDark)
-                }
-              />
-            </View>
-          ) : (
-            <>
-              <TextInput
+                ref={ref} // ✅ attach ref for normal input if needed
                 value={value}
                 onChangeText={handleChange}
                 onFocus={onFocus}
@@ -202,68 +206,65 @@ const Input = ({
                 }
                 autoCapitalize={uppercaseOnly ? 'characters' : 'none'}
               />
-              {errorText ? (
-                <Text style={styles.errorTextStyle}>{errorText}</Text>
-              ) : null}
-            </>
-          )}
-        </>
-      )}
+            )}
+          </>
+        )}
 
-      {/* Secure Input (Password) */}
-      {secureTextEntry && !isSearch && (
-        <View
-          style={[
-            styles.inputContainer,
-            {
-              backgroundColor: isDark ? Colors.secondaryBg : Colors.lightBg,
-              borderColor: isDark ? Colors.bg : Colors.greyLight,
-            },
-          ]}
-        >
-          <TextInput
-            value={value}
-            onChangeText={handleChange}
-            onFocus={onFocus}
+        {secureTextEntry && !isSearch && (
+          <View
             style={[
-              styles.insideText,
-              style,
-              { color: isDark ? Colors.white : Colors.black },
+              styles.inputContainer,
+              {
+                backgroundColor: isDark ? Colors.secondaryBg : Colors.lightBg,
+                borderColor: isDark ? Colors.bg : Colors.greyLight,
+              },
             ]}
-            keyboardType={keyboardType || 'default'}
-            returnKeyType={returnKeyType || 'default'}
-            placeholder={placeholder || ''}
-            multiline={multiline}
-            secureTextEntry={isSecure}
-            editable={editable}
-            numberOfLines={multiline ? 5 : 1}
-            maxLength={maxLength}
-            textAlignVertical={multiline ? 'top' : 'center'}
-            placeholderTextColor={
-              placeholderTextColor || (isDark ? Colors.grey : Colors.greyDark)
-            }
-            autoCapitalize={uppercaseOnly ? 'characters' : 'none'}
-          />
-          <TouchableOpacity onPress={setIsSecure} style={styles.eyeWrapper}>
-            <Image
-              source={
-                isSecure
-                  ? require('../assets/image/appIcon/eyes.png')
-                  : require('../assets/image/appIcon/eye.png')
+          >
+            <TextInput
+              ref={ref} // ✅ attach ref for secure input
+              value={value}
+              onChangeText={handleChange}
+              onFocus={onFocus}
+              style={[
+                styles.insideText,
+                style,
+                { color: isDark ? Colors.white : Colors.black },
+              ]}
+              keyboardType={keyboardType || 'default'}
+              returnKeyType={returnKeyType || 'default'}
+              placeholder={placeholder || ''}
+              multiline={multiline}
+              secureTextEntry={isSecure}
+              editable={editable}
+              numberOfLines={multiline ? 5 : 1}
+              maxLength={maxLength}
+              textAlignVertical={multiline ? 'top' : 'center'}
+              placeholderTextColor={
+                placeholderTextColor || (isDark ? Colors.grey : Colors.greyDark)
               }
-              style={{
-                width: scaleUtils.scaleWidth(20),
-                height: scaleUtils.scaleWidth(20),
-                tintColor: isDark ? Colors.grey : Colors.black,
-              }}
-              resizeMode="contain"
+              autoCapitalize={uppercaseOnly ? 'characters' : 'none'}
             />
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
-};
+            <TouchableOpacity onPress={setIsSecure} style={styles.eyeWrapper}>
+              <Image
+                source={
+                  isSecure
+                    ? require('../assets/image/appIcon/eyes.png')
+                    : require('../assets/image/appIcon/eye.png')
+                }
+                style={{
+                  width: scaleUtils.scaleWidth(20),
+                  height: scaleUtils.scaleWidth(20),
+                  tintColor: isDark ? Colors.grey : Colors.black,
+                }}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+    );
+  },
+);
 
 export default Input;
 
