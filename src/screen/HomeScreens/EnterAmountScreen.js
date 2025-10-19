@@ -24,6 +24,8 @@ const EnterAmountScreen = () => {
   const navigation = useNavigation();
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
+  const [inputHeight, setInputHeight] = useState(0);
+  const [isFocused, setIsFocused] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
@@ -133,17 +135,36 @@ const EnterAmountScreen = () => {
           </View>
 
           {/* Note Input */}
-          <TextInput
-            style={[
-              styles.noteInput,
-              { color: themeColors.text, borderColor: themeColors.subText },
-            ]}
-            placeholder={I18n.t('add_note')}
-            placeholderTextColor={themeColors.subText}
-            value={note}
-            onChangeText={setNote}
-            returnKeyType="done"
-          />
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'center',
+            }}
+          >
+            <TextInput
+              style={[
+                styles.noteInput,
+                {
+                  color: themeColors.text,
+                  borderColor: themeColors.subText,
+                  height: Math.max(40, inputHeight),
+                },
+              ]}
+              placeholder={isFocused ? '' : I18n.t('add_note')}
+              placeholderTextColor={themeColors.subText}
+              value={note}
+              onChangeText={setNote}
+              returnKeyType="done"
+              numberOfLines={5}
+              multiline
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              onContentSizeChange={event => {
+                setInputHeight(event.nativeEvent.contentSize.height);
+              }}
+            />
+          </View>
         </ScrollView>
 
         {/* Bottom Image Button */}
@@ -219,11 +240,14 @@ const styles = StyleSheet.create({
   },
 
   noteInput: {
+    flex: 1,
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Regular',
     height: scaleUtils.scaleHeight(40),
-    width: '50%',
-    alignSelf: 'center',
+    maxWidth: 'auto',
+    // textAlign: 'center',
+    textAlign: 'center',
+    textAlignVertical: 'top',
   },
 
   bottomButtonContainer: {

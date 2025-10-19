@@ -149,7 +149,7 @@ const HomeScreen = () => {
               flex: 1,
               marginRight: scaleUtils.scaleWidth(10),
               backgroundColor: themeColors.secondaryBg,
-              borderRadius: scaleUtils.scaleWidth(12),
+              borderRadius: scaleUtils.scaleWidth(20),
               paddingVertical: scaleUtils.scaleHeight(10),
               paddingHorizontal: scaleUtils.scaleWidth(14),
               flexDirection: 'row',

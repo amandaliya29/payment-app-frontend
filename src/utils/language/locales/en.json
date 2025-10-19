@@ -328,7 +328,7 @@
 
   "enter_amount": "Enter Amount",
   "enter_amount_placeholder": "0",
-  "add_note": "Add a note (optional)",
+  "add_note": "Add a note",
   "proceed_to_pay": "Proceed to Pay",
   "enter_valid_amount": "Please enter a valid amount",
   "unknown_user": "Unknown User",
