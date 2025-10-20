@@ -8,7 +8,6 @@ import {
   Image,
   ActivityIndicator,
   useColorScheme,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -19,6 +18,7 @@ import Input from '../../component/Input';
 import { useNavigation } from '@react-navigation/native';
 import { LanguageContext } from '../../utils/language/LanguageContext';
 import { getBankAccountList } from '../../utils/apiHelper/Axios';
+import { Toast } from '../../utils/Toast'; // 🔹 Import custom Toast
 
 const HomeScreen = () => {
   const scheme = useColorScheme();
@@ -29,6 +29,15 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(true);
 
   const { language } = useContext(LanguageContext);
+
+  const [toastVisible, setToastVisible] = useState(false); // 🔹 Toast state
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 2000);
+  };
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -48,15 +57,11 @@ const HomeScreen = () => {
       setLoading(true);
       const res = await getBankAccountList();
 
-      // The response structure is { status: true, data: [...] }
-      if (res?.status) {
-        setBanks(res.data || []);
+      if (res.data?.status) {
+        setBanks(res.data?.data || []);
       } else {
         setBanks([]);
       }
-    } catch (err) {
-      console.log('Fetch Banks Error:', err);
-      Alert.alert('Error', 'Failed to load bank accounts');
     } finally {
       setLoading(false);
     }
@@ -65,7 +70,7 @@ const HomeScreen = () => {
   // 🔹 Navigate based on number of linked banks
   const handleCheckBalance = () => {
     if (banks.length === 0) {
-      Alert.alert(i18n.t('no_banks_linked'), i18n.t('please_add_a_bank_first'));
+      showToast(i18n.t('please_add_a_bank_first')); // 🔹 Use toast instead of Alert
       return;
     }
 
@@ -163,7 +168,6 @@ const HomeScreen = () => {
                 width: scaleUtils.scaleWidth(16),
                 height: scaleUtils.scaleWidth(16),
                 tintColor: Colors.grey,
-                // marginRight: scaleUtils.scaleWidth(8),
               }}
             />
             <Text
@@ -312,6 +316,9 @@ const HomeScreen = () => {
           />
         </View>
       </ScrollView>
+
+      {/* 🔹 Custom Toast */}
+      <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
 };

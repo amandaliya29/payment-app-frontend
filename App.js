@@ -17,7 +17,7 @@ import {
   setupNotificationListeners,
 } from './src/utils/notificationService';
 import messaging from '@react-native-firebase/messaging';
-import { updateFcmToken } from './src/api/api';
+import { updateFcmToken } from './src/utils/apiHelper/Axios';
 
 const App = () => {
   const scheme = useColorScheme();
@@ -69,11 +69,7 @@ const App = () => {
     // Token refresh listener
     const refreshUnsubscribe = messaging().onTokenRefresh(async newToken => {
       if (uid) {
-        try {
-          await updateFcmToken(uid, newToken);
-        } catch (error) {
-          console.error('Error updating FCM token:', error);
-        }
+        await updateFcmToken(newToken);
       }
     });
 

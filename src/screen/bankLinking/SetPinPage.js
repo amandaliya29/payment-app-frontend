@@ -112,9 +112,7 @@ const SetPinPage = () => {
 
     try {
       const response = await saveBankDetails(payload);
-      console.log('Save Bank Response:', response);
 
-      // ✅ Update has_bank_accounts = true locally
       const userData = await getUserData();
       const updatedUser = {
         ...userData.user,
@@ -122,13 +120,12 @@ const SetPinPage = () => {
       };
       await saveUserData({ ...userData, user: updatedUser });
 
-      showToast(I18n.t('upi_setup_success'));
+      showToast(response.data.messages || I18n.t('upi_setup_success'));
       setTimeout(() => {
         resetToSingleScreen(navigation);
       }, 1000);
     } catch (error) {
-      console.error('Error saving bank details:', error);
-      showToast(error.message || I18n.t('failed_save'));
+      showToast(error.response?.data?.messages || I18n.t('failed_save'));
     }
   };
 

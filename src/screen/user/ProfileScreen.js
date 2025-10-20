@@ -19,6 +19,7 @@ import Header from '../../component/Header';
 import { logoutUser, getUserProfile } from '../../utils/apiHelper/Axios';
 import LanguageModal from '../../component/LanguageModal';
 import { useNavigation } from '@react-navigation/native';
+import { Toast } from '../../utils/Toast'; // ✅ Import your custom Toast
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -44,13 +45,22 @@ const ProfileScreen = () => {
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+  };
+
   // Fetch data only once (on first load)
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const response = await getUserProfile();
-        if (response.status && response.data) {
-          const { user, bank_accounts } = response.data;
+        if (response.data?.status && response.data?.data) {
+          const { user, bank_accounts } = response.data?.data;
           const primaryBank = bank_accounts?.find(acc => acc.is_primary === 1);
 
           const displayName =
@@ -67,11 +77,14 @@ const ProfileScreen = () => {
           });
 
           setBankAccounts(bank_accounts || []);
+        } else {
+          showToast(I18n.t('failed_to_load_profile'));
         }
       } catch (error) {
-        console.log('Error fetching profile:', error);
+        showToast(
+          error.response?.data?.messages || I18n.t('error_loading_profile'),
+        );
       } finally {
-        // Hide loader once data is loaded
         setLoading(false);
       }
     };
@@ -92,9 +105,14 @@ const ProfileScreen = () => {
           onPress: async () => {
             try {
               await logoutUser();
-              navigation.replace('MobileNumberEntry');
+              showToast(I18n.t('logout_successful'));
+              setTimeout(() => {
+                navigation.replace('MobileNumberEntry');
+              }, 1200);
             } catch (error) {
-              Alert.alert(I18n.t('error'), error.message || 'Logout failed');
+              showToast(
+                error.response?.data?.messages || I18n.t('logout_failed'),
+              );
             }
           },
         },
@@ -105,8 +123,15 @@ const ProfileScreen = () => {
 
   const handleMenuPress = item => {
     if (item.logout) return handleLogout();
-    if (item.action === 'language') return setLanguageModalVisible(true);
-    if (item.id === 1) return navigation.navigate('ReceiveMoneyScreen');
+    if (item.action === 'language') {
+      setLanguageModalVisible(true);
+      showToast(I18n.t('language_settings_opened'));
+      return;
+    }
+    if (item.id === 1) {
+      navigation.navigate('ReceiveMoneyScreen');
+      showToast(I18n.t('opening_qr_code'));
+    }
   };
 
   const menuItems = [
@@ -144,19 +169,16 @@ const ProfileScreen = () => {
     },
   ];
 
-  // ✅ Show Loader Screen while fetching data initially
   if (loading) {
     console.log();
 
     return (
       <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color={Colors.primary} />
-        {/* <Text style={styles.loaderText}>{I18n.t('loading_profile')}...</Text> */}
       </View>
     );
   }
 
-  // ✅ Once loaded, render the actual profile UI
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
@@ -167,7 +189,6 @@ const ProfileScreen = () => {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* User Info Card */}
         <LinearGradient
           colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
           style={styles.userCard}
@@ -197,7 +218,10 @@ const ProfileScreen = () => {
               <Text style={styles.avatarText}>{getInitial(user?.name)}</Text>
               <TouchableOpacity
                 style={styles.qrBadge}
-                onPress={() => navigation.navigate('ReceiveMoneyScreen')}
+                onPress={() => {
+                  navigation.navigate('ReceiveMoneyScreen');
+                  showToast(I18n.t('opening_qr_code'));
+                }}
               >
                 <Image
                   source={require('../../assets/image/appIcon/qr.png')}
@@ -208,7 +232,6 @@ const ProfileScreen = () => {
           </View>
         </LinearGradient>
 
-        {/* Bank Accounts Section */}
         <View style={styles.paymentCard}>
           <Text style={[styles.paymentTitle, { color: themeColors.text }]}>
             {I18n.t('bank_accounts_cards')}
@@ -264,13 +287,15 @@ const ProfileScreen = () => {
             </View>
           ))}
 
-          {/* Add Bank Account */}
           <TouchableOpacity
             style={[
               styles.paymentOption,
               { marginTop: scaleUtils.scaleHeight(10) },
             ]}
-            onPress={() => navigation.navigate('BankLinkScreen')}
+            onPress={() => {
+              navigation.navigate('BankLinkScreen');
+              showToast(I18n.t('opening_bank_link'));
+            }}
           >
             <View
               style={[
@@ -297,7 +322,6 @@ const ProfileScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Menu Section */}
         <View style={{ marginVertical: scaleUtils.scaleHeight(6) }}>
           {menuItems.map(item => (
             <TouchableOpacity
@@ -320,16 +344,23 @@ const ProfileScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Language Modal */}
       <LanguageModal
         visible={languageModalVisible}
         onClose={() => setLanguageModalVisible(false)}
+      />
+
+      {/* ✅ Custom Toast Component */}
+      <Toast
+        visible={toastVisible}
+        message={toastMessage}
+        duration={2000}
+        isDark={isDark}
       />
     </SafeAreaView>
   );
 };
 
-// ✅ Styles
+// ✅ Styles remain unchanged
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContainer: { padding: scaleUtils.scaleWidth(16) },

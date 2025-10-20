@@ -58,18 +58,18 @@ const CustomQRScanner = () => {
   const handleScan = async image => {
     try {
       setLoading(true);
-      const res = await scanBankQr(image);
-      setLoading(false);
 
-      if (res?.status) {
-        const code = res.data?.code;
-        navigateToEnterAmount(code);
-      } else {
-        showToast(res?.messages || 'QR scan failed');
+      const res = await scanBankQr(image);
+      if (!res.data?.status) {
+        showToast(res.data?.messages);
       }
+
+      const code = res.data?.data?.code;
+      navigateToEnterAmount(code);
     } catch (error) {
+      showToast(error.response?.data?.messages || 'Failed to scan QR');
+    } finally {
       setLoading(false);
-      showToast(error?.message || 'Failed to scan QR');
     }
   };
 

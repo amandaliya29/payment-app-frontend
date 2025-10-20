@@ -17,6 +17,7 @@ import Button from '../../component/Button';
 import { useSelector } from 'react-redux';
 import { activateCreditUpi } from '../../utils/apiHelper/Axios';
 import { useNavigation } from '@react-navigation/native';
+import { Toast } from '../../utils/Toast';
 
 const CreditUPIStatusScreen = () => {
   const navigation = useNavigation();
@@ -27,7 +28,9 @@ const CreditUPIStatusScreen = () => {
   const idToken = useSelector(state => state.user.token);
 
   const [loading, setLoading] = useState(false);
-  const [upiData, setUpiData] = useState(null); // store dynamic data
+  const [upiData, setUpiData] = useState(null);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -37,20 +40,34 @@ const CreditUPIStatusScreen = () => {
     card: isDark ? Colors.secondaryBg : Colors.cardGrey,
   };
 
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(false);
+    setTimeout(() => {
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 2000);
+    }, 100);
+  };
+
   useEffect(() => {
     const activateUpi = async () => {
-      // run always to keep hook order consistent
       if (selectedBank && idToken) {
-        setLoading(true);
         try {
-          const response = await activateCreditUpi(idToken, selectedBank.id);
-          // Expected response: { status: true, data: { upi_id, credit_limit }, messages: "Activate Successful" }
-          if (response?.status && response?.data) {
-            setUpiData(response.data);
+          setLoading(true);
+
+          let payload = {
+            token: idToken,
+            bank_account: selectedBank.id,
+          };
+          const response = await activateCreditUpi(payload);
+
+          if (response.data?.status && response.data?.data) {
+            setUpiData(response.data.data);
           }
         } catch (error) {
-          console.log('Activation Error:', error);
-          alert(error.message || 'Failed to activate credit UPI');
+          showToast(
+            error.response?.data?.messages || 'Failed to activate credit UPI',
+          );
         } finally {
           setLoading(false);
         }
@@ -73,7 +90,6 @@ const CreditUPIStatusScreen = () => {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* Success Icon */}
         <View style={styles.iconWrapper}>
           <View style={styles.successIcon}>
             <Image
@@ -83,7 +99,6 @@ const CreditUPIStatusScreen = () => {
           </View>
         </View>
 
-        {/* Title */}
         <Text style={[styles.title, { color: Colors.darkGreen }]}>
           {I18n.t('credit_upi_activated')}
         </Text>
@@ -91,7 +106,6 @@ const CreditUPIStatusScreen = () => {
           {I18n.t('upi_success_message')}
         </Text>
 
-        {/* Bank Details Card */}
         <View style={[styles.card, { backgroundColor: themeColors.card }]}>
           <Text style={[styles.cardTitle, { color: themeColors.text }]}>
             {I18n.t('bank_details')}
@@ -126,7 +140,6 @@ const CreditUPIStatusScreen = () => {
           </View>
         </View>
 
-        {/* Button */}
         <Button
           title={loading ? I18n.t('loading') : I18n.t('setup_upi_pin')}
           onPress={() =>
@@ -145,6 +158,8 @@ const CreditUPIStatusScreen = () => {
           />
         )}
       </ScrollView>
+
+      <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
 };

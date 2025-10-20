@@ -58,18 +58,18 @@ const Search = () => {
       try {
         setLoading(true);
         const res = await searchUser(searchText);
-        if (res?.status && Array.isArray(res?.data)) {
-          setFilteredPeople(res.data);
+
+        if (res.data?.status && Array.isArray(res.data?.data)) {
+          setFilteredPeople(res.data.data);
         } else {
           setFilteredPeople([]);
         }
       } catch (error) {
-        console.log('Search API error:', error);
         setFilteredPeople([]);
       } finally {
         setLoading(false);
       }
-    }, 800);
+    }, 500);
 
     return () => clearTimeout(debounceTimeout.current);
   }, [searchText]);
