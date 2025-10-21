@@ -241,6 +241,7 @@ const HomeScreen = () => {
           <ActionButton3
             title={i18n.t('transaction_history')}
             image={require('../../assets/image/homeIcon/history.png')}
+            onPress={() => navigation.navigate('TransactionSuccessScreen')}
           />
         </View>
 

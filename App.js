@@ -69,6 +69,7 @@ const App = () => {
     // Token refresh listener
     const refreshUnsubscribe = messaging().onTokenRefresh(async newToken => {
       if (uid) {
+        console.log('newToken', newToken);
         await updateFcmToken(newToken);
       }
     });

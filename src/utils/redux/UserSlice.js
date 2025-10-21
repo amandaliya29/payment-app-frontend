@@ -5,6 +5,7 @@ const UserSlice = createSlice({
   initialState: {
     selectedBank: null,
     token: null,
+    creditUpiData: null,
   },
   reducers: {
     setSelectedBank: (state, action) => {
@@ -19,9 +20,17 @@ const UserSlice = createSlice({
     clearToken: state => {
       state.token = null;
     },
+    setCreditUpiData: (state, action) => {
+      state.creditUpiData = action.payload;
+    },
   },
 });
 
-export const { setSelectedBank, clearSelectedBank, setToken, clearToken } =
-  UserSlice.actions;
+export const {
+  setSelectedBank,
+  clearSelectedBank,
+  setToken,
+  clearToken,
+  setCreditUpiData,
+} = UserSlice.actions;
 export default UserSlice.reducer;

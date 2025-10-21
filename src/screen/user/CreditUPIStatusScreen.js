@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,6 @@ import Header from '../../component/Header';
 import I18n from '../../utils/language/i18n';
 import Button from '../../component/Button';
 import { useSelector } from 'react-redux';
-import { activateCreditUpi } from '../../utils/apiHelper/Axios';
 import { useNavigation } from '@react-navigation/native';
 import { Toast } from '../../utils/Toast';
 
@@ -24,11 +23,11 @@ const CreditUPIStatusScreen = () => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
+  // ✅ Get data from Redux instead of API
   const selectedBank = useSelector(state => state.user.selectedBank);
-  const idToken = useSelector(state => state.user.token);
+  const upiData = useSelector(state => state.user.creditUpiData); // stored after activation in OTP screen
 
   const [loading, setLoading] = useState(false);
-  const [upiData, setUpiData] = useState(null);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
@@ -48,34 +47,6 @@ const CreditUPIStatusScreen = () => {
       setTimeout(() => setToastVisible(false), 2000);
     }, 100);
   };
-
-  useEffect(() => {
-    const activateUpi = async () => {
-      if (selectedBank && idToken) {
-        try {
-          setLoading(true);
-
-          let payload = {
-            token: idToken,
-            bank_account: selectedBank.id,
-          };
-          const response = await activateCreditUpi(payload);
-
-          if (response.data?.status && response.data?.data) {
-            setUpiData(response.data.data);
-          }
-        } catch (error) {
-          showToast(
-            error.response?.data?.messages || 'Failed to activate credit UPI',
-          );
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    activateUpi();
-  }, [selectedBank, idToken, navigation]);
 
   return (
     <SafeAreaView
@@ -144,10 +115,10 @@ const CreditUPIStatusScreen = () => {
           title={loading ? I18n.t('loading') : I18n.t('setup_upi_pin')}
           onPress={() =>
             navigation.navigate('CreditSetPinPage', {
-              bankCreditUpiId: upiData.id,
+              bankCreditUpiId: upiData?.id,
             })
           }
-          disabled={loading}
+          disabled={loading || !upiData}
         />
 
         {loading && (
