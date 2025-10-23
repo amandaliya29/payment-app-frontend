@@ -15,7 +15,6 @@ import { Toast } from '../../utils/Toast'; // 👈 add your Toast component
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
-import { saveBankDetails } from '../../utils/apiHelper/Axios';
 
 const FaceIDVerification = () => {
   const navigation = useNavigation();

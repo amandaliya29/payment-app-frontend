@@ -17,8 +17,9 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import Button from '../../component/Button';
 import auth from '@react-native-firebase/auth';
 import { Toast } from '../../utils/Toast';
-import { useDispatch } from 'react-redux';
-import { setToken } from '../../utils/redux/UserSlice'; // make sure this is correct
+import { useDispatch, useSelector } from 'react-redux';
+import { setToken, setCreditUpiData } from '../../utils/redux/UserSlice';
+import { activateCreditUpi } from '../../utils/apiHelper/Axios';
 
 const CreditOTPVerification = () => {
   const navigation = useNavigation();
@@ -28,6 +29,7 @@ const CreditOTPVerification = () => {
   const dispatch = useDispatch();
 
   const { phone, verificationId: initialVerificationId } = route.params || {};
+  const selectedBank = useSelector(state => state.user.selectedBank);
 
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(45);
@@ -46,20 +48,17 @@ const CreditOTPVerification = () => {
     primary: Colors.primary,
   };
 
-  // Timer countdown for resend
   useEffect(() => {
     if (timer === 0) return;
     const interval = setInterval(() => setTimer(prev => prev - 1), 1000);
     return () => clearInterval(interval);
   }, [timer]);
 
-  // Function to show toast with auto hide
   const showToast = message => {
     setToast({ visible: true, message });
     setTimeout(() => setToast({ visible: false, message: '' }), 3000);
   };
 
-  // OTP verification
   const handleVerify = async () => {
     if (otp.length !== 6) {
       showToast('Please enter a valid 6-digit OTP.');
@@ -80,36 +79,52 @@ const CreditOTPVerification = () => {
 
       const idToken = await auth().currentUser.getIdToken();
       dispatch(setToken(idToken));
-      // console.log('OTP Verified, idToken:', idToken);
 
-      showToast('OTP verified successfully!');
-      setLoading(false);
-      navigation.navigate('CreditUPILoadingScreen');
+      // ✅ Call activateCreditUpi API after OTP verification
+      if (selectedBank && idToken) {
+        const payload = {
+          token: idToken,
+          bank_account: selectedBank.id,
+        };
+
+        try {
+          const response = await activateCreditUpi(payload);
+          if (response.data?.status && response.data?.data) {
+            const upiData = response.data.data;
+            dispatch(setCreditUpiData(upiData)); // store data in Redux
+            showToast('Credit UPI activated successfully!');
+            navigation.navigate('CreditUPILoadingScreen');
+          } else {
+            showToast(
+              response.data?.messages || 'Activation failed. Please try again.',
+            );
+          }
+        } catch (error) {
+          showToast(
+            error.response?.data?.messages || 'Failed to activate Credit UPI.',
+          );
+        }
+      } else {
+        showToast('Missing required data to activate Credit UPI.');
+      }
     } catch (error) {
-      console.log('OTP Verification Error:', error);
-      setLoading(false);
       setOtp('');
       showToast('Invalid OTP. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Resend OTP
   const handleResend = useCallback(async () => {
     if (!phone) {
       showToast('Phone number missing.');
       return;
     }
-
     setTimer(45);
-
     try {
       const confirmation = await auth().signInWithPhoneNumber(phone);
       setVerificationId(confirmation.verificationId);
       showToast('A new OTP has been sent to your phone.');
-      console.log(
-        'Resent OTP, new verificationId:',
-        confirmation.verificationId,
-      );
     } catch (error) {
       console.log('Resend OTP Error:', error);
       showToast('Failed to resend OTP. Try again later.');
@@ -172,7 +187,7 @@ const CreditOTPVerification = () => {
         </View>
 
         <Button
-          title={I18n.t('verify_activate')}
+          title={loading ? 'Verifying...' : I18n.t('verify_activate')}
           disabled={otp.length !== 6 || loading}
           onPress={handleVerify}
         />
@@ -184,7 +199,6 @@ const CreditOTPVerification = () => {
         </View>
       </ScrollView>
 
-      {/* ✅ Custom Toast */}
       <Toast visible={toast.visible} message={toast.message} isDark={isDark} />
     </SafeAreaView>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   useColorScheme,
   FlatList,
   ScrollView,
+  ActivityIndicator, // ✅ added
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -19,9 +20,10 @@ import Button from '../../component/Button';
 import LineButton from '../../component/LineButton';
 import moment from 'moment';
 import { CreditUpiBankList } from '../../utils/apiHelper/Axios';
-import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { setSelectedBank } from '../../utils/redux/UserSlice';
+import { Toast } from '../../utils/Toast'; // ✅ Added custom Toast
+import { useNavigation } from '@react-navigation/native';
 
 const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
 
@@ -32,6 +34,17 @@ const CreditUPIPage = () => {
   const [bankAccounts, setBankAccounts] = useState([]);
   const [activeCount, setActiveCount] = useState(0);
   const [inactiveCount, setInactiveCount] = useState(0);
+  const [loading, setLoading] = useState(false); // ✅ Added loader state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(false);
+    setTimeout(() => {
+      setToastVisible(true);
+    }, 100);
+  };
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -41,13 +54,13 @@ const CreditUPIPage = () => {
     divider: isDark ? Colors.darkGrey : Colors.grey,
   };
 
-  // Fetch Credit/UPI banks
   useEffect(() => {
     const fetchCreditUpiBanks = async () => {
       try {
+        setLoading(true); // ✅ show loader
         const res = await CreditUpiBankList();
-        if (res?.status && Array.isArray(res.data)) {
-          const formattedData = res.data.map(item => {
+        if (res.data?.status && Array.isArray(res.data?.data)) {
+          const formattedData = res.data.data.map(item => {
             const hasCreditUpi = !!item.bank_credit_upi;
             const isActive =
               hasCreditUpi && item.bank_credit_upi.status === 'active';
@@ -79,7 +92,7 @@ const CreditUPIPage = () => {
                 ? moment(item.bank_credit_upi.updated_at).fromNow()
                 : null,
               status: isActive ? 'active' : isInactive ? 'inactive' : 'no_upi',
-              bank_credit_upi: item.bank_credit_upi || null, // pass for navigation
+              bank_credit_upi: item.bank_credit_upi || null,
             };
           });
 
@@ -92,9 +105,16 @@ const CreditUPIPage = () => {
           ).length;
           setActiveCount(active);
           setInactiveCount(inactive);
+        } else {
+          showToast('Failed to load bank list');
         }
       } catch (error) {
-        console.log('Error fetching Credit/UPI bank list:', error);
+        showToast(
+          error.response?.data?.messages ||
+            'Something went wrong while fetching bank list',
+        );
+      } finally {
+        setLoading(false); // ✅ hide loader
       }
     };
 
@@ -107,188 +127,247 @@ const CreditUPIPage = () => {
     >
       <Header title={I18n.t('credit_upi')} onBack={() => navigation.goBack()} />
 
-      <View style={{ flex: 1, paddingHorizontal: scaleUtils.scaleWidth(14) }}>
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          style={{ marginBottom: scaleUtils.scaleHeight(50) }}
-        >
-          <LinearGradient
-            colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
-            style={styles.statusBox}
-          >
-            <Text style={styles.statusTitle}>
-              {I18n.t('credit_upi_status')}
-            </Text>
-            <Text style={styles.statusSub}>
-              {I18n.t('credit_upi_status_subtitle')}
-            </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginTop: scaleUtils.scaleHeight(6),
-              }}
-            >
-              <Text style={styles.activeText}>
-                🟢 {activeCount} {I18n.t('account_active')}
-              </Text>
-              <Text style={styles.inactiveBankText}>
-                🔴 {bankAccounts.length - activeCount}{' '}
-                {I18n.t('account_inactive')}
-              </Text>
-            </View>
-          </LinearGradient>
-
-          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
-            {I18n.t('your_bank_accounts')}
-          </Text>
-
-          <FlatList
-            data={bankAccounts}
-            keyExtractor={item => item.id}
-            scrollEnabled={false}
-            renderItem={({ item }) => (
-              <BankCard {...item} themeColors={themeColors} />
-            )}
-            contentContainerStyle={{
-              paddingBottom: scaleUtils.scaleHeight(20),
-            }}
+      {loading ? ( // ✅ show loader here
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
+      ) : (
+        <View style={{ flex: 1, paddingHorizontal: scaleUtils.scaleWidth(14) }}>
+          <ScrollView
             showsVerticalScrollIndicator={false}
-          />
-        </ScrollView>
+            style={{ marginBottom: scaleUtils.scaleHeight(50) }}
+          >
+            <LinearGradient
+              colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
+              style={styles.statusBox}
+            >
+              <Text style={styles.statusTitle}>
+                {I18n.t('credit_upi_status')}
+              </Text>
+              <Text style={styles.statusSub}>
+                {I18n.t('credit_upi_status_subtitle')}
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginTop: scaleUtils.scaleHeight(6),
+                }}
+              >
+                <Text style={styles.activeText}>
+                  🟢 {activeCount} {I18n.t('account_active')}
+                </Text>
+                <Text style={styles.inactiveBankText}>
+                  🔴 {bankAccounts.length - activeCount}{' '}
+                  {I18n.t('account_inactive')}
+                </Text>
+              </View>
+            </LinearGradient>
 
-        <View
-          style={[
-            styles.bottomRow,
-            { backgroundColor: themeColors.background },
-          ]}
-        >
-          <View style={{ flex: 1 }}>
-            <Button
-              title={I18n.t('add_new_bank')}
-              onPress={() => console.log('Add Bank')}
+            <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
+              {I18n.t('your_bank_accounts')}
+            </Text>
+
+            <FlatList
+              data={bankAccounts}
+              keyExtractor={item => item.id}
+              scrollEnabled={false}
+              renderItem={({ item }) => (
+                <BankCard
+                  {...item}
+                  themeColors={themeColors}
+                  showToast={showToast}
+                />
+              )}
+              contentContainerStyle={{
+                paddingBottom: scaleUtils.scaleHeight(20),
+              }}
+              showsVerticalScrollIndicator={false}
             />
-          </View>
-          <View style={{ flex: 1 }}>
-            <LineButton
-              title={I18n.t('transaction_history')}
-              onPress={() => console.log('Transaction History')}
-            />
+          </ScrollView>
+
+          <View
+            style={[
+              styles.bottomRow,
+              { backgroundColor: themeColors.background },
+            ]}
+          >
+            <View style={{ flex: 1 }}>
+              <Button
+                title={I18n.t('add_new_bank')}
+                onPress={() => showToast('Add New Bank feature coming soon!')}
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <LineButton
+                title={I18n.t('transaction_history')}
+                onPress={() => showToast('Transaction History opening soon!')}
+              />
+            </View>
           </View>
         </View>
-      </View>
+      )}
+
+      {/* ✅ Custom Toast Component */}
+      <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
 };
 
-const BankCard = ({
-  bankLogo,
-  bankName,
-  account,
-  limit,
-  available,
-  used,
-  lastUsed,
-  status,
-  id,
-  themeColors,
-  bank_credit_upi,
-}) => {
-  const navigation = useNavigation();
-  const dispatch = useDispatch();
+const BankCard = memo(
+  ({
+    bankLogo,
+    bankName,
+    account,
+    limit,
+    available,
+    used,
+    lastUsed,
+    status,
+    id,
+    themeColors,
+    bank_credit_upi,
+    showToast,
+  }) => {
+    const navigation = useNavigation();
+    const dispatch = useDispatch();
 
-  const isActive = status === 'active';
-  const isInactive = status === 'inactive';
-  const hasNoUpi = status === 'no_upi';
+    const isActive = status === 'active';
+    const isInactive = status === 'inactive';
+    const hasNoUpi = status === 'no_upi';
 
-  const handlePress = () => {
-    if (isActive) {
-      navigation.navigate('CreditUpiBankDetail', {
-        bankLogo,
-        bankName,
-        account,
-        limit,
-        available,
-        used,
-        lastUsed,
-        status,
-        bankCreditUpiId: bank_credit_upi?.id || null,
-      });
-    } else {
-      console.log('Bank is not active, navigation blocked');
-    }
-  };
+    const handlePress = () => {
+      if (isActive) {
+        navigation.navigate('CreditUpiBankDetail', {
+          bankLogo,
+          bankName,
+          account,
+          limit,
+          available,
+          used,
+          lastUsed,
+          status,
+          bankCreditUpiId: bank_credit_upi?.id || null,
+        });
+      } else {
+        showToast('Bank is not active, cannot open details');
+      }
+    };
 
-  const handleActivatePress = () => {
-    dispatch(
-      setSelectedBank({
-        id,
-        bankLogo,
-        bankName,
-        account,
-        limit,
-        available,
-        used,
-        lastUsed,
-        status,
-        bankCreditUpiId: bank_credit_upi?.id || null,
-      }),
-    );
+    const handleActivatePress = () => {
+      dispatch(
+        setSelectedBank({
+          id,
+          bankLogo,
+          bankName,
+          account,
+          limit,
+          available,
+          used,
+          lastUsed,
+          status,
+          bankCreditUpiId: bank_credit_upi?.id || null,
+        }),
+      );
 
-    if (hasNoUpi) {
-      navigation.navigate('CreditUPISetup');
-    } else {
-      navigation.navigate('CreditSetPinPage', {
-        bankCreditUpiId: bank_credit_upi?.id,
-      });
-    }
-  };
+      if (hasNoUpi) {
+        navigation.navigate('CreditUPISetup');
+      } else {
+        navigation.navigate('CreditSetPinPage', {
+          bankCreditUpiId: bank_credit_upi?.id,
+        });
+      }
+    };
 
-  return (
-    <TouchableOpacity
-      activeOpacity={0.8}
-      onPress={handlePress}
-      style={[styles.bankCard, { backgroundColor: themeColors.secondaryBg }]}
-    >
-      <View style={styles.bankHeader}>
-        <View style={styles.bankInfo}>
-          <Image source={bankLogo} style={styles.bankIcon} />
-          <View>
-            <Text style={[styles.bankName, { color: themeColors.text }]}>
-              {bankName}
-            </Text>
-            <Text style={[styles.bankSub, { color: themeColors.subText }]}>
-              {account}
-            </Text>
+    return (
+      <TouchableOpacity
+        activeOpacity={0.8} // 🔹 Press effect only for active banks
+        disabled={!isActive} // 🔹 Disable press when not active
+        onPress={isActive ? handlePress : () => showToast('Bank is not active')}
+        style={[
+          styles.bankCard,
+          {
+            backgroundColor: themeColors.secondaryBg,
+            opacity: 1, // 🔹 Dim inactive cards slightly
+          },
+        ]}
+      >
+        <View style={styles.bankHeader}>
+          <View style={styles.bankInfo}>
+            <Image source={bankLogo} style={styles.bankIcon} />
+            <View>
+              <Text style={[styles.bankName, { color: themeColors.text }]}>
+                {bankName}
+              </Text>
+              <Text style={[styles.bankSub, { color: themeColors.subText }]}>
+                {account}
+              </Text>
+            </View>
           </View>
+
+          {isActive && (
+            <View style={[styles.badge, { backgroundColor: Colors.green }]}>
+              <Text style={styles.badgeText}>{I18n.t('active')}</Text>
+            </View>
+          )}
+
+          {isInactive && limit && (
+            <View style={[styles.badge, { backgroundColor: Colors.error }]}>
+              <Text style={styles.badgeText}>{I18n.t('inactive')}</Text>
+            </View>
+          )}
         </View>
 
+        {limit && (
+          <>
+            <View
+              style={[styles.divider, { backgroundColor: themeColors.divider }]}
+            />
+            <View style={styles.creditRow}>
+              <View>
+                <Text style={[styles.label, { color: themeColors.subText }]}>
+                  {I18n.t('credit_limit')}:
+                </Text>
+                <Text style={[styles.value, { color: themeColors.subText }]}>
+                  {limit}
+                </Text>
+              </View>
+              <View>
+                <Text
+                  style={[
+                    styles.label,
+                    { color: themeColors.subText, textAlign: 'right' },
+                  ]}
+                >
+                  {I18n.t('last_used')}:
+                </Text>
+                <Text
+                  style={[
+                    styles.value,
+                    { color: themeColors.subText, textAlign: 'right' },
+                  ]}
+                >
+                  {lastUsed}
+                </Text>
+              </View>
+            </View>
+          </>
+        )}
+
         {isActive && (
-          <View style={[styles.badge, { backgroundColor: Colors.green }]}>
-            <Text style={styles.badgeText}>{I18n.t('active')}</Text>
-          </View>
-        )}
-
-        {isInactive && limit && (
-          <View style={[styles.badge, { backgroundColor: Colors.error }]}>
-            <Text style={styles.badgeText}>{I18n.t('inactive')}</Text>
-          </View>
-        )}
-      </View>
-
-      {limit && (
-        <>
           <View
-            style={[styles.divider, { backgroundColor: themeColors.divider }]}
-          />
-          <View style={styles.creditRow}>
+            style={[
+              styles.creditRow,
+              { marginTop: scaleUtils.scaleHeight(12) },
+            ]}
+          >
             <View>
               <Text style={[styles.label, { color: themeColors.subText }]}>
-                {I18n.t('credit_limit')}:
+                {I18n.t('available_credit')}:
               </Text>
               <Text style={[styles.value, { color: themeColors.subText }]}>
-                {limit}
+                {available}
               </Text>
             </View>
             <View>
@@ -298,82 +377,54 @@ const BankCard = ({
                   { color: themeColors.subText, textAlign: 'right' },
                 ]}
               >
-                {I18n.t('last_used')}:
+                {I18n.t('used_credit')}:
               </Text>
               <Text
                 style={[
                   styles.value,
-                  { color: themeColors.subText, textAlign: 'right' },
+                  { color: Colors.error, textAlign: 'right' },
                 ]}
               >
-                {lastUsed}
+                {used}
               </Text>
             </View>
           </View>
-        </>
-      )}
+        )}
 
-      {isActive && (
-        <View
-          style={[styles.creditRow, { marginTop: scaleUtils.scaleHeight(12) }]}
-        >
-          <View>
-            <Text style={[styles.label, { color: themeColors.subText }]}>
-              {I18n.t('available_credit')}:
-            </Text>
-            <Text style={[styles.value, { color: themeColors.subText }]}>
-              {available}
-            </Text>
-          </View>
-          <View>
-            <Text
-              style={[
-                styles.label,
-                { color: themeColors.subText, textAlign: 'right' },
-              ]}
-            >
-              {I18n.t('used_credit')}:
-            </Text>
-            <Text
-              style={[
-                styles.value,
-                { color: Colors.error, textAlign: 'right' },
-              ]}
-            >
-              {used}
-            </Text>
-          </View>
-        </View>
-      )}
-
-      {(isInactive || hasNoUpi) && (
-        <>
-          <View
-            style={[styles.divider, { backgroundColor: themeColors.divider }]}
-          />
-          <View style={styles.inactiveRow}>
-            <Text style={styles.inactiveText}>
-              {hasNoUpi
-                ? I18n.t('credit_upi_not_activated')
-                : I18n.t('set_pin_to_activate')}
-            </Text>
-            <TouchableOpacity
-              style={styles.activateBtn}
-              onPress={handleActivatePress}
-            >
-              <Text style={styles.activateText}>
-                {hasNoUpi ? I18n.t('activate') : I18n.t('set_pin')}
+        {(isInactive || hasNoUpi) && (
+          <>
+            <View
+              style={[styles.divider, { backgroundColor: themeColors.divider }]}
+            />
+            <View style={styles.inactiveRow}>
+              <Text style={styles.inactiveText}>
+                {hasNoUpi
+                  ? I18n.t('credit_upi_not_activated')
+                  : I18n.t('set_pin_to_activate')}
               </Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
-    </TouchableOpacity>
-  );
-};
+              <TouchableOpacity
+                style={styles.activateBtn}
+                onPress={handleActivatePress}
+              >
+                <Text style={styles.activateText}>
+                  {hasNoUpi ? I18n.t('activate') : I18n.t('set_pin')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+      </TouchableOpacity>
+    );
+  },
+);
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   statusBox: {
     borderRadius: scaleUtils.scaleWidth(12),
     marginVertical: scaleUtils.scaleHeight(20),

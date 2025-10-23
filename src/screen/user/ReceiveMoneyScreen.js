@@ -9,11 +9,10 @@ import {
   useColorScheme,
   Modal,
   FlatList,
-  ToastAndroid,
-  Alert,
   Platform,
   PanResponder,
   ActivityIndicator,
+  Clipboard,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LinearGradient from 'react-native-linear-gradient';
@@ -21,12 +20,12 @@ import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import QRCode from 'react-native-qrcode-svg';
-import Clipboard from '@react-native-clipboard/clipboard';
 import I18n from '../../utils/language/i18n';
 import ViewShot from 'react-native-view-shot';
 import Share from 'react-native-share';
 import { getBankAccountList } from '../../utils/apiHelper/Axios';
 import { useNavigation } from '@react-navigation/native';
+import { Toast } from '../../utils/Toast';
 
 const ReceiveMoneyScreen = () => {
   const navigation = useNavigation();
@@ -45,7 +44,14 @@ const ReceiveMoneyScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Fetch banks on first load
+  // ✅ Toast state
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+  };
 
   const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
 
@@ -53,22 +59,25 @@ const ReceiveMoneyScreen = () => {
     const fetchBanks = async () => {
       try {
         const res = await getBankAccountList();
-        if (res.status && res.data.length > 0) {
-          const bankData = res.data.map(account => ({
+        if (res.data?.status && res.data?.data?.length > 0) {
+          const bankData = res.data?.data?.map(account => ({
             id: account.id,
             name: account.account_holder_name,
             upiId: account.upi_id,
             logo: account.bank?.logo
-              ? { uri: `${IMAGE_BASE_URL}/${account.bank.logo}` } // load from API
+              ? { uri: `${IMAGE_BASE_URL}/${account.bank.logo}` }
               : require('../../assets/image/bankIcon/sbi.png'),
             bankName: account.bank?.name || '',
           }));
           setBanks(bankData);
           setSelectedBank(bankData[0]);
+        } else {
+          showToast(I18n.t('no_bank_accounts'));
         }
       } catch (error) {
-        console.log('Error fetching banks:', error);
-        Alert.alert(I18n.t('error'), I18n.t('failed_fetch_banks'));
+        showToast(
+          error.response?.data?.messages || I18n.t('failed_fetch_banks'),
+        );
       } finally {
         setLoading(false);
       }
@@ -80,11 +89,7 @@ const ReceiveMoneyScreen = () => {
   const copyUPI = () => {
     if (!selectedBank) return;
     Clipboard.setString(selectedBank.upiId);
-    if (Platform.OS === 'android') {
-      ToastAndroid.show(I18n.t('upi_id_copied'), ToastAndroid.SHORT);
-    } else {
-      Alert.alert(I18n.t('copied'), I18n.t('upi_id_copied'));
-    }
+    showToast(I18n.t('upi_id_copied'));
   };
 
   const getInitial = name => name?.charAt(0)?.toUpperCase() || '';
@@ -96,7 +101,6 @@ const ReceiveMoneyScreen = () => {
     setModalVisible(false);
   };
 
-  // 👉 Swipe left/right to switch banks
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: (_, gestureState) => {
       return Math.abs(gestureState.dx) > 20;
@@ -129,6 +133,7 @@ const ReceiveMoneyScreen = () => {
       });
     } catch (error) {
       console.log('Share Error:', error);
+      showToast(I18n.t('share_failed'));
     }
   };
 
@@ -136,7 +141,6 @@ const ReceiveMoneyScreen = () => {
     navigation.navigate('QrPage');
   };
 
-  // 🔹 Loading indicator while fetching banks
   if (loading) {
     return (
       <SafeAreaView
@@ -167,6 +171,7 @@ const ReceiveMoneyScreen = () => {
             {I18n.t('no_bank_accounts')}
           </Text>
         </View>
+        <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
       </SafeAreaView>
     );
   }
@@ -182,13 +187,12 @@ const ReceiveMoneyScreen = () => {
 
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View {...panResponder.panHandlers}>
-          {/* 👇 Wrap QR inside ViewShot for sharing */}
           <ViewShot
             ref={viewShotRef}
             options={{ format: 'png', quality: 1 }}
             style={{
               position: 'absolute',
-              top: -9999, // still off-screen
+              top: -9999,
               left: 0,
               right: 0,
               backgroundColor: Colors.bg,
@@ -227,10 +231,8 @@ const ReceiveMoneyScreen = () => {
                     {getInitial(selectedBank.name)}
                   </Text>
                 </View>
-
                 <Text style={styles.userNameImage}>{selectedBank.name}</Text>
                 <Text style={styles.upiIdImage}>{selectedBank.upiId}</Text>
-
                 <View style={styles.qrWrapper}>
                   <QRCode
                     value={getUpiLink(selectedBank)}
@@ -240,35 +242,6 @@ const ReceiveMoneyScreen = () => {
                   />
                 </View>
               </LinearGradient>
-              <Text
-                style={{
-                  color: Colors.white,
-                  fontSize: scaleUtils.scaleFont(11),
-                  fontFamily: 'Poppins-Medium',
-                  alignSelf: 'center',
-                  marginTop: scaleUtils.scaleHeight(20),
-                }}
-              >
-                Receiver money from any UPI app
-              </Text>
-              <View style={styles.iconContainer}>
-                <Image
-                  source={require('../../assets/image/bankIcon/phonePe.png')}
-                  style={styles.phonePeIconStyle}
-                />
-                <Image
-                  source={require('../../assets/image/bankIcon/bhim.png')}
-                  style={styles.bhimIconStyle}
-                />
-                <Image
-                  source={require('../../assets/image/bankIcon/gpay.png')}
-                  style={styles.iconStyle}
-                />
-                <Image
-                  source={require('../../assets/image/bankIcon/paytm.png')}
-                  style={styles.iconStyle}
-                />
-              </View>
             </View>
           </ViewShot>
 
@@ -287,9 +260,7 @@ const ReceiveMoneyScreen = () => {
                   {getInitial(selectedBank.name)}
                 </Text>
               </View>
-
               <Text style={styles.userName}>{selectedBank.name}</Text>
-
               <View style={styles.qrWrapper}>
                 <QRCode
                   value={getUpiLink(selectedBank)}
@@ -298,7 +269,6 @@ const ReceiveMoneyScreen = () => {
                   backgroundColor={Colors.white}
                 />
               </View>
-
               <View style={styles.upiContainer}>
                 <Text style={styles.upiId}>{selectedBank.upiId}</Text>
                 <TouchableOpacity
@@ -312,7 +282,6 @@ const ReceiveMoneyScreen = () => {
                   />
                 </TouchableOpacity>
               </View>
-
               <TouchableOpacity
                 style={styles.bankSelector}
                 onPress={() => setModalVisible(true)}
@@ -339,7 +308,6 @@ const ReceiveMoneyScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Bottom Buttons */}
       <View style={styles.bottomButtonsContainer}>
         <TouchableOpacity style={styles.bottomButton} onPress={handleScan}>
           <Image
@@ -359,7 +327,6 @@ const ReceiveMoneyScreen = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Bank selection modal */}
       <Modal visible={modalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View
@@ -389,11 +356,14 @@ const ReceiveMoneyScreen = () => {
           </View>
         </View>
       </Modal>
+
+      {/* 🔹 Custom Toast */}
+      <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
 };
 
-// 🎨 Styles remain the same
+// Styles remain the same
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContainer: { padding: scaleUtils.scaleWidth(16) },
@@ -448,7 +418,6 @@ const styles = StyleSheet.create({
     color: Colors.white,
     marginBottom: scaleUtils.scaleHeight(16),
   },
-
   qrWrapper: {
     backgroundColor: Colors.white,
     padding: scaleUtils.scaleWidth(10),
@@ -582,21 +551,18 @@ const styles = StyleSheet.create({
   },
   iconStyle: {
     width: scaleUtils.scaleWidth(30),
-    // height: scaleUtils.scaleWidth(26),
     aspectRatio: 1 / 1,
     resizeMode: 'contain',
     tintColor: Colors.white,
   },
   phonePeIconStyle: {
     width: scaleUtils.scaleWidth(45),
-    // height: scaleUtils.scaleWidth(26),
     aspectRatio: 1 / 1,
     resizeMode: 'contain',
     tintColor: Colors.white,
   },
   bhimIconStyle: {
     width: scaleUtils.scaleWidth(35),
-    // height: scaleUtils.scaleWidth(26),
     aspectRatio: 1 / 1,
     resizeMode: 'contain',
     tintColor: Colors.white,

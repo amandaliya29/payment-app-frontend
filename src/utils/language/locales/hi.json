@@ -339,5 +339,12 @@
   "search_name_or_number": "नाम या नंबर से खोजें",
   "recent_searches": "हाल की खोजें",
   "people": "लोग",
-  "no_result_found": "कोई परिणाम नहीं मिला"
+  "no_result_found": "कोई परिणाम नहीं मिला",
+
+  "transactionDetails": "लेनदेन विवरण",
+  "from": "से",
+  "to": "तक",
+  "upiTransactionId": "यूपीआई लेनदेन आईडी :",
+  "paymentDelayNote": "भुगतान आपके खाते में दिखाई देने में 3 कार्य दिवस तक लग सकते हैं",
+  "completed": "पूर्ण"
 }

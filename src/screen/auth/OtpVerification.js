@@ -61,29 +61,27 @@ const OtpVerification = () => {
       await auth().signInWithCredential(credential);
       const idToken = await auth().currentUser.getIdToken();
       const fcm = await getFCMToken();
-      // console.log('fcm', fcm);
 
-      // ✅ Call backend login API here
-      const loginResponse = await loginUser(idToken, fcm);
+      let payload = {
+        token: idToken,
+        fcm_token: fcm,
+      };
+      const res = await loginUser(payload);
 
-      // console.log('loginResponse', loginResponse.data.user.has_bank_accounts);
+      if (!res.data?.status) {
+        throw 'Login failed';
+      }
 
-      if (loginResponse.status) {
-        // Save user data in AsyncStorage
-        await saveUserData(loginResponse.data);
+      await saveUserData(res.data?.data);
+      showToast(res.data?.messages);
 
-        showToast(loginResponse.messages);
-        if (loginResponse.data.user.has_bank_accounts === false) {
-          navigation.replace('BankLinkScreen');
-        } else {
-          navigation.replace('HomePage');
-        }
+      if (!res.data?.data?.user?.has_bank_accounts) {
+        navigation.replace('BankLinkScreen');
       } else {
-        showToast('Login failed');
+        navigation.replace('HomePage');
       }
     } catch (error) {
-      console.error('OTP Verification Error:', error);
-      showToast(error.message || t('otp_invalid'));
+      showToast(error.response?.data?.messages || 'Login failed');
     }
   };
 

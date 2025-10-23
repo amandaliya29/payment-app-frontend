@@ -65,20 +65,21 @@ const SetPinPage = () => {
     }
 
     try {
-      const response = await saveCreditUpiPin(bankCreditUpiId, pin, confirmPin);
-      if (response?.status) {
-        showToast('PIN set successfully');
-        setTimeout(() => {
-          navigation.reset({
-            index: 1,
-            routes: [{ name: 'HomePage' }, { name: 'CreditUPIPage' }],
-          });
-        }, 1000);
-      } else {
-        showToast(response?.messages || 'Failed to set PIN');
-      }
+      let payload = {
+        bank_credit_upi: bankCreditUpiId,
+        pin_code: pin,
+        pin_code_confirmation: confirmPin,
+      };
+      const response = await saveCreditUpiPin(payload);
+      showToast(response.data?.messages);
+      setTimeout(() => {
+        navigation.reset({
+          index: 1,
+          routes: [{ name: 'HomePage' }, { name: 'CreditUPIPage' }],
+        });
+      }, 1000);
     } catch (error) {
-      showToast(error.message || 'Something went wrong');
+      showToast(error.response?.data?.messages || 'Failed to set PIN');
     }
   };
 

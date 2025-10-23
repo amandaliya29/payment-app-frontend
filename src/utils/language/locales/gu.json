@@ -350,5 +350,12 @@
   "search_name_or_number": "નામ અથવા નંબર દ્વારા શોધો",
   "recent_searches": "તાજેતરના શોધો",
   "people": "લોકો",
-  "no_result_found": "કોઈ પરિણામ મળ્યું નથી"
+  "no_result_found": "કોઈ પરિણામ મળ્યું નથી",
+
+  "transactionDetails": "ટ્રાન્ઝેક્શન વિગતો",
+  "from": "માથી",
+  "to": "સુધી",
+  "upiTransactionId": "યુપીઆઈ ટ્રાન્ઝેક્શન આઈડી :",
+  "paymentDelayNote": "ચુકવણીને તમારા ખાતામાં દર્શાવવામાં 3 કામકાજના દિવસો લાગી શકે છે",
+  "completed": "પૂર્ણ થયું"
 }

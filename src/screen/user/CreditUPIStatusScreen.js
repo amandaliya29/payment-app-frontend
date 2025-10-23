@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -15,19 +15,21 @@ import Header from '../../component/Header';
 import I18n from '../../utils/language/i18n';
 import Button from '../../component/Button';
 import { useSelector } from 'react-redux';
-import { activateCreditUpi } from '../../utils/apiHelper/Axios';
 import { useNavigation } from '@react-navigation/native';
+import { Toast } from '../../utils/Toast';
 
 const CreditUPIStatusScreen = () => {
   const navigation = useNavigation();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
+  // ✅ Get data from Redux instead of API
   const selectedBank = useSelector(state => state.user.selectedBank);
-  const idToken = useSelector(state => state.user.token);
+  const upiData = useSelector(state => state.user.creditUpiData); // stored after activation in OTP screen
 
   const [loading, setLoading] = useState(false);
-  const [upiData, setUpiData] = useState(null); // store dynamic data
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -37,28 +39,14 @@ const CreditUPIStatusScreen = () => {
     card: isDark ? Colors.secondaryBg : Colors.cardGrey,
   };
 
-  useEffect(() => {
-    const activateUpi = async () => {
-      // run always to keep hook order consistent
-      if (selectedBank && idToken) {
-        setLoading(true);
-        try {
-          const response = await activateCreditUpi(idToken, selectedBank.id);
-          // Expected response: { status: true, data: { upi_id, credit_limit }, messages: "Activate Successful" }
-          if (response?.status && response?.data) {
-            setUpiData(response.data);
-          }
-        } catch (error) {
-          console.log('Activation Error:', error);
-          alert(error.message || 'Failed to activate credit UPI');
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    activateUpi();
-  }, [selectedBank, idToken, navigation]);
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(false);
+    setTimeout(() => {
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 2000);
+    }, 100);
+  };
 
   return (
     <SafeAreaView
@@ -73,7 +61,6 @@ const CreditUPIStatusScreen = () => {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* Success Icon */}
         <View style={styles.iconWrapper}>
           <View style={styles.successIcon}>
             <Image
@@ -83,7 +70,6 @@ const CreditUPIStatusScreen = () => {
           </View>
         </View>
 
-        {/* Title */}
         <Text style={[styles.title, { color: Colors.darkGreen }]}>
           {I18n.t('credit_upi_activated')}
         </Text>
@@ -91,7 +77,6 @@ const CreditUPIStatusScreen = () => {
           {I18n.t('upi_success_message')}
         </Text>
 
-        {/* Bank Details Card */}
         <View style={[styles.card, { backgroundColor: themeColors.card }]}>
           <Text style={[styles.cardTitle, { color: themeColors.text }]}>
             {I18n.t('bank_details')}
@@ -126,15 +111,14 @@ const CreditUPIStatusScreen = () => {
           </View>
         </View>
 
-        {/* Button */}
         <Button
           title={loading ? I18n.t('loading') : I18n.t('setup_upi_pin')}
           onPress={() =>
             navigation.navigate('CreditSetPinPage', {
-              bankCreditUpiId: upiData.id,
+              bankCreditUpiId: upiData?.id,
             })
           }
-          disabled={loading}
+          disabled={loading || !upiData}
         />
 
         {loading && (
@@ -145,6 +129,8 @@ const CreditUPIStatusScreen = () => {
           />
         )}
       </ScrollView>
+
+      <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
 };

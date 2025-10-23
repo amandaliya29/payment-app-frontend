@@ -15,6 +15,7 @@ import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
 import { getBankAccountList } from '../../utils/apiHelper/Axios';
+import { Toast } from '../../utils/Toast'; // ✅ Import your custom toast
 import { useNavigation } from '@react-navigation/native';
 
 const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
@@ -26,7 +27,14 @@ const SelfTransfer = () => {
 
   const [bankAccounts, setBankAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
+  const showToast = message => {
+    setToastVisible(false);
+    setToastMessage(message);
+    setTimeout(() => setToastVisible(true), 50);
+  };
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
     text: isDark ? Colors.white : Colors.black,
@@ -41,16 +49,18 @@ const SelfTransfer = () => {
     const fetchAccounts = async () => {
       try {
         const response = await getBankAccountList();
-        console.log('Bank List API Response:', response);
 
-        if (response.status && Array.isArray(response.data)) {
-          setBankAccounts(response.data);
+        if (response.data?.status && Array.isArray(response.data?.data)) {
+          setBankAccounts(response.data.data);
         } else {
           setBankAccounts([]);
+          showToast(I18n.t('no_linked_account'));
         }
       } catch (error) {
-        console.log('Error fetching bank accounts:', error);
         setBankAccounts([]);
+        showToast(
+          error.response?.data?.messages || I18n.t('something_went_wrong'),
+        );
       } finally {
         setLoading(false);
       }
@@ -86,7 +96,15 @@ const SelfTransfer = () => {
         <View style={styles.bankSection}>
           {bankAccounts.length > 0 ? (
             bankAccounts.map(bank => (
-              <TouchableOpacity key={bank.id} style={[styles.bankCard]}>
+              <TouchableOpacity
+                key={bank.id}
+                style={[styles.bankCard]}
+                onPress={() =>
+                  showToast(
+                    `${bank.bank.name} ${I18n.t('selected_successfully')}`,
+                  )
+                }
+              >
                 <View
                   style={[
                     styles.bankIconBox,
@@ -127,7 +145,10 @@ const SelfTransfer = () => {
               styles.paymentOption,
               { marginTop: scaleUtils.scaleHeight(10) },
             ]}
-            onPress={() => navigation.navigate('BankLinkScreen')}
+            onPress={() => {
+              showToast(I18n.t('navigating_add_bank'));
+              navigation.navigate('BankLinkScreen');
+            }}
           >
             <View
               style={[
@@ -152,6 +173,9 @@ const SelfTransfer = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* ✅ Custom Toast Component */}
+      <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
 };

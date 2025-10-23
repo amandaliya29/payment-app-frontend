@@ -339,5 +339,12 @@
   "search_name_or_number": "Search by name or number",
   "recent_searches": "Recent Searches",
   "people": "People",
-  "no_result_found": "No result found"
+  "no_result_found": "No result found",
+
+  "transactionDetails": "Transaction details",
+  "from": "From",
+  "to": "To",
+  "upiTransactionId": "UPI transaction ID :",
+  "paymentDelayNote": "Payments may take up to 3 working days to be reflected in your account",
+  "completed": "Completed"
 }

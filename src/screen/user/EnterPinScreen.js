@@ -42,29 +42,33 @@ const EnterPinScreen = () => {
 
   const showToast = message => {
     setToastMessage(message);
-    setToastVisible(true);
+    setToastVisible(false); // reset first
+    setTimeout(() => {
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 2000); // auto-hide after 2s
+    }, 100); // short delay to trigger re-render
   };
 
   const handleContinue = async () => {
-    setLoading(true);
     try {
-      // Make API call with bank_id and pin
-      const response = await getBankBalance(banks.id, pin);
+      setLoading(true);
 
-      if (response.status) {
-        // Success: navigate to BankBalanceScreen
-        navigation.replace('BankBalanceScreen', {
-          selectedBank: banks,
-          balance: response.data.amount,
-        });
-      } else {
-        showToast(response.messages);
-        setPin('');
+      let payload = {
+        account_id: banks.id,
+        pin_code: pin,
+      };
+
+      const res = await getBankBalance(payload);
+      if (!res.data.status) {
+        showToast(res.data.messages);
       }
+
+      navigation.replace('BankBalanceScreen', {
+        selectedBank: banks,
+        balance: res.data.data?.amount || 0,
+      });
     } catch (error) {
-      console.log(error);
       showToast(error?.response?.data?.messages || 'Invalid PIN');
-      setPin('');
     } finally {
       setLoading(false);
     }

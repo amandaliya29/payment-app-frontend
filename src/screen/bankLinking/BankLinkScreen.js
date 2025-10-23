@@ -17,11 +17,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import I18n from '../../utils/language/i18n';
 import { BankList } from '../../utils/apiHelper/Axios';
 import { getUserData } from '../../utils/async/storage';
+import { Toast } from '../../utils/Toast'; // ✅ import custom toast
 
 const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
 
 const BankLinkScreen = () => {
-  // ✅ All hooks must stay at the top level
   const navigation = useNavigation();
   const { colors, dark } = useTheme();
 
@@ -29,15 +29,23 @@ const BankLinkScreen = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isChecking, setIsChecking] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false); // ✅ toast state
+  const [toastMessage, setToastMessage] = useState(''); // ✅ toast message
+
+  // ✅ Centralized toast function
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+  };
 
   // ✅ Fetch bank list from API
   useEffect(() => {
     const fetchBankList = async () => {
       try {
         const res = await BankList();
-        setData(res.data || []);
+        setData(res.data?.data || []);
       } catch (error) {
-        console.log('Bank List Error:', error);
+        showToast(error.response?.data?.messages);
       } finally {
         setLoading(false);
       }
@@ -46,7 +54,22 @@ const BankLinkScreen = () => {
     fetchBankList();
   }, []);
 
-  // ✅ Function to handle bank selection (wrapped in useCallback for stability)
+  // useEffect(() => {
+  //   const fetchBankList = async () => {
+  //     try {
+  //       const res = await BankList();
+  //       setData(res.data?.data || []);
+  //     } catch (error) {
+  //       console.log('Bank List Error:', error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchBankList();
+  // }, []);
+
+  // ✅ Function to handle bank selection
   const handleBankPress = useCallback(
     async item => {
       try {
@@ -55,15 +78,18 @@ const BankLinkScreen = () => {
         console.log('User Data:', userData);
 
         if (userData?.user?.has_bank_accounts) {
+          showToast('Redirecting to UPI Pin Setup...');
           navigation.navigate('UPIPinSetup', {
             token: userData.token,
             Itemid: item.id,
           });
         } else {
+          showToast('Redirecting to Aadhaar Verification...');
           navigation.navigate('AadhaarVerification', { Itemid: item.id });
         }
       } catch (error) {
         console.log('Bank selection error:', error);
+        showToast('Something went wrong. Please try again.');
       } finally {
         setIsChecking(false);
       }
@@ -173,6 +199,14 @@ const BankLinkScreen = () => {
           />
         )}
       </ScrollView>
+
+      {/* ✅ Custom Toast */}
+      <Toast
+        visible={toastVisible}
+        message={toastMessage}
+        isDark={dark}
+        duration={2000}
+      />
     </SafeAreaView>
   );
 };
