@@ -61,3 +61,6 @@ export const saveCreditUpiPin = async payload =>
 
 export const searchUser = async search =>
   await axios.post('/user/search', { search });
+
+export const getTransaction = async id =>
+  await axios.get(`/transaction/get/${id}`);

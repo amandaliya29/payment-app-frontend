@@ -19,6 +19,8 @@ import { useNavigation } from '@react-navigation/native';
 import { LanguageContext } from '../../utils/language/LanguageContext';
 import { getBankAccountList } from '../../utils/apiHelper/Axios';
 import { Toast } from '../../utils/Toast'; // 🔹 Import custom Toast
+import { navigationRef } from '../../../App';
+import { getMessaging } from '@react-native-firebase/messaging';
 
 const HomeScreen = () => {
   const scheme = useColorScheme();
@@ -46,6 +48,24 @@ const HomeScreen = () => {
     secondaryBg: isDark ? Colors.secondaryBg : Colors.cardGrey,
     card: isDark ? Colors.card : Colors.cardGrey,
   };
+
+  useEffect(() => {
+    const unsubscribe = getMessaging().onNotificationOpenedApp(
+      remoteMessage => {
+        console.log(
+          'HomePage listener - notification opened:',
+          remoteMessage.data,
+        );
+        if (remoteMessage?.data?.screen && navigationRef.current) {
+          navigationRef.current.navigate(remoteMessage.data.screen, {
+            transaction_id: remoteMessage.data.transaction_id,
+          });
+        }
+      },
+    );
+
+    return unsubscribe;
+  }, []);
 
   // 🔹 Fetch Banks on Mount
   useEffect(() => {
@@ -241,7 +261,11 @@ const HomeScreen = () => {
           <ActionButton3
             title={i18n.t('transaction_history')}
             image={require('../../assets/image/homeIcon/history.png')}
-            onPress={() => navigation.navigate('TransactionSuccessScreen')}
+            onPress={() =>
+              navigation.navigate('TransactionSuccessScreen', {
+                transaction_id: 'TXN202510211732353437',
+              })
+            }
           />
         </View>
 
