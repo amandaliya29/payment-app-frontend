@@ -42,6 +42,7 @@ import SelfTransfer from '../screen/HomeScreens/SelfTransfer';
 import EnterAmountScreen from '../screen/HomeScreens/EnterAmountScreen';
 import Search from '../screen/HomeScreens/Search';
 import TransactionSuccessScreen from '../screen/user/TransactionSuccessScreen';
+import TransactionPinScreen from '../screen/HomeScreens/TransactionPinScreen';
 
 const Stack = createStackNavigator();
 
@@ -144,6 +145,10 @@ const StackNavigation = ({ notificationScreen }) => {
         <Stack.Screen
           name="TransactionSuccessScreen"
           component={TransactionSuccessScreen}
+        />
+        <Stack.Screen
+          name="TransactionPinScreen"
+          component={TransactionPinScreen}
         />
       </Stack.Navigator>
     </>

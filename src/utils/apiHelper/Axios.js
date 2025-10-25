@@ -64,3 +64,8 @@ export const searchUser = async search =>
 
 export const getTransaction = async id =>
   await axios.get(`/transaction/get/${id}`);
+
+export const getUser = async identifier =>
+  await axios.get(`/user/get/${identifier}`);
+
+export const getPay = async payload => await axios.post('/pay', payload);
