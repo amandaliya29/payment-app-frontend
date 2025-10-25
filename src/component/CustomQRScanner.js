@@ -42,15 +42,17 @@ const CustomQRScanner = () => {
     setToastVisible(true);
   };
 
+  // console.log('qrValue', qrValue);
+
   // ✅ Navigate after scan success
   const navigateToEnterAmount = code => {
     setQrValue(code);
-    showToast(`${I18n.t('qr_found')}: ${code}`);
+    // showToast(`${I18n.t('qr_found')}: ${code}`);
 
     // Add slight delay so toast is visible before navigating
     setTimeout(() => {
       navigation.navigate('EnterAmountScreen', {
-        user: { name: 'Rahul Mehta', upiCode: code }, // static user
+        user: { code }, // static user
       });
     }, 800);
   };
@@ -101,69 +103,57 @@ const CustomQRScanner = () => {
           </Text>
         </View>
       )}
+      <>
+        <View style={styles.cameraWrapper}>
+          <Camera
+            ref={cameraRef}
+            style={styles.camera}
+            scanBarcode={true}
+            onReadCode={handleReadCode}
+            showFrame={false}
+            torchMode={torchOn ? 'on' : 'off'}
+          />
 
-      {!qrValue ? (
-        <>
-          <View style={styles.cameraWrapper}>
-            <Camera
-              ref={cameraRef}
-              style={styles.camera}
-              scanBarcode={true}
-              onReadCode={handleReadCode}
-              showFrame={false}
-              torchMode={torchOn ? 'on' : 'off'}
-            />
-
-            <View style={styles.overlay}>
-              <View style={styles.topOverlay} />
-              <View style={styles.centerRow}>
-                <View style={styles.sideOverlay} />
-                <View style={styles.scanBox}>
-                  <View style={[styles.corner, styles.topLeft]} />
-                  <View style={[styles.corner, styles.topRight]} />
-                  <View style={[styles.corner, styles.bottomLeft]} />
-                  <View style={[styles.corner, styles.bottomRight]} />
-                </View>
-                <View style={styles.sideOverlay} />
+          <View style={styles.overlay}>
+            <View style={styles.topOverlay} />
+            <View style={styles.centerRow}>
+              <View style={styles.sideOverlay} />
+              <View style={styles.scanBox}>
+                <View style={[styles.corner, styles.topLeft]} />
+                <View style={[styles.corner, styles.topRight]} />
+                <View style={[styles.corner, styles.bottomLeft]} />
+                <View style={[styles.corner, styles.bottomRight]} />
               </View>
-              <View style={styles.bottomOverlay} />
+              <View style={styles.sideOverlay} />
             </View>
-
-            <View style={styles.actionButtons}>
-              <TouchableOpacity
-                onPress={openGallery}
-                style={styles.galleryButton}
-              >
-                <Image
-                  source={require('../assets/image/appIcon/gallery.png')}
-                  style={styles.galleryIcon}
-                />
-                <Text style={styles.galleryText}>{I18n.t('gallery')}</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.iconWrapper}
-                onPress={toggleTorch}
-              >
-                <Image
-                  source={
-                    torchOn
-                      ? require('../assets/image/appIcon/tourch_on.png')
-                      : require('../assets/image/appIcon/tourch_off.png')
-                  }
-                  style={styles.iconButton}
-                />
-              </TouchableOpacity>
-            </View>
+            <View style={styles.bottomOverlay} />
           </View>
-        </>
-      ) : (
-        <View style={styles.resultBox}>
-          <Text style={styles.resultText}>
-            {I18n.t('qr_code')}: {qrValue}
-          </Text>
+
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              onPress={openGallery}
+              style={styles.galleryButton}
+            >
+              <Image
+                source={require('../assets/image/appIcon/gallery.png')}
+                style={styles.galleryIcon}
+              />
+              <Text style={styles.galleryText}>{I18n.t('gallery')}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.iconWrapper} onPress={toggleTorch}>
+              <Image
+                source={
+                  torchOn
+                    ? require('../assets/image/appIcon/tourch_on.png')
+                    : require('../assets/image/appIcon/tourch_off.png')
+                }
+                style={styles.iconButton}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
-      )}
+      </>
 
       <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </View>

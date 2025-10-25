@@ -346,5 +346,9 @@
   "to": "To",
   "upiTransactionId": "UPI transaction ID :",
   "paymentDelayNote": "Payments may take up to 3 working days to be reflected in your account",
-  "completed": "Completed"
+  "completed": "Completed",
+
+  "enter_transaction_pin": "Enter Transaction PIN",
+  "pin_verified": "Transaction PIN Verified Successfully",
+  "invalid_pin": "Invalid PIN"
 }

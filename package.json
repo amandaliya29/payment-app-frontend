@@ -40,6 +40,7 @@
     "react-native-screens": "^4.17.1",
     "react-native-share": "^12.2.0",
     "react-native-size-matters": "^0.4.2",
+    "react-native-sound": "^0.13.0",
     "react-native-svg": "^15.13.0",
     "react-native-view-shot": "^4.0.3",
     "react-redux": "^9.2.0"

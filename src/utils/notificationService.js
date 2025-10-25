@@ -59,6 +59,8 @@ export function setupNotificationListeners(navigate) {
     .getInitialNotification()
     .then(remoteMessage => {
       console.log('Notification opened from quit state:', remoteMessage);
+      // console.log('name : ', remoteMessage?.data?.screen);
+
       if (remoteMessage?.data?.screen) {
         setTimeout(() => {
           navigate(remoteMessage.data.screen);

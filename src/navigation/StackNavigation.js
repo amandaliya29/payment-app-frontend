@@ -1,7 +1,10 @@
-import { StyleSheet, StatusBar } from 'react-native';
 import React from 'react';
+import { StatusBar, StyleSheet } from 'react-native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { useTheme } from '@react-navigation/native'; // 👈 get theme from NavigationContainer
+import { useTheme } from '@react-navigation/native';
+import { Colors } from '../themes/Colors';
+
+import SplashScreen from '../screen/auth/SplashScreen';
 import MobileNumberEntry from '../screen/auth/MobileNumberEntry';
 import OtpVerification from '../screen/auth/OtpVerification';
 import BankLinkScreen from '../screen/bankLinking/BankLinkScreen';
@@ -26,8 +29,6 @@ import MobileHbfc from '../screen/hbfcCraditUpi/MobileHbfc';
 import HbfCreditUpiVerification from '../screen/hbfcCraditUpi/HbfCreditUpiVerification';
 import HbfcCrditLoadingScreen from '../screen/hbfcCraditUpi/HbfcCrditLoadingScreen';
 import HbfcCreditLimitActivate from '../screen/hbfcCraditUpi/HbfcCreditLimitActivate';
-import { Colors } from '../themes/Colors';
-import SplashScreen from '../screen/auth/SplashScreen';
 import QrPage from '../screen/qrPages/QrPage';
 import BankBalanceScreen from '../screen/user/BankBalanceScreen';
 import ReceiveMoneyScreen from '../screen/user/ReceiveMoneyScreen';
@@ -41,28 +42,34 @@ import SelfTransfer from '../screen/HomeScreens/SelfTransfer';
 import EnterAmountScreen from '../screen/HomeScreens/EnterAmountScreen';
 import Search from '../screen/HomeScreens/Search';
 import TransactionSuccessScreen from '../screen/user/TransactionSuccessScreen';
+import TransactionPinScreen from '../screen/HomeScreens/TransactionPinScreen';
 
 const Stack = createStackNavigator();
 
-const StackNavigation = () => {
-  const { colors, dark } = useTheme(); // 👈 detect current theme
+const StackNavigation = ({ notificationScreen }) => {
+  const { colors, dark } = useTheme();
+  console.log('initialNotificationScreen  navigation', notificationScreen);
 
   return (
     <>
       <StatusBar
         translucent
         backgroundColor="transparent"
-        barStyle={dark ? 'light-content' : 'dark-content'} // 👈 change automatically
+        barStyle={dark ? 'light-content' : 'dark-content'}
       />
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
           contentStyle: {
             backgroundColor: dark ? Colors.white : colors.background,
-          }, // 👈 use theme bg
+          },
         }}
       >
-        <Stack.Screen name="Splash" component={SplashScreen} />
+        <Stack.Screen
+          name="Splash"
+          component={SplashScreen}
+          initialParams={{ notificationScreen: notificationScreen }}
+        />
         <Stack.Screen name="MobileNumberEntry" component={MobileNumberEntry} />
         <Stack.Screen name="OtpVerification" component={OtpVerification} />
         <Stack.Screen name="BankLinkScreen" component={BankLinkScreen} />
@@ -139,11 +146,14 @@ const StackNavigation = () => {
           name="TransactionSuccessScreen"
           component={TransactionSuccessScreen}
         />
+        <Stack.Screen
+          name="TransactionPinScreen"
+          component={TransactionPinScreen}
+        />
       </Stack.Navigator>
     </>
   );
 };
 
 export default StackNavigation;
-
 const styles = StyleSheet.create({});

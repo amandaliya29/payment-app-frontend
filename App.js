@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useColorScheme } from 'react-native';
 import {
   NavigationContainer,
@@ -7,101 +7,108 @@ import {
 } from '@react-navigation/native';
 import { I18nextProvider } from 'react-i18next';
 import NetInfo from '@react-native-community/netinfo';
+import messaging from '@react-native-firebase/messaging';
+
 import i18n from './src/utils/language/i18n';
 import StackNavigation from './src/navigation/StackNavigation';
 import NoInternetScreen from './src/screen/user/NoInternetScreen';
 import { LanguageProvider } from './src/utils/language/LanguageContext';
-import {
-  requestUserPermission,
-  getFCMToken,
-  setupNotificationListeners,
-} from './src/utils/notificationService';
-import messaging from '@react-native-firebase/messaging';
 import { updateFcmToken } from './src/utils/apiHelper/Axios';
+import { getUserData } from './src/utils/async/storage';
+
+// ✅ Global navigation reference
+export const navigationRef = React.createRef();
+
+async function requestUserPermission() {
+  const authStatus = await messaging().requestPermission();
+  return (
+    authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+    authStatus === messaging.AuthorizationStatus.PROVISIONAL
+  );
+}
+
+async function getFCMToken() {
+  const token = await messaging().getToken();
+  console.log('FCM Token:', token);
+  return token;
+}
 
 const App = () => {
   const scheme = useColorScheme();
   const [isConnected, setIsConnected] = useState(true);
-  const [uid, setUid] = useState(null);
-  const [initialScreen, setInitialScreen] = useState(null);
-  const navigationRef = useRef();
+  const [fcmReady, setFcmReady] = useState(false);
+  const [notificationScreen, setNotificationScreen] = useState(null);
 
-  // ✅ Navigate callback defined outside of conditions
-  const navigate = useCallback(screenName => {
-    if (navigationRef.current && screenName) {
-      console.log('Navigating to screen:', screenName);
-      navigationRef.current.navigate(screenName);
-    } else {
-      console.log('Navigation not ready, storing screen:', screenName);
-      setInitialScreen(screenName);
-    }
-  }, []);
-
-  // Internet connectivity
+  // 🔹 Internet status listener
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener(state => {
       setIsConnected(state.isConnected && state.isInternetReachable !== false);
     });
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
-  // Firebase notifications
+  // 🔹 FCM setup
   useEffect(() => {
-    requestUserPermission();
-    getFCMToken();
+    const initFCM = async () => {
+      const auth = await requestUserPermission();
+      if (!auth) return;
 
-    // Setup notification listeners only once
-    const unsubscribeNotifications = setupNotificationListeners(navigate);
+      const token = await getFCMToken();
+      const userData = await getUserData();
+      if (token && userData?.user?.id) await updateFcmToken(token);
 
-    // Quit state notifications
-    messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
-        if (remoteMessage?.data?.screen) {
-          console.log(
-            'Notification from quit state:',
+      // ✅ Foreground notification
+      messaging().onMessage(async remoteMessage => {
+        console.log('Foreground notification:', remoteMessage.data);
+        alert(remoteMessage.notification?.title || 'Notification');
+      });
+
+      // ✅ Background tap
+      messaging().onNotificationOpenedApp(remoteMessage => {
+        console.log('Background notification opened:', remoteMessage.data);
+        if (remoteMessage?.data?.screen && navigationRef.current) {
+          navigationRef.current.navigate(
             remoteMessage.data.screen,
+            remoteMessage.data,
           );
-          setInitialScreen(remoteMessage.data.screen);
         }
       });
 
-    // Token refresh listener
-    const refreshUnsubscribe = messaging().onTokenRefresh(async newToken => {
-      if (uid) {
-        console.log('newToken', newToken);
-        await updateFcmToken(newToken);
+      // ✅ Quit (killed) state
+      const initialMessage = await messaging().getInitialNotification();
+      if (initialMessage?.data?.screen) {
+        console.log(
+          'Notification opened from quit state:',
+          initialMessage.data,
+        );
+        setNotificationScreen({
+          screen: initialMessage.data.screen,
+          transaction_id: initialMessage.data.transaction_id,
+        });
       }
-    });
 
-    return () => {
-      unsubscribeNotifications();
-      refreshUnsubscribe();
+      // 🔹 Token refresh
+      messaging().onTokenRefresh(async newToken => {
+        if (userData?.user?.id) await updateFcmToken(newToken);
+      });
+
+      setFcmReady(true);
     };
-  }, [uid, navigate]);
 
-  // Navigate after NavigationContainer is ready
-  const onReady = useCallback(() => {
-    if (initialScreen) {
-      console.log('Navigating to initial screen:', initialScreen);
-      navigationRef.current?.navigate(initialScreen);
-      setInitialScreen(null);
-    }
-  }, [initialScreen]);
+    initFCM();
+  }, []);
 
-  if (!isConnected) {
-    return <NoInternetScreen onRetry={() => NetInfo.fetch()} />;
-  }
+  if (!isConnected) return <NoInternetScreen onRetry={() => NetInfo.fetch()} />;
+  if (!fcmReady) return null;
 
   return (
     <I18nextProvider i18n={i18n}>
       <LanguageProvider>
         <NavigationContainer
           ref={navigationRef}
-          onReady={onReady}
           theme={scheme === 'dark' ? DarkTheme : DefaultTheme}
         >
-          <StackNavigation setUid={setUid} />
+          <StackNavigation notificationScreen={notificationScreen} />
         </NavigationContainer>
       </LanguageProvider>
     </I18nextProvider>

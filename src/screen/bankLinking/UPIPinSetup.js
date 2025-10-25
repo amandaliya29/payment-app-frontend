@@ -34,7 +34,10 @@ const UPIPinSetup = () => {
   const generate_IFSC = () => {
     const banks = ['HDFC', 'ICIC', 'SBI', 'PNB', 'AXIS'];
     const bankCode = banks[Math.floor(Math.random() * banks.length)];
-    const branchCode = String(Math.floor(100000 + Math.random() * 900000));
+    const branchCode = Array.from({ length: 6 }, () => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      return chars[Math.floor(Math.random() * chars.length)];
+    }).join('');
     return `${bankCode}0${branchCode}`;
   };
 
