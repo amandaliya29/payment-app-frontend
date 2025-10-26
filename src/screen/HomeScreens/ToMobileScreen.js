@@ -39,7 +39,13 @@ const ToMobileScreen = () => {
         : { method: 'upi', value: upiId };
 
     console.log('Transfer Data:', data);
-    navigation.goBack();
+    // navigation.goBack();
+    navigation.navigate('EnterAmountScreen', {
+      user:
+        data.method === 'phone'
+          ? { id: `+91${data.value}` }
+          : { code: data.value },
+    });
   };
 
   return (

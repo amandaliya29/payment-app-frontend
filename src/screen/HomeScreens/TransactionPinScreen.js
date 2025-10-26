@@ -75,7 +75,7 @@ const TransactionPinScreen = () => {
       // ✅ Build API payload dynamically
       const payload = {
         amount: amount,
-        to_bank_account: user?.bank_account?.id,
+        from_bank_account: bank.id,
         description: note,
         pin_code: pin,
       };
@@ -83,7 +83,7 @@ const TransactionPinScreen = () => {
       if (isViaUPI) {
         payload.upi_id = user?.bank_account?.upi_id;
       } else {
-        payload.from_bank_account = bank.id;
+        payload.to_bank_account = user?.bank_account?.id;
       }
 
       console.log('Transaction payload =>', payload);
@@ -94,13 +94,14 @@ const TransactionPinScreen = () => {
         showToast(response?.data?.messages || 'Transaction failed!');
       }
       showToast(response?.data?.messages || 'Transaction successful!');
-      // setTimeout(() => {
-      //   navigation.replace('TransactionSuccessScreen', {
-      //     amount,
-      //     bank,
-      //     user,
-      //   });
-      // }, 1500);
+      setTimeout(() => {
+        navigation.replace('PaymentSuccessScreen', {
+          amount,
+          bank,
+          user,
+          transaction: response?.data?.data,
+        });
+      }, 1500);
     } catch (error) {
       showToast(error?.response?.data?.messages || 'Transaction error');
       //   setTimeout(() => navigation.goBack(), 2000);

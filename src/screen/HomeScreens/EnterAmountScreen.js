@@ -169,6 +169,11 @@ const EnterAmountScreen = () => {
     });
   };
 
+  // console.log(
+  //   'userData?.bank_account?.id,',
+  //   banks.filter(item => item.id !== userData?.bank_account?.id),
+  // );
+
   if (userLoading || userError || !userData) {
     return (
       <SafeAreaView
@@ -296,7 +301,9 @@ const EnterAmountScreen = () => {
               {I18n.t('select_bank')}
             </Text>
             <FlatList
-              data={banks}
+              data={banks.filter(
+                item => item.id !== userData?.bank_account?.id,
+              )}
               showsVerticalScrollIndicator={false}
               keyExtractor={item => item.id.toString()}
               renderItem={({ item }) => (
