@@ -148,8 +148,10 @@ const ToMobileScreen = () => {
             title={I18n.t('continue')}
             style={styles.continueButton}
             disabled={
-              (selectedOption === 'phone' && !phoneNumber) ||
-              (selectedOption === 'upi' && !upiId)
+              (selectedOption === 'phone' &&
+                (!phoneNumber || phoneNumber.length < 10)) ||
+              (selectedOption === 'upi' &&
+                (!upiId || !/^[\w.-]+@[\w.-]+$/.test(upiId)))
             }
             onPress={handleContinue}
           />

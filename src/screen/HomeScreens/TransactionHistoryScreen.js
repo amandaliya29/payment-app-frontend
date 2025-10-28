@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// src/screens/TransactionHistoryScreen.js
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,6 +10,7 @@ import {
   FlatList,
   useColorScheme,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../themes/Colors';
@@ -18,10 +20,33 @@ import I18n from '../../utils/language/i18n';
 import Button from '../../component/Button'; // ✅ Reuse your shared Button component
 import { useNavigation } from '@react-navigation/native';
 
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  startLoading,
+  startLoadingMore,
+  setTransactionsPage,
+  appendTransactionsPage,
+  clearTransactions,
+  setError,
+} from '../../utils/redux/TransactionSlice'; // adjust path if needed
+import {
+  getTransactions,
+  getBankAccountList,
+} from '../../utils/apiHelper/Axios'; // adjust path to your api file
+
 const TransactionHistoryScreen = () => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
+  const {
+    sections: reduxSections,
+    page: reduxPage,
+    lastPage: reduxLastPage,
+    isLoading: reduxIsLoading,
+    isLoadingMore: reduxIsLoadingMore,
+  } = useSelector(state => state.transaction);
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -42,12 +67,7 @@ const TransactionHistoryScreen = () => {
     paymentType: '',
   });
 
-  const openFilter = type => {
-    setSelectedFilter(type);
-    setModalVisible(true);
-  };
-
-  const filterOptions = {
+  const [filterOptions, setFilterOptions] = useState({
     status: [I18n.t('completed'), I18n.t('failed'), I18n.t('processing')],
     paymentMethod: ['Bank A', 'Bank B', 'Bank C'],
     date: [
@@ -66,32 +86,211 @@ const TransactionHistoryScreen = () => {
       I18n.t('money_received'),
       I18n.t('self_transfer'),
     ],
+  });
+
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    fetchBanks();
+    // initial load page 1
+    fetchTransactions(1, true);
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const openFilter = type => {
+    setSelectedFilter(type);
+    setModalVisible(true);
   };
 
-  const data = [
-    {
-      title: 'October 2025',
-      total: 6876.2,
-      data: [
-        { id: 1, name: 'Ravi Kumar', date: '26 October', amount: 199.9 },
-        { id: 2, name: 'Anjali Sharma', date: '25 October', amount: -120.5 },
-      ],
-    },
-    {
-      title: 'September 2025',
-      total: -560.0,
-      data: [
-        { id: 3, name: 'Vikas Patel', date: '10 September', amount: -560.0 },
-      ],
-    },
-  ];
+  const mapApiItemToRow = item => {
+    // Determine name for UI
+    const name =
+      item.counterparty?.name ||
+      item.counterparty?.upi ||
+      item.counterparty?.account ||
+      '';
 
+    // parse created_at to readable date like '26 October'
+    const dateObj = item.created_at ? new Date(item.created_at) : null;
+    let dateStr = item.created_at;
+    if (dateObj) {
+      const day = dateObj.getDate();
+      const month = dateObj.toLocaleString('default', { month: 'long' });
+      dateStr = `${day} ${month}`;
+    }
+
+    // mode: "debit" -> negative amount, "credit" -> positive amount
+    const rawAmount = parseFloat(item.amount || 0);
+    const signedAmount =
+      item.mode === 'debit' ? -Math.abs(rawAmount) : Math.abs(rawAmount);
+
+    return {
+      id: item.transaction_id || `${item.transaction_id}-${Math.random()}`,
+      name,
+      date: dateStr,
+      amount: signedAmount,
+      raw: item,
+      month:
+        item.month ||
+        (dateObj
+          ? `${dateObj.toLocaleString('default', { month: 'long' })} ${dateObj.getFullYear()}`
+          : ''),
+    };
+  };
+
+  const groupIntoSections = apiDataArray => {
+    const grouped = {};
+    apiDataArray.forEach(tx => {
+      const mapped = mapApiItemToRow(tx);
+      const month = mapped.month || 'Unknown';
+      if (!grouped[month])
+        grouped[month] = { title: month, total: 0, data: [] };
+      grouped[month].data.push(mapped);
+      grouped[month].total = grouped[month].data.reduce(
+        (acc, it) => acc + (it.amount || 0),
+        0,
+      );
+    });
+
+    // Preserve API order by using insertion order of keys
+    const sectionArray = Object.keys(grouped).map(k => grouped[k]);
+    return sectionArray;
+  };
+
+  const fetchBanks = async () => {
+    try {
+      const res = await getBankAccountList();
+      if (res?.data) {
+        const banks = res.data.data || res.data;
+        if (Array.isArray(banks) && banks.length) {
+          // map to { label, value } to show label in modal and store value
+          const names = banks.map(b => ({
+            label: b.bank_name || b.name || `Bank ${b.id}`,
+            value: b.id,
+          }));
+          setFilterOptions(prev => ({ ...prev, paymentMethod: names }));
+        }
+      }
+    } catch (err) {
+      console.warn('fetchBanks error', err);
+    }
+  };
+
+  const buildPayloadFromFilters = () => {
+    const payload = {};
+    if (filters.status) payload.status = filters.status;
+    if (filters.paymentMethod) {
+      if (
+        typeof filters.paymentMethod === 'object' &&
+        filters.paymentMethod.value
+      ) {
+        payload.payment_method = filters.paymentMethod.value;
+      } else {
+        payload.payment_method = filters.paymentMethod;
+      }
+    }
+    if (filters.date) payload.date_range = filters.date;
+    if (filters.amount) payload.amount_range = filters.amount;
+    if (filters.paymentType) payload.payment_type = filters.paymentType;
+    return payload;
+  };
+
+  const fetchTransactions = async (page = 1, replace = false) => {
+    try {
+      if (!mountedRef.current) return;
+      const payload = buildPayloadFromFilters();
+
+      if (page === 1) dispatch(startLoading());
+      else dispatch(startLoadingMore());
+
+      const res = await getTransactions(payload, page);
+
+      if (!res || !res.data) {
+        dispatch(setError('Invalid response'));
+        return;
+      }
+
+      const body = res.data;
+      if (!body.status) {
+        dispatch(setError(body.messages || 'Error fetching'));
+        return;
+      }
+
+      const pageData = body.data || body;
+      const transactionsArray = pageData.data || [];
+      const newSections = groupIntoSections(transactionsArray);
+
+      const pageNum = pageData.current_page || page;
+      const lastPage = pageData.last_page || pageNum;
+      const total = pageData.total || transactionsArray.length;
+      const per_page = pageData.per_page || 20;
+
+      const payloadForStore = {
+        sections: newSections,
+        page: pageNum,
+        lastPage,
+        total,
+        per_page,
+      };
+
+      if (pageNum === 1 || replace) {
+        dispatch(setTransactionsPage(payloadForStore));
+      } else {
+        dispatch(appendTransactionsPage(payloadForStore));
+      }
+    } catch (err) {
+      console.warn('fetchTransactions err', err);
+      const message =
+        err?.response?.data?.message || err?.message || 'Network Error';
+      dispatch(setError(message));
+    }
+  };
+
+  const applyFilter = option => {
+    let valToStore = option;
+    if (
+      selectedFilter === 'paymentMethod' &&
+      Array.isArray(filterOptions.paymentMethod)
+    ) {
+      const match = filterOptions.paymentMethod.find(
+        o =>
+          (typeof o === 'string' && o === option) ||
+          (typeof o === 'object' &&
+            (o.label === option ||
+              o.value === option ||
+              (option && option.label === o.label))),
+      );
+      if (match) valToStore = match;
+    }
+
+    setFilters(prev => ({ ...prev, [selectedFilter]: valToStore }));
+    setModalVisible(false);
+
+    // clear redux and fetch fresh
+    dispatch(clearTransactions());
+    fetchTransactions(1, true);
+  };
+
+  const onEndReachedCalledDuringMomentum = useRef(false);
+
+  const handleLoadMore = () => {
+    if (reduxIsLoadingMore || reduxIsLoading) return;
+    const nextPage = reduxPage + 1;
+    if (nextPage <= reduxLastPage) {
+      fetchTransactions(nextPage, false);
+    }
+  };
+
+  // Render unchanged except amount color & sign controlled by amount value (negative => debit)
   const renderTransaction = ({ item }) => (
     <View
       style={[styles.transactionRow, { borderBottomColor: themeColors.border }]}
     >
       <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{item.name.charAt(0)}</Text>
+        <Text style={styles.avatarText}>{item.name?.charAt(0)}</Text>
       </View>
       <View style={{ flex: 1 }}>
         <Text style={[styles.name, { color: themeColors.text }]}>
@@ -128,9 +327,15 @@ const TransactionHistoryScreen = () => {
     </View>
   );
 
-  const applyFilter = option => {
-    setFilters(prev => ({ ...prev, [selectedFilter]: option }));
-    setModalVisible(false);
+  const ListFooterComponent = () => {
+    if (reduxIsLoadingMore) {
+      return (
+        <View style={{ padding: 12, alignItems: 'center' }}>
+          <ActivityIndicator size="small" />
+        </View>
+      );
+    }
+    return null;
   };
 
   return (
@@ -162,7 +367,9 @@ const TransactionHistoryScreen = () => {
               onPress={() => openFilter(item)}
             >
               <Text style={[styles.filterText, { color: themeColors.text }]}>
-                {filters[item] || I18n.t(item)}
+                {filters[item] && typeof filters[item] === 'object'
+                  ? filters[item].label || filters[item].value || I18n.t(item)
+                  : filters[item] || I18n.t(item)}
               </Text>
             </TouchableOpacity>
           )}
@@ -171,8 +378,9 @@ const TransactionHistoryScreen = () => {
 
       {/* Transaction Section List */}
       <SectionList
-        sections={data}
-        keyExtractor={item => item.id.toString()}
+        sections={reduxSections.length ? reduxSections : []}
+        showsVerticalScrollIndicator={false}
+        keyExtractor={item => item.id?.toString()}
         renderItem={renderTransaction}
         renderSectionHeader={renderHeader}
         ItemSeparatorComponent={() => (
@@ -185,6 +393,16 @@ const TransactionHistoryScreen = () => {
           paddingBottom: scaleUtils.scaleHeight(16),
         }}
         stickySectionHeadersEnabled={false}
+        onEndReachedThreshold={0.5}
+        onEndReached={() => {
+          if (onEndReachedCalledDuringMomentum.current) return;
+          onEndReachedCalledDuringMomentum.current = true;
+          handleLoadMore();
+          setTimeout(() => {
+            onEndReachedCalledDuringMomentum.current = false;
+          }, 500);
+        }}
+        ListFooterComponent={ListFooterComponent}
       />
 
       {/* Bottom Modal (styled like EnterAmountScreen) */}
@@ -211,8 +429,17 @@ const TransactionHistoryScreen = () => {
           </Text>
 
           <FlatList
-            data={filterOptions[selectedFilter]}
-            keyExtractor={item => item}
+            data={
+              selectedFilter === 'paymentMethod' &&
+              Array.isArray(filterOptions.paymentMethod)
+                ? filterOptions.paymentMethod.map(opt =>
+                    typeof opt === 'string' ? opt : opt.label,
+                  )
+                : filterOptions[selectedFilter]
+            }
+            keyExtractor={item =>
+              typeof item === 'string' ? item : item.label
+            }
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
               <TouchableOpacity
@@ -264,14 +491,13 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: scaleUtils.scaleHeight(10),
+    paddingVertical: scaleUtils.scaleHeight(6),
     borderRadius: scaleUtils.scaleWidth(8),
-    marginTop: scaleUtils.scaleHeight(8),
-    paddingHorizontal: scaleUtils.scaleWidth(4),
+    alignItems: 'center',
   },
   sectionTitle: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: scaleUtils.scaleFont(16),
+    fontSize: scaleUtils.scaleFont(18),
   },
   sectionTotal: {
     fontFamily: 'Poppins-Medium',
@@ -345,6 +571,5 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: 'rgba(255,255,255,0.3)',
-    // marginVertical: scaleUtils.scaleHeight(12),
   },
 });
