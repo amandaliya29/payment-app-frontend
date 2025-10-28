@@ -39,7 +39,13 @@ const ToMobileScreen = () => {
         : { method: 'upi', value: upiId };
 
     console.log('Transfer Data:', data);
-    navigation.goBack();
+    // navigation.goBack();
+    navigation.navigate('EnterAmountScreen', {
+      user:
+        data.method === 'phone'
+          ? { id: `+91${data.value}` }
+          : { code: data.value },
+    });
   };
 
   return (
@@ -142,8 +148,10 @@ const ToMobileScreen = () => {
             title={I18n.t('continue')}
             style={styles.continueButton}
             disabled={
-              (selectedOption === 'phone' && !phoneNumber) ||
-              (selectedOption === 'upi' && !upiId)
+              (selectedOption === 'phone' &&
+                (!phoneNumber || phoneNumber.length < 10)) ||
+              (selectedOption === 'upi' &&
+                (!upiId || !/^[\w.-]+@[\w.-]+$/.test(upiId)))
             }
             onPress={handleContinue}
           />

@@ -16,13 +16,34 @@ import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
 import Button from '../../component/Button';
 import OTPInput from '../../component/OTPInput';
-import { getBankBalance } from '../../utils/apiHelper/Axios';
 import { Toast } from '../../utils/Toast';
+import { getPay } from '../../utils/apiHelper/Axios';
 
-const EnterPinScreen = () => {
+const TransactionPinScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { banks } = route.params || {};
+
+  // ✅ Destructure route params with defaults
+  const {
+    amount = '',
+    bank = {},
+    user = {},
+    isViaUPI = false,
+    note = '',
+  } = route.params || {};
+
+  console.log(
+    'amount',
+    amount,
+    'bank',
+    bank.id,
+    'user',
+    user,
+    'isViaUPI',
+    isViaUPI,
+    'note',
+    note,
+  );
 
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
@@ -37,38 +58,53 @@ const EnterPinScreen = () => {
     subText: isDark ? Colors.grey : Colors.darkGrey,
   };
 
-  const pinLength = banks.pin_code_length;
-  // console.log(banks);
+  const pinLength = bank.pin_code_length || 4;
 
   const showToast = message => {
     setToastMessage(message);
-    setToastVisible(false); // reset first
-    setTimeout(() => {
-      setToastVisible(true);
-      setTimeout(() => setToastVisible(false), 2000); // auto-hide after 2s
-    }, 100); // short delay to trigger re-render
+    setToastVisible(true);
+    // setTimeout(() => setToastVisible(false), 2000);
   };
 
   const handleContinue = async () => {
-    try {
-      setLoading(true);
+    if (pin.length !== pinLength) return;
 
-      let payload = {
-        account_id: banks.id,
+    setLoading(true);
+
+    try {
+      // ✅ Build API payload dynamically
+      const payload = {
+        amount: amount,
+        from_bank_account: bank.id,
+        description: note,
         pin_code: pin,
       };
 
-      const res = await getBankBalance(payload);
-      if (!res.data.status) {
-        showToast(res.data.messages);
+      if (isViaUPI) {
+        payload.upi_id = user?.bank_account?.upi_id;
+      } else {
+        payload.to_bank_account = user?.bank_account?.id;
       }
 
-      navigation.replace('BankBalanceScreen', {
-        selectedBank: banks,
-        balance: res.data.data?.amount || 0,
-      });
+      console.log('Transaction payload =>', payload);
+
+      const response = await getPay(payload);
+
+      if (!response?.data?.status) {
+        showToast(response?.data?.messages || 'Transaction failed!');
+      }
+      showToast(response?.data?.messages || 'Transaction successful!');
+      setTimeout(() => {
+        navigation.replace('PaymentSuccessScreen', {
+          amount,
+          bank,
+          user,
+          transaction: response?.data?.data,
+        });
+      }, 1500);
     } catch (error) {
-      showToast(error?.response?.data?.messages || 'Invalid PIN');
+      showToast(error?.response?.data?.messages || 'Transaction error');
+      //   setTimeout(() => navigation.goBack(), 2000);
     } finally {
       setLoading(false);
     }
@@ -79,11 +115,10 @@ const EnterPinScreen = () => {
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
       <Header
-        title={I18n.t('enter_your_pin')}
+        title={I18n.t('enter_transaction_pin')}
         onBack={() => navigation.goBack()}
       />
 
-      {/* PIN Image */}
       <View style={styles.imageContainer}>
         <Image
           source={require('../../assets/image/appIcon/pin-lock.png')}
@@ -97,26 +132,24 @@ const EnterPinScreen = () => {
         showsVerticalScrollIndicator={false}
       >
         <Text style={[styles.title, { color: themeColors.text }]}>
-          {I18n.t('enter_your_pin')}
+          {I18n.t('enter_transaction_pin')}
         </Text>
         <Text style={[styles.subtitle, { color: themeColors.subText }]}>
           {I18n.t('enter_pin_to_continue')}
         </Text>
 
-        {/* PIN Input */}
         <Text style={[styles.label, { color: themeColors.text }]}>
-          {I18n.t('enter_your_pin')}
+          {I18n.t('enter_transaction_pin')}
         </Text>
-        <View style={{ alignSelf: 'center' }}>
-          <OTPInput
-            code={pin}
-            setCode={setPin}
-            length={pinLength}
-            isSecure={true}
-          />
+        <View
+          style={{
+            alignSelf: 'center',
+            marginVertical: scaleUtils.scaleHeight(10),
+          }}
+        >
+          <OTPInput code={pin} setCode={setPin} length={pinLength} isSecure />
         </View>
 
-        {/* Continue Button or Loader */}
         <View style={{ marginVertical: scaleUtils.scaleHeight(20) }}>
           {loading ? (
             <ActivityIndicator size="large" color={Colors.primary} />
@@ -130,7 +163,6 @@ const EnterPinScreen = () => {
         </View>
       </ScrollView>
 
-      {/* Custom Toast */}
       <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
@@ -169,4 +201,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EnterPinScreen;
+export default TransactionPinScreen;

@@ -23,7 +23,9 @@
     "@reduxjs/toolkit": "^2.9.1",
     "axios": "^1.12.2",
     "i18next": "^25.5.3",
+    "lottie-react-native": "^7.3.4",
     "moment": "^2.30.1",
+    "moment-timezone": "^0.6.0",
     "react": "19.1.1",
     "react-i18next": "^16.0.0",
     "react-native": "0.82.1",
@@ -40,6 +42,7 @@
     "react-native-screens": "^4.17.1",
     "react-native-share": "^12.2.0",
     "react-native-size-matters": "^0.4.2",
+    "react-native-sound": "^0.13.0",
     "react-native-svg": "^15.13.0",
     "react-native-view-shot": "^4.0.3",
     "react-redux": "^9.2.0"

@@ -99,11 +99,16 @@ const SelfTransfer = () => {
               <TouchableOpacity
                 key={bank.id}
                 style={[styles.bankCard]}
-                onPress={() =>
-                  showToast(
-                    `${bank.bank.name} ${I18n.t('selected_successfully')}`,
-                  )
-                }
+                onPress={() => {
+                  console.log('bank', bank.upi_id);
+                  navigation.navigate('EnterAmountScreen', {
+                    user: { code: bank.upi_id },
+                  });
+
+                  // showToast(
+                  //   `${bank.bank.name} ${I18n.t('selected_successfully')}`,
+                  // );
+                }}
               >
                 <View
                   style={[

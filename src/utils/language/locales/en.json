@@ -346,5 +346,31 @@
   "to": "To",
   "upiTransactionId": "UPI transaction ID :",
   "paymentDelayNote": "Payments may take up to 3 working days to be reflected in your account",
-  "completed": "Completed"
+  "completed": "Completed",
+
+  "enter_transaction_pin": "Enter Transaction PIN",
+  "pin_verified": "Transaction PIN Verified Successfully",
+  "invalid_pin": "Invalid PIN",
+
+  "upi_transaction_id": "UPI Transaction ID",
+  "share_receipt": "Share Receipt",
+  "paid_to": "Paid To",
+
+  "status": "Status",
+  "paymentMethod": "Payment Method",
+  "date": "Date",
+  "amount": "Amount",
+  "paymentType": "Payment Type",
+  "failed": "Failed",
+  "processing": "Processing",
+  "this_month": "This Month",
+  "last_30_days": "Last 30 Days",
+  "last_90_days": "Last 90 Days",
+  "upto_200": "Up to 200",
+  "200_500": "200 - 500",
+  "500_2000": "500 - 2000",
+  "above_2000": "Above 2000",
+  "money_sent": "Money Sent",
+  "money_received": "Money Received",
+  "select": "Select"
 }
