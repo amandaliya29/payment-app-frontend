@@ -59,7 +59,7 @@ jobs:
         run: mv android/app/build/outputs/apk/release/app-release.apk payment-app.apk
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: Payment App
           path: payment-app.apk
