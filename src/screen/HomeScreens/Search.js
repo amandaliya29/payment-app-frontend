@@ -74,15 +74,15 @@ const Search = () => {
     return () => clearTimeout(debounceTimeout.current);
   }, [searchText]);
 
-  // Handle user selection and store in recent searches
   const handleSelectPerson = person => {
     const updatedRecent = [
       person,
       ...recentSearches.filter(p => p.id !== person.id),
-    ].slice(0, 5); // keep only 5 recent items
+    ].slice(0, 5);
     setRecentSearches(updatedRecent);
+
     navigation.navigate('EnterAmountScreen', {
-      user: { name: person.name, upiCode: person.upi_id, phone: person.phone }, // static user
+      user: { id: person.id },
     });
   };
 

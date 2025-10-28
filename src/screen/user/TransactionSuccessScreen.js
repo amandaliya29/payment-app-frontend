@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,18 +6,28 @@ import {
   Image,
   useColorScheme,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import I18n from '../../utils/language/i18n';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { getTransaction } from '../../utils/apiHelper/Axios';
+import { Toast } from '../../utils/Toast';
+
+const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
 
 const TransactionSuccessScreen = () => {
   const navigation = useNavigation();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const route = useRoute();
+  const { transaction_id } = route?.params;
+
+  const [transaction, setTransaction] = useState(null);
+  const [toast, setToast] = useState({ visible: false, message: '' });
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -27,26 +37,133 @@ const TransactionSuccessScreen = () => {
     card: isDark ? Colors.secondaryBg : Colors.cardGrey,
   };
 
-  // Example dynamic transaction data
-  const transaction = {
-    fromName: 'Ravi Kumar Sharma',
-    fromPhone: '+91 98254 67890',
-    toName: 'Neha Patel',
-    toUpi: 'nehapatel98@okaxis',
-    fromUpi: 'ravikumarsharma@oksbi',
-    bank: 'State Bank of India • 4129',
-    amount: '₹1,250',
-    status: 'completed',
-    date: '21 Oct 2025, 10:15 AM',
-    upiTxnId: '928457109231',
-    googleTxnId: 'CICAgIDk7PQEdw',
+  useEffect(() => {
+    if (transaction_id) fetchTransaction();
+  }, [transaction_id]);
+
+  const fetchTransaction = async () => {
+    try {
+      const res = await getTransaction(transaction_id);
+
+      if (res?.data?.status) {
+        const data = res.data.data;
+        const authRole = data.auth_role;
+
+        // Determine From/To
+        const fromLabel = authRole === 'sender' ? I18n.t('to') : I18n.t('from');
+
+        // Determine sender/receiver details
+        const fromUser = data.sender_credit_upi || data.sender_bank;
+        const toUser = data.receiver_bank || data.receiver_upi;
+
+        // const toUser =
+        //   authRole === 'sender'
+        //     ? data.receiver_bank || data.receiver_upi
+        //     : data.sender_credit_upi || data.sender_bank;
+
+        const fromName = fromUser?.user?.name || 'Unknown';
+        const fromPhone = fromUser?.user?.phone || '';
+        const fromUpi = fromUser?.upi_id || '';
+        const fromBankName = fromUser?.bank?.name || '';
+        const fromBankLogo = fromUser?.bank?.logo
+          ? `${IMAGE_BASE_URL}${fromUser.bank.logo}`
+          : null;
+        const fromAccountNumber = fromUser?.account_number || fromUpi;
+        const bankNumber =
+          authRole === 'sender'
+            ? fromUser?.account_number
+            : toUser?.account_number;
+
+        const toName = toUser?.user?.name || '';
+        const toPhone = toUser?.user?.phone || '';
+        const toUpi = toUser?.upi_id || '';
+        const toBankName = toUser?.bank?.name || '';
+        const toBankLogo = toUser?.bank?.logo
+          ? `${IMAGE_BASE_URL}${toUser.bank.logo}`
+          : null;
+        const toAccountNumber = toUser?.account_number || toUpi;
+
+        // Status image
+        const statusImage =
+          data.status === 'completed'
+            ? require('../../assets/image/appIcon/success.png')
+            : data.status === 'pending'
+              ? require('../../assets/image/appIcon/pending.png')
+              : require('../../assets/image/appIcon/failed.png');
+
+        setTransaction({
+          authRole,
+          fromLabel,
+          fromName,
+          fromPhone,
+          fromUpi,
+          fromBankName,
+          fromBankLogo,
+          fromAccountNumber,
+          bankNumber,
+          toName,
+          toPhone,
+          toUpi,
+          toBankName,
+          toBankLogo,
+          toAccountNumber,
+          amount: `₹${data.amount}`,
+          status: data.status,
+          date: new Date(data.created_at).toLocaleString(),
+          upiTxnId: data.transaction_id,
+          statusImage,
+        });
+      } else {
+        showToast(res.data.messages || 'Failed to fetch transaction');
+      }
+    } catch (err) {
+      showToast(err.response?.data?.messages || 'Something went wrong');
+    }
   };
+
+  const showToast = message => setToast({ visible: true, message });
+
+  if (!transaction) {
+    return (
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: themeColors.background }]}
+      >
+        <Header
+          title={I18n.t('transactionDetails')}
+          onBack={() => navigation.goBack()}
+        />
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <ActivityIndicator size="large" color={themeColors.primary} />
+        </View>
+        <Toast
+          visible={toast.visible}
+          message={toast.message}
+          isDark={isDark}
+        />
+      </SafeAreaView>
+    );
+  }
+
+  // Decide which user details to show at the top
+  const userDetail =
+    transaction.authRole === 'sender'
+      ? {
+          name: transaction.toName,
+          phone: transaction.toPhone,
+          label: I18n.t('to'),
+        }
+      : {
+          name: transaction.fromName,
+          phone: transaction.fromPhone,
+          label: I18n.t('from'),
+        };
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
-      {/* Header */}
       <Header
         title={I18n.t('transactionDetails')}
         onBack={() => navigation.goBack()}
@@ -56,17 +173,18 @@ const TransactionSuccessScreen = () => {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
+        {/* Show selected user details */}
         <View style={styles.userSection}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
-              {transaction.fromName.charAt(0).toUpperCase()}
+              {userDetail.name.charAt(0).toUpperCase()}
             </Text>
           </View>
           <Text style={[styles.name, { color: themeColors.text }]}>
-            {I18n.t('from')} {transaction.fromName}
+            {userDetail.label} {userDetail.name}
           </Text>
           <Text style={[styles.phone, { color: themeColors.subText }]}>
-            {transaction.fromPhone}
+            {userDetail.phone}
           </Text>
         </View>
 
@@ -76,10 +194,32 @@ const TransactionSuccessScreen = () => {
 
         <View style={styles.statusRow}>
           <Image
-            source={require('../../assets/image/appIcon/success.png')}
-            style={styles.statusIcon}
+            source={transaction.statusImage}
+            style={[
+              styles.statusIcon,
+              {
+                tintColor:
+                  transaction.status === 'completed'
+                    ? Colors.darkGreen
+                    : transaction.status === 'pending'
+                      ? Colors.orange
+                      : Colors.red,
+              },
+            ]}
           />
-          <Text style={[styles.status, { color: Colors.darkGreen }]}>
+          <Text
+            style={[
+              styles.status,
+              {
+                color:
+                  transaction.status === 'completed'
+                    ? Colors.darkGreen
+                    : transaction.status === 'pending'
+                      ? Colors.orange
+                      : Colors.red,
+              },
+            ]}
+          >
             {I18n.t(transaction.status)}
           </Text>
         </View>
@@ -89,15 +229,33 @@ const TransactionSuccessScreen = () => {
         </Text>
 
         <View style={[styles.card, { backgroundColor: themeColors.card }]}>
-          <View style={styles.bankRow}>
-            <Image
-              source={require('../../assets/image/bankIcon/sbi.png')}
-              style={styles.bankLogo}
-            />
-            <Text style={[styles.bankName, { color: themeColors.text }]}>
-              {transaction.bank}
-            </Text>
-          </View>
+          {transaction.authRole === 'sender' ? (
+            <View style={styles.bankRow}>
+              {transaction.fromBankLogo && (
+                <Image
+                  source={{ uri: transaction.fromBankLogo }}
+                  style={styles.bankLogo}
+                />
+              )}
+              <Text style={[styles.bankName, { color: themeColors.text }]}>
+                {transaction.fromBankName}{' '}
+                {transaction.bankNumber && `• ${transaction.bankNumber}`}
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.bankRow}>
+              {transaction.toBankLogo && (
+                <Image
+                  source={{ uri: transaction.toBankLogo }}
+                  style={styles.bankLogo}
+                />
+              )}
+              <Text style={[styles.bankName, { color: themeColors.text }]}>
+                {transaction.toBankName}{' '}
+                {transaction.bankNumber && `• ${transaction.bankNumber}`}
+              </Text>
+            </View>
+          )}
 
           <View style={styles.divider} />
 
@@ -119,7 +277,9 @@ const TransactionSuccessScreen = () => {
                 {transaction.toName}
               </Text>
               <Text style={[styles.subValue, { color: themeColors.subText }]}>
-                Cya Pay • {transaction.toUpi}
+                {transaction.toBankName
+                  ? `${transaction.toBankName} • ${transaction.toAccountNumber}`
+                  : `Cya Pay • ${transaction.toUpi}`}
               </Text>
             </View>
           </View>
@@ -130,10 +290,12 @@ const TransactionSuccessScreen = () => {
             </Text>
             <View style={{ flex: 1 }}>
               <Text style={[styles.value, { color: themeColors.text }]}>
-                {transaction.fromName} ({transaction.bank})
+                {transaction.fromName} ({transaction.fromBankName})
               </Text>
               <Text style={[styles.subValue, { color: themeColors.subText }]}>
-                Cya Pay • {transaction.fromUpi}
+                {transaction.fromBankName
+                  ? transaction.fromAccountNumber
+                  : transaction.fromUpi}
               </Text>
             </View>
           </View>
@@ -143,6 +305,8 @@ const TransactionSuccessScreen = () => {
           {I18n.t('paymentDelayNote')}
         </Text>
       </ScrollView>
+
+      <Toast visible={toast.visible} message={toast.message} isDark={isDark} />
     </SafeAreaView>
   );
 };
@@ -170,6 +334,7 @@ const styles = StyleSheet.create({
   avatarText: {
     color: Colors.white,
     fontSize: scaleUtils.scaleFont(28),
+    fontWeight: 'bold',
   },
   name: {
     fontSize: scaleUtils.scaleFont(16),
@@ -195,7 +360,6 @@ const styles = StyleSheet.create({
   statusIcon: {
     width: scaleUtils.scaleWidth(20),
     height: scaleUtils.scaleWidth(20),
-    tintColor: Colors.darkGreen,
     marginRight: 8,
   },
   status: {
@@ -217,9 +381,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   bankLogo: {
-    width: scaleUtils.scaleWidth(25),
-    height: scaleUtils.scaleWidth(25),
-    marginRight: 8,
+    width: scaleUtils.scaleWidth(22),
+    height: scaleUtils.scaleWidth(22),
+    marginRight: scaleUtils.scaleWidth(16),
   },
   bankName: {
     fontSize: scaleUtils.scaleFont(15),
