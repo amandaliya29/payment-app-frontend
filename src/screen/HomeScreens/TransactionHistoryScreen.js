@@ -1,4 +1,3 @@
-// src/screens/TransactionHistoryScreen.js
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
@@ -17,9 +16,8 @@ import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import I18n from '../../utils/language/i18n';
-import Button from '../../component/Button'; // ✅ Reuse your shared Button component
+import Button from '../../component/Button';
 import { useNavigation } from '@react-navigation/native';
-
 import { useDispatch, useSelector } from 'react-redux';
 import {
   startLoading,
@@ -28,11 +26,11 @@ import {
   appendTransactionsPage,
   clearTransactions,
   setError,
-} from '../../utils/redux/TransactionSlice'; // adjust path if needed
+} from '../../utils/redux/TransactionSlice';
 import {
   getTransactions,
   getBankAccountList,
-} from '../../utils/apiHelper/Axios'; // adjust path to your api file
+} from '../../utils/apiHelper/Axios';
 
 const TransactionHistoryScreen = () => {
   const scheme = useColorScheme();
@@ -58,33 +56,34 @@ const TransactionHistoryScreen = () => {
 
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-
-  const [filters, setFilters] = useState({
-    status: '',
-    paymentMethod: '',
-    date: '',
-    amount: '',
-    paymentType: '',
-  });
+  const [filters, setFilters] = useState(null);
 
   const [filterOptions, setFilterOptions] = useState({
-    status: [I18n.t('completed'), I18n.t('failed'), I18n.t('processing')],
-    paymentMethod: ['Bank A', 'Bank B', 'Bank C'],
+    status: [
+      { label: I18n.t('pending'), value: 'pending' },
+      { label: I18n.t('completed'), value: 'completed' },
+      { label: I18n.t('failed'), value: 'failed' },
+    ],
+    paymentMethod: [],
     date: [
-      I18n.t('this_month'),
-      I18n.t('last_30_days'),
-      I18n.t('last_90_days'),
+      { label: I18n.t('last_24h'), value: '24h' },
+      { label: I18n.t('last_7d'), value: '7d' },
+      { label: I18n.t('last_14d'), value: '14d' },
+      { label: I18n.t('last_1m'), value: '1m' },
+      { label: I18n.t('last_3m'), value: '3m' },
     ],
     amount: [
-      I18n.t('upto_200'),
-      I18n.t('200_500'),
-      I18n.t('500_2000'),
-      I18n.t('above_2000'),
+      { label: I18n.t('upto_1000'), value: 'upto_1000' },
+      { label: I18n.t('1000_10000'), value: '1000_10000' },
+      { label: I18n.t('15000_25000'), value: '15000_25000' },
+      { label: I18n.t('25000_50000'), value: '25000_50000' },
+      { label: I18n.t('50000_75000'), value: '50000_75000' },
+      { label: I18n.t('75000_100000'), value: '75000_100000' },
     ],
     paymentType: [
-      I18n.t('money_sent'),
-      I18n.t('money_received'),
-      I18n.t('self_transfer'),
+      { label: I18n.t('send_money'), value: 'send_money' },
+      { label: I18n.t('receive_money'), value: 'receive_money' },
+      { label: I18n.t('self_transfer'), value: 'self_transfer' },
     ],
   });
 
@@ -93,7 +92,6 @@ const TransactionHistoryScreen = () => {
   useEffect(() => {
     mountedRef.current = true;
     fetchBanks();
-    // initial load page 1
     fetchTransactions(1, true);
     return () => {
       mountedRef.current = false;
@@ -106,14 +104,12 @@ const TransactionHistoryScreen = () => {
   };
 
   const mapApiItemToRow = item => {
-    // Determine name for UI
     const name =
       item.counterparty?.name ||
       item.counterparty?.upi ||
       item.counterparty?.account ||
       '';
 
-    // parse created_at to readable date like '26 October'
     const dateObj = item.created_at ? new Date(item.created_at) : null;
     let dateStr = item.created_at;
     if (dateObj) {
@@ -122,7 +118,6 @@ const TransactionHistoryScreen = () => {
       dateStr = `${day} ${month}`;
     }
 
-    // mode: "debit" -> negative amount, "credit" -> positive amount
     const rawAmount = parseFloat(item.amount || 0);
     const signedAmount =
       item.mode === 'debit' ? -Math.abs(rawAmount) : Math.abs(rawAmount);
@@ -136,7 +131,9 @@ const TransactionHistoryScreen = () => {
       month:
         item.month ||
         (dateObj
-          ? `${dateObj.toLocaleString('default', { month: 'long' })} ${dateObj.getFullYear()}`
+          ? `${dateObj.toLocaleString('default', {
+              month: 'long',
+            })} ${dateObj.getFullYear()}`
           : ''),
     };
   };
@@ -154,10 +151,7 @@ const TransactionHistoryScreen = () => {
         0,
       );
     });
-
-    // Preserve API order by using insertion order of keys
-    const sectionArray = Object.keys(grouped).map(k => grouped[k]);
-    return sectionArray;
+    return Object.keys(grouped).map(k => grouped[k]);
   };
 
   const fetchBanks = async () => {
@@ -166,9 +160,8 @@ const TransactionHistoryScreen = () => {
       if (res?.data) {
         const banks = res.data.data || res.data;
         if (Array.isArray(banks) && banks.length) {
-          // map to { label, value } to show label in modal and store value
           const names = banks.map(b => ({
-            label: b.bank_name || b.name || `Bank ${b.id}`,
+            label: b.bank?.name || b.name || `Bank ${b.id}`,
             value: b.id,
           }));
           setFilterOptions(prev => ({ ...prev, paymentMethod: names }));
@@ -179,35 +172,56 @@ const TransactionHistoryScreen = () => {
     }
   };
 
-  const buildPayloadFromFilters = () => {
+  const buildPayloadFromFilters = (currentFilters = filters) => {
     const payload = {};
-    if (filters.status) payload.status = filters.status;
-    if (filters.paymentMethod) {
-      if (
-        typeof filters.paymentMethod === 'object' &&
-        filters.paymentMethod.value
-      ) {
-        payload.payment_method = filters.paymentMethod.value;
-      } else {
-        payload.payment_method = filters.paymentMethod;
-      }
+    if (!currentFilters) return payload;
+
+    const key = Object.keys(currentFilters)[0];
+    const value = currentFilters[key]?.value;
+    if (!value) return payload;
+
+    switch (key) {
+      case 'status':
+        payload.status = value;
+        break;
+      case 'paymentMethod':
+        payload.payment_method = value;
+        break;
+      case 'date':
+        payload.date_range = value;
+        break;
+      case 'amount':
+        payload.amount_range = value;
+        break;
+      case 'paymentType':
+        payload.payment_type = value;
+        break;
     }
-    if (filters.date) payload.date_range = filters.date;
-    if (filters.amount) payload.amount_range = filters.amount;
-    if (filters.paymentType) payload.payment_type = filters.paymentType;
+
     return payload;
   };
 
-  const fetchTransactions = async (page = 1, replace = false) => {
+  const clearActiveFilter = () => {
+    setFilters(null);
+    dispatch(clearTransactions());
+    fetchTransactions(1, true, {});
+  };
+
+  const fetchTransactions = async (
+    page = 1,
+    replace = false,
+    overrideFilters = null,
+  ) => {
     try {
       if (!mountedRef.current) return;
-      const payload = buildPayloadFromFilters();
+
+      const payload = buildPayloadFromFilters(overrideFilters || filters);
+      console.log('payload', payload);
 
       if (page === 1) dispatch(startLoading());
       else dispatch(startLoadingMore());
 
       const res = await getTransactions(payload, page);
-
       if (!res || !res.data) {
         dispatch(setError('Invalid response'));
         return;
@@ -225,22 +239,18 @@ const TransactionHistoryScreen = () => {
 
       const pageNum = pageData.current_page || page;
       const lastPage = pageData.last_page || pageNum;
-      const total = pageData.total || transactionsArray.length;
-      const per_page = pageData.per_page || 20;
 
       const payloadForStore = {
         sections: newSections,
         page: pageNum,
         lastPage,
-        total,
-        per_page,
+        total: pageData.total || transactionsArray.length,
+        per_page: pageData.per_page || 20,
       };
 
-      if (pageNum === 1 || replace) {
+      if (pageNum === 1 || replace)
         dispatch(setTransactionsPage(payloadForStore));
-      } else {
-        dispatch(appendTransactionsPage(payloadForStore));
-      }
+      else dispatch(appendTransactionsPage(payloadForStore));
     } catch (err) {
       console.warn('fetchTransactions err', err);
       const message =
@@ -250,28 +260,11 @@ const TransactionHistoryScreen = () => {
   };
 
   const applyFilter = option => {
-    let valToStore = option;
-    if (
-      selectedFilter === 'paymentMethod' &&
-      Array.isArray(filterOptions.paymentMethod)
-    ) {
-      const match = filterOptions.paymentMethod.find(
-        o =>
-          (typeof o === 'string' && o === option) ||
-          (typeof o === 'object' &&
-            (o.label === option ||
-              o.value === option ||
-              (option && option.label === o.label))),
-      );
-      if (match) valToStore = match;
-    }
-
-    setFilters(prev => ({ ...prev, [selectedFilter]: valToStore }));
+    const updatedFilter = { [selectedFilter]: option };
+    setFilters(updatedFilter);
     setModalVisible(false);
-
-    // clear redux and fetch fresh
     dispatch(clearTransactions());
-    fetchTransactions(1, true);
+    fetchTransactions(1, true, updatedFilter);
   };
 
   const onEndReachedCalledDuringMomentum = useRef(false);
@@ -279,12 +272,10 @@ const TransactionHistoryScreen = () => {
   const handleLoadMore = () => {
     if (reduxIsLoadingMore || reduxIsLoading) return;
     const nextPage = reduxPage + 1;
-    if (nextPage <= reduxLastPage) {
-      fetchTransactions(nextPage, false);
-    }
+    if (nextPage <= reduxLastPage) fetchTransactions(nextPage, false);
   };
 
-  // Render unchanged except amount color & sign controlled by amount value (negative => debit)
+  // ✅ Updated: add ₹ symbol
   const renderTransaction = ({ item }) => (
     <View
       style={[styles.transactionRow, { borderBottomColor: themeColors.border }]}
@@ -304,11 +295,14 @@ const TransactionHistoryScreen = () => {
           { color: item.amount >= 0 ? Colors.green : Colors.error },
         ]}
       >
-        {item.amount >= 0 ? `+${item.amount}` : `${item.amount}`}
+        {item.amount >= 0
+          ? `+₹${item.amount.toFixed(2)}`
+          : `-₹${Math.abs(item.amount).toFixed(2)}`}
       </Text>
     </View>
   );
 
+  // ✅ Updated: add ₹ symbol for totals
   const renderHeader = ({ section }) => (
     <View
       style={[styles.sectionHeader, { backgroundColor: themeColors.modalBg }]}
@@ -322,21 +316,23 @@ const TransactionHistoryScreen = () => {
           { color: section.total >= 0 ? Colors.green : Colors.error },
         ]}
       >
-        {section.total >= 0 ? `+${section.total}` : `${section.total}`}
+        {section.total >= 0
+          ? `+₹${section.total.toFixed(2)}`
+          : `-₹${Math.abs(section.total).toFixed(2)}`}
       </Text>
     </View>
   );
 
-  const ListFooterComponent = () => {
-    if (reduxIsLoadingMore) {
-      return (
-        <View style={{ padding: 12, alignItems: 'center' }}>
-          <ActivityIndicator size="small" />
-        </View>
-      );
-    }
-    return null;
-  };
+  const ListFooterComponent = () =>
+    reduxIsLoadingMore ? (
+      <View style={{ padding: 12, alignItems: 'center' }}>
+        <ActivityIndicator size="small" />
+      </View>
+    ) : null;
+
+  const isEmpty =
+    !reduxSections.length ||
+    reduxSections.every(section => !section.data.length);
 
   return (
     <SafeAreaView
@@ -347,65 +343,98 @@ const TransactionHistoryScreen = () => {
         onBack={() => navigation.goBack()}
       />
 
-      {/* Horizontal Filter FlatList */}
+      {/* FILTER BUTTONS */}
       <View style={{ marginVertical: scaleUtils.scaleHeight(10) }}>
         <FlatList
           horizontal
-          data={Object.keys(filters)}
+          data={Object.keys(filterOptions)}
           keyExtractor={item => item}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterScroll}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.filterButton,
-                {
-                  borderColor: themeColors.border,
-                  backgroundColor: themeColors.modalBg,
-                },
-              ]}
-              onPress={() => openFilter(item)}
-            >
-              <Text style={[styles.filterText, { color: themeColors.text }]}>
-                {filters[item] && typeof filters[item] === 'object'
-                  ? filters[item].label || filters[item].value || I18n.t(item)
-                  : filters[item] || I18n.t(item)}
-              </Text>
-            </TouchableOpacity>
-          )}
+          renderItem={({ item }) => {
+            const isActive =
+              filters && Object.keys(filters)[0] === item && filters[item];
+            return (
+              <TouchableOpacity
+                style={[
+                  styles.filterButton,
+                  {
+                    borderColor: themeColors.border,
+                    backgroundColor: isActive
+                      ? Colors.gradientSecondary
+                      : themeColors.modalBg,
+                  },
+                ]}
+                onPress={() => openFilter(item)}
+              >
+                <Text
+                  style={[
+                    styles.filterText,
+                    { color: isActive ? Colors.white : themeColors.text },
+                  ]}
+                >
+                  {isActive
+                    ? `${I18n.t(item)}: ${filters[item].label}`
+                    : I18n.t(item)}
+                </Text>
+                {isActive && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      clearActiveFilter();
+                    }}
+                    style={{ marginLeft: 8 }}
+                  >
+                    <Text style={{ color: Colors.white, fontWeight: 'bold' }}>
+                      ✕
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </TouchableOpacity>
+            );
+          }}
         />
       </View>
 
-      {/* Transaction Section List */}
-      <SectionList
-        sections={reduxSections.length ? reduxSections : []}
-        showsVerticalScrollIndicator={false}
-        keyExtractor={item => item.id?.toString()}
-        renderItem={renderTransaction}
-        renderSectionHeader={renderHeader}
-        ItemSeparatorComponent={() => (
-          <View
-            style={[styles.divider, { backgroundColor: themeColors.divider }]}
-          />
-        )}
-        contentContainerStyle={{
-          paddingHorizontal: scaleUtils.scaleWidth(16),
-          paddingBottom: scaleUtils.scaleHeight(16),
-        }}
-        stickySectionHeadersEnabled={false}
-        onEndReachedThreshold={0.5}
-        onEndReached={() => {
-          if (onEndReachedCalledDuringMomentum.current) return;
-          onEndReachedCalledDuringMomentum.current = true;
-          handleLoadMore();
-          setTimeout(() => {
-            onEndReachedCalledDuringMomentum.current = false;
-          }, 500);
-        }}
-        ListFooterComponent={ListFooterComponent}
-      />
+      {/* TRANSACTION LIST */}
+      {isEmpty && !reduxIsLoading ? (
+        <View
+          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
+          <Text style={{ color: themeColors.text, fontSize: 16 }}>
+            {I18n.t('no_transactions_found')}
+          </Text>
+        </View>
+      ) : (
+        <SectionList
+          sections={reduxSections}
+          showsVerticalScrollIndicator={false}
+          keyExtractor={item => item.id?.toString()}
+          renderItem={renderTransaction}
+          renderSectionHeader={renderHeader}
+          ItemSeparatorComponent={() => (
+            <View
+              style={[styles.divider, { backgroundColor: themeColors.divider }]}
+            />
+          )}
+          contentContainerStyle={{
+            paddingHorizontal: scaleUtils.scaleWidth(16),
+            paddingBottom: scaleUtils.scaleHeight(16),
+          }}
+          stickySectionHeadersEnabled={false}
+          onEndReachedThreshold={0.5}
+          onEndReached={() => {
+            if (onEndReachedCalledDuringMomentum.current) return;
+            onEndReachedCalledDuringMomentum.current = true;
+            handleLoadMore();
+            setTimeout(() => {
+              onEndReachedCalledDuringMomentum.current = false;
+            }, 500);
+          }}
+          ListFooterComponent={ListFooterComponent}
+        />
+      )}
 
-      {/* Bottom Modal (styled like EnterAmountScreen) */}
+      {/* FILTER MODAL */}
       <Modal
         visible={modalVisible}
         transparent
@@ -419,9 +448,7 @@ const TransactionHistoryScreen = () => {
         <View
           style={[
             styles.bottomModalContent,
-            {
-              backgroundColor: themeColors.background,
-            },
+            { backgroundColor: themeColors.background },
           ]}
         >
           <Text style={[styles.modalTitle, { color: themeColors.text }]}>
@@ -429,17 +456,8 @@ const TransactionHistoryScreen = () => {
           </Text>
 
           <FlatList
-            data={
-              selectedFilter === 'paymentMethod' &&
-              Array.isArray(filterOptions.paymentMethod)
-                ? filterOptions.paymentMethod.map(opt =>
-                    typeof opt === 'string' ? opt : opt.label,
-                  )
-                : filterOptions[selectedFilter]
-            }
-            keyExtractor={item =>
-              typeof item === 'string' ? item : item.label
-            }
+            data={filterOptions[selectedFilter] || []}
+            keyExtractor={item => item.value.toString()}
             showsVerticalScrollIndicator={false}
             renderItem={({ item }) => (
               <TouchableOpacity
@@ -447,7 +465,7 @@ const TransactionHistoryScreen = () => {
                 onPress={() => applyFilter(item)}
               >
                 <Text style={[styles.modalText, { color: themeColors.text }]}>
-                  {item}
+                  {item.label}
                 </Text>
               </TouchableOpacity>
             )}
@@ -469,7 +487,6 @@ export default TransactionHistoryScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-
   filterScroll: {
     height: scaleUtils.scaleHeight(50),
     flexDirection: 'row',
@@ -478,6 +495,7 @@ const styles = StyleSheet.create({
   },
   filterButton: {
     borderWidth: 1,
+    flexDirection: 'row',
     borderRadius: scaleUtils.scaleWidth(20),
     paddingVertical: scaleUtils.scaleHeight(6),
     paddingHorizontal: scaleUtils.scaleWidth(14),
@@ -487,7 +505,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Regular',
     fontSize: scaleUtils.scaleFont(13),
   },
-
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -503,7 +520,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     fontSize: scaleUtils.scaleFont(16),
   },
-
   transactionRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -536,7 +552,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     fontSize: scaleUtils.scaleFont(14),
   },
-
   modalOverlay: {
     flex: 1,
     backgroundColor: '#00000080',
@@ -557,15 +572,6 @@ const styles = StyleSheet.create({
   },
   modalText: {
     fontFamily: 'Poppins-Regular',
-    fontSize: scaleUtils.scaleFont(14),
-  },
-  cancelButton: {
-    alignSelf: 'center',
-    marginTop: scaleUtils.scaleHeight(12),
-  },
-  cancelText: {
-    color: Colors.red,
-    fontFamily: 'Poppins-Medium',
     fontSize: scaleUtils.scaleFont(14),
   },
   divider: {
