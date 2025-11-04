@@ -377,5 +377,24 @@
   "send_money": "Send Money",
   "receive_money": "Receive Money",
   "select": "Select",
-  "no_transactions_found": "No transactions found"
+  "no_transactions_found": "No transactions found",
+
+  "confirm_account_number_label": "Confirm Account Number",
+  "confirm_account_number_placeholder": "Re-enter account number",
+  "account_holder_name_label": "Account Holder Name",
+  "account_holder_name_placeholder": "Enter account holder name",
+
+  "bank_details_title": "Bank Details",
+  "account_holder_name": "Account Holder Name",
+  "account_number": "Account Number",
+  "account_type": "Account Type",
+  "branch": "Branch",
+  "ifsc_code": "IFSC Code",
+
+  "no_recent_transfers": "No recent transfers found",
+
+  "branch_name": "Branch Name",
+  "branch_address": "Branch Address",
+  "city": "City",
+  "state": "State"
 }

@@ -7,6 +7,7 @@ import {
   FlatList,
   useColorScheme,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
@@ -16,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Button from '../../component/Button';
 import Input from '../../component/Input';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { getResentTransfer } from '../../utils/apiHelper/Axios'; // ✅ your custom axios API import
 
 const ToBank = () => {
   const scheme = useColorScheme();
@@ -29,28 +31,66 @@ const ToBank = () => {
   };
 
   const [accountNumber, setAccountNumber] = useState('');
+  const [confirmAccountNumber, setConfirmAccountNumber] = useState('');
   const [ifscCode, setIfscCode] = useState('');
+  const [recentTransfers, setRecentTransfers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const isAccountValid =
     accountNumber.length >= 9 && accountNumber.length <= 18;
   const isIfscValid = /^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifscCode);
-  const isButtonEnabled = isAccountValid && isIfscValid;
+  const isConfirmMatch =
+    confirmAccountNumber.length > 0 && confirmAccountNumber === accountNumber;
+
+  const isButtonEnabled = isAccountValid && isIfscValid && isConfirmMatch;
 
   const handleIfscChange = text => setIfscCode(text.toUpperCase());
 
-  const recentTransfers = [
-    { id: 1, name: 'Tejpal Singh' },
-    { id: 2, name: 'Sura' },
-    { id: 3, name: 'Sonu' },
-    { id: 4, name: 'Sush' },
-    { id: 5, name: 'Raj' },
-    { id: 6, name: 'Mina' },
-  ];
+  // ✅ Fetch Recent Transactions from API
+  const fetchRecentTransfers = async () => {
+    try {
+      setLoading(true);
+      const res = await getResentTransfer();
+      if (res?.data?.status && Array.isArray(res.data.data)) {
+        setRecentTransfers(res.data.data);
+      } else {
+        setRecentTransfers([]);
+      }
+    } catch (error) {
+      console.log('Error fetching recent transfers:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecentTransfers();
+  }, []);
+
+  // ✅ Navigate on Continue
+  const handleContinue = () => {
+    navigation.navigate('EnterAmountScreen', {
+      user: { id: accountNumber },
+    });
+  };
+
+  // ✅ Navigate when clicking on recent transfer
+  const handleResend = person => {
+    navigation.navigate('EnterAmountScreen', {
+      user: { id: person.id },
+    });
+  };
 
   const renderItem = ({ item }) => (
-    <View style={styles.recentItem}>
+    <TouchableOpacity
+      style={styles.recentItem}
+      onPress={() => handleResend(item)}
+      activeOpacity={0.7}
+    >
       <View style={styles.circle}>
-        <Text style={styles.initial}>{item.name.charAt(0).toUpperCase()}</Text>
+        <Text style={styles.initial}>
+          {item.name?.charAt(0)?.toUpperCase() || '?'}
+        </Text>
       </View>
       <Text
         numberOfLines={1}
@@ -59,7 +99,7 @@ const ToBank = () => {
       >
         {item.name}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -108,7 +148,7 @@ const ToBank = () => {
             onPress={() =>
               navigation.navigate('SearchIfscScreen', {
                 onGoBack: data => {
-                  setIfscCode(data); // update IFSC when returning
+                  setIfscCode(data);
                 },
               })
             }
@@ -117,11 +157,26 @@ const ToBank = () => {
           </TouchableOpacity>
         </View>
 
-        {/* Continue */}
+        {/* Confirm Account Number */}
+        {isAccountValid && isIfscValid && (
+          <View style={styles.bankCont}>
+            <Input
+              label={I18n.t('confirm_account_number_label')}
+              value={confirmAccountNumber}
+              onChange={setConfirmAccountNumber}
+              placeholder={I18n.t('confirm_account_number_placeholder')}
+              keyboardType="number-pad"
+              maxLength={18}
+            />
+          </View>
+        )}
+
+        {/* Continue Button */}
         <View style={styles.bankCont}>
           <Button
             title={I18n.t('continue')}
             disabled={!isButtonEnabled}
+            onPress={handleContinue}
             style={{ opacity: isButtonEnabled ? 1 : 0.5 }}
           />
         </View>
@@ -132,15 +187,32 @@ const ToBank = () => {
         </Text>
 
         <View style={styles.gridContainer}>
-          <FlatList
-            data={recentTransfers}
-            renderItem={renderItem}
-            keyExtractor={item => item.id.toString()}
-            numColumns={4}
-            columnWrapperStyle={styles.row}
-            scrollEnabled={false}
-            contentContainerStyle={styles.recentList}
-          />
+          {loading ? (
+            <ActivityIndicator size="small" color={Colors.gradientSecondary} />
+          ) : (
+            <FlatList
+              data={recentTransfers}
+              renderItem={renderItem}
+              keyExtractor={item => item.id.toString()}
+              numColumns={4}
+              columnWrapperStyle={styles.row}
+              scrollEnabled={false}
+              contentContainerStyle={styles.recentList}
+              ListEmptyComponent={() => (
+                <Text
+                  style={{
+                    color: themeColors.text,
+                    textAlign: 'center',
+                    fontFamily: 'Poppins-Regular',
+                    fontSize: scaleUtils.scaleFont(12),
+                    opacity: 0.6,
+                  }}
+                >
+                  {I18n.t('no_recent_transfers')}
+                </Text>
+              )}
+            />
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

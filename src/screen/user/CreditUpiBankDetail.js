@@ -29,6 +29,7 @@ const CreditUpiBankDetail = () => {
     used,
     lastUsed,
     status,
+    bankCreditUpiId,
   } = route.params || {};
 
   const scheme = useColorScheme();
@@ -64,7 +65,7 @@ const CreditUpiBankDetail = () => {
           style={styles.topCard}
         >
           <View style={styles.row}>
-            <Text style={styles.email}>nikhil@creditupi</Text>
+            <Text style={styles.email}>{bankCreditUpiId}</Text>
             <View style={[styles.badge, { backgroundColor: Colors.green }]}>
               <Text style={styles.badgeText}>{I18n.t('active')}</Text>
             </View>

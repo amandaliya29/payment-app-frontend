@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,33 +14,7 @@ import Header from '../../component/Header';
 import Button from '../../component/Button';
 import I18n from '../../utils/language/i18n';
 import { useNavigation, useRoute } from '@react-navigation/native';
-
-const banksData = [
-  {
-    name: 'Axis Bank',
-    branches: [
-      { name: 'A B Road Indore, Indore', ifsc: 'UTIB0001680' },
-      { name: 'MG Road, Mumbai', ifsc: 'UTIB0000192' },
-      { name: 'Civil Lines, Delhi', ifsc: 'UTIB0000987' },
-    ],
-  },
-  {
-    name: 'HDFC Bank',
-    branches: [
-      { name: 'Ring Road, Surat', ifsc: 'HDFC0001234' },
-      { name: 'C G Road, Ahmedabad', ifsc: 'HDFC0005678' },
-      { name: 'Vesu, Surat', ifsc: 'HDFC0006754' },
-      { name: 'Kalupur, Ahmedabad', ifsc: 'HDFC0006758' },
-    ],
-  },
-  {
-    name: 'ICICI Bank',
-    branches: [
-      { name: 'Connaught Place, Delhi', ifsc: 'ICIC0000456' },
-      { name: 'Lalbagh, Lucknow', ifsc: 'ICIC0000897' },
-    ],
-  },
-];
+import { getSearchIfsc } from '../../utils/apiHelper/Axios'; // ✅ your axios import
 
 const ITEM_HEIGHT = scaleUtils.scaleHeight(40);
 const VISIBLE_ITEMS = 3;
@@ -50,7 +24,6 @@ const SearchIfscScreen = () => {
   const route = useRoute();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
-
   const { onGoBack } = route.params || {};
 
   const themeColors = {
@@ -59,11 +32,41 @@ const SearchIfscScreen = () => {
     divider: isDark ? Colors.cardGrey : Colors.darkGrey,
   };
 
+  // ✅ Hooks must be declared before any condition
+  const [banksData, setBanksData] = useState([]); // <-- dynamic API data
   const [selectedBank, setSelectedBank] = useState('');
   const [selectedBranch, setSelectedBranch] = useState('');
   const [ifscCode, setIfscCode] = useState('');
   const [showBankDropdown, setShowBankDropdown] = useState(false);
   const [showBranchDropdown, setShowBranchDropdown] = useState(false);
+
+  // ✅ Fetch IFSC data on mount
+  useEffect(() => {
+    const fetchIfsc = async () => {
+      try {
+        const res = await getSearchIfsc();
+        if (res?.data?.status && Array.isArray(res.data.data)) {
+          // ✅ Group by bank name for dropdown compatibility
+          const grouped = Object.values(
+            res.data.data.reduce((acc, item) => {
+              const bankName = item.bank?.name || 'Unknown Bank';
+              if (!acc[bankName])
+                acc[bankName] = { name: bankName, branches: [] };
+              acc[bankName].branches.push({
+                name: `${item.branch_name}, ${item.city}`,
+                ifsc: item.ifsc_code,
+              });
+              return acc;
+            }, {}),
+          );
+          setBanksData(grouped);
+        }
+      } catch (error) {
+        console.error('Failed to fetch IFSC list:', error);
+      }
+    };
+    fetchIfsc();
+  }, []);
 
   const handleSelectBank = bankName => {
     setSelectedBank(bankName);
@@ -90,7 +93,6 @@ const SearchIfscScreen = () => {
 
   const selectedBankData = banksData.find(bank => bank.name === selectedBank);
 
-  // ✅ Go back and pass IFSC to previous screen
   const handleContinue = () => {
     if (onGoBack && ifscCode) {
       onGoBack(ifscCode);
