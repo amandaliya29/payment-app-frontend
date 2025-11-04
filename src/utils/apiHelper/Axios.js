@@ -72,3 +72,11 @@ export const getPay = async payload => await axios.post('/pay', payload);
 
 export const getTransactions = async (payload, page = 1) =>
   await axios.post(`/transactions?page=${page}`, payload);
+
+export const getResentTransfer = async () =>
+  await axios.get(`/transactions/recent-users`);
+
+export const getBankDetail = async payload =>
+  await axios.post(`/bank/account/get`, payload);
+
+export const getSearchIfsc = async () => await axios.get(`/bank/ifsc/search`);

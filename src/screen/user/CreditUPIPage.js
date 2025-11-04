@@ -248,7 +248,7 @@ const BankCard = memo(
           used,
           lastUsed,
           status,
-          bankCreditUpiId: bank_credit_upi?.id || null,
+          bankCreditUpiId: bank_credit_upi?.upi_id,
         });
       } else {
         showToast('Bank is not active, cannot open details');

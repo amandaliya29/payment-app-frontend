@@ -86,22 +86,17 @@ const TransactionPinScreen = () => {
         payload.to_bank_account = user?.bank_account?.id;
       }
 
-      console.log('Transaction payload =>', payload);
-
       const response = await getPay(payload);
 
       if (!response?.data?.status) {
         showToast(response?.data?.messages || 'Transaction failed!');
       }
-      showToast(response?.data?.messages || 'Transaction successful!');
-      setTimeout(() => {
-        navigation.replace('PaymentSuccessScreen', {
-          amount,
-          bank,
-          user,
-          transaction: response?.data?.data,
-        });
-      }, 1500);
+      navigation.replace('PaymentSuccessScreen', {
+        amount,
+        bank,
+        user,
+        transaction: response?.data?.data,
+      });
     } catch (error) {
       showToast(error?.response?.data?.messages || 'Transaction error');
       //   setTimeout(() => navigation.goBack(), 2000);

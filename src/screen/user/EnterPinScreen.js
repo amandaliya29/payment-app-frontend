@@ -16,13 +16,13 @@ import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
 import Button from '../../component/Button';
 import OTPInput from '../../component/OTPInput';
-import { getBankBalance } from '../../utils/apiHelper/Axios';
+import { getBankBalance, getBankDetail } from '../../utils/apiHelper/Axios';
 import { Toast } from '../../utils/Toast';
 
 const EnterPinScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { banks } = route.params || {};
+  const { banks, linked_account } = route.params || {};
 
   const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,15 +38,14 @@ const EnterPinScreen = () => {
   };
 
   const pinLength = banks.pin_code_length;
-  // console.log(banks);
 
   const showToast = message => {
     setToastMessage(message);
-    setToastVisible(false); // reset first
+    setToastVisible(false);
     setTimeout(() => {
       setToastVisible(true);
-      setTimeout(() => setToastVisible(false), 2000); // auto-hide after 2s
-    }, 100); // short delay to trigger re-render
+      setTimeout(() => setToastVisible(false), 2000);
+    }, 100);
   };
 
   const handleContinue = async () => {
@@ -57,6 +56,28 @@ const EnterPinScreen = () => {
         account_id: banks.id,
         pin_code: pin,
       };
+      // ✅ If the account is already linked, call getBankDetail API
+      if (linked_account) {
+        try {
+          const res = await getBankDetail(payload);
+
+          if (res?.data?.status) {
+            navigation.replace('BankBalanceScreen', {
+              linked_account: linked_account,
+              selectedBank: res?.data?.data, // pass bank detail result
+            });
+          } else {
+            showToast(res?.data?.messages || 'Failed to fetch bank detail');
+          }
+        } catch (error) {
+          showToast(error?.response?.data?.messages || 'Something went wrong');
+        } finally {
+          setLoading(false);
+        }
+        return;
+      }
+
+      // ✅ Otherwise, fetch balance from API
 
       const res = await getBankBalance(payload);
       if (!res.data.status) {

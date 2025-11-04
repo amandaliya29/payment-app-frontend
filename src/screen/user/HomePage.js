@@ -103,6 +103,27 @@ const HomeScreen = () => {
     }
   };
 
+  const handleLinkedAccount = () => {
+    if (banks.length === 0) {
+      showToast(i18n.t('please_add_a_bank_first'));
+      return;
+    }
+
+    if (banks.length === 1) {
+      // Navigate directly with the first bank
+      navigation.navigate('EnterPinScreen', {
+        banks: banks[0],
+        linked_account: true, // ✅ identify that user clicked linked account
+      });
+    } else {
+      // Navigate to select screen
+      navigation.navigate('SelectBankScreen', {
+        banks,
+        linked_account: true, // ✅ pass this param
+      });
+    }
+  };
+
   // 🔹 Loader
   if (loading) {
     return (
@@ -328,7 +349,7 @@ const HomeScreen = () => {
           <ActionButton2
             title={i18n.t('linked_account')}
             image={require('../../assets/image/homeIcon/link.png')}
-            onPress={() => console.log('Linked Accounts')}
+            onPress={handleLinkedAccount}
           />
           <ActionButton2
             title={i18n.t('check_balance')}

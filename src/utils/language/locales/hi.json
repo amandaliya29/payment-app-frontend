@@ -377,5 +377,23 @@
   "send_money": "पैसे भेजें",
   "receive_money": "पैसे प्राप्त करें",
   "select": "चुनें",
-  "no_transactions_found": "कोई लेन-देन नहीं मिला"
+  "no_transactions_found": "कोई लेन-देन नहीं मिला",
+
+  "confirm_account_number_label": "खाता संख्या की पुष्टि करें",
+  "confirm_account_number_placeholder": "खाता संख्या दोबारा दर्ज करें",
+  "account_holder_name_label": "खाता धारक का नाम",
+  "account_holder_name_placeholder": "खाता धारक का नाम दर्ज करें",
+
+  "bank_details_title": "बैंक विवरण",
+  "account_holder_name": "खाता धारक का नाम",
+  "account_number": "खाता संख्या",
+  "account_type": "खाते का प्रकार",
+  "branch": "शाखा",
+  "ifsc_code": "आईएफएससी कोड",
+
+  "no_recent_transfers": "कोई हाल का ट्रांसफर नहीं मिला",
+  "branch_name": "શાખાનું નામ",
+  "branch_address": "શાખાનો સરનામું",
+  "city": "શહેર",
+  "state": "રાજ્ય"
 }

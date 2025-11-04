@@ -388,5 +388,23 @@
   "send_money": "પૈસા મોકલો",
   "receive_money": "પૈસા મેળવો",
   "select": "પસંદ કરો",
-  "no_transactions_found": "કોઈ ટ્રાન્ઝેક્શન મળ્યું નથી"
+  "no_transactions_found": "કોઈ ટ્રાન્ઝેક્શન મળ્યું નથી",
+
+  "confirm_account_number_label": "એકાઉન્ટ નંબર પુષ્ટિ કરો",
+  "confirm_account_number_placeholder": "એકાઉન્ટ નંબર ફરી દાખલ કરો",
+  "account_holder_name_label": "એકાઉન્ટ ધારકનું નામ",
+  "account_holder_name_placeholder": "એકાઉન્ટ ધારકનું નામ દાખલ કરો",
+
+  "bank_details_title": "બેંક વિગતો",
+  "account_holder_name": "એકાઉન્ટ ધારકનું નામ",
+  "account_number": "એકાઉન્ટ નંબર",
+  "account_type": "એકાઉન્ટ પ્રકાર",
+  "branch": "શાખા",
+  "ifsc_code": "આઈએફએસસી કોડ",
+
+  "no_recent_transfers": "કોઈ તાજેતરના ટ્રાન્સફર મળ્યા નથી",
+  "branch_name": "शाखा का नाम",
+  "branch_address": "शाखा का पता",
+  "city": "शहर",
+  "state": "राज्य"
 }

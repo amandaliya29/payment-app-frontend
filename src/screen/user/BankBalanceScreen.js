@@ -21,6 +21,7 @@ const BankBalanceScreen = () => {
   const route = useRoute();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const { linked_account } = route?.params || {};
 
   const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
 
@@ -28,7 +29,6 @@ const BankBalanceScreen = () => {
     background: isDark ? Colors.bg : Colors.white,
     text: Colors.white,
     subText: isDark ? Colors.white : Colors.black,
-    btnColor: isDark ? Colors.darkGrey : Colors.cardGrey,
   };
 
   const defaultBank = {
@@ -36,15 +36,14 @@ const BankBalanceScreen = () => {
     name: 'State Bank of India',
     accountNumber: 'XXXX XXXX XXXX 1234',
     type: 'Savings',
+    accountHolderName: 'Ashish Mandaliya',
     logo: require('../../assets/image/bankIcon/sbi.png'),
   };
 
-  // Use bank data from route.params if available
   const [selectedBank, setSelectedBank] = useState(
     route.params?.selectedBank || defaultBank,
   );
 
-  // Animation
   const cardScale = useRef(new Animated.Value(0.9)).current;
   const cardOpacity = useRef(new Animated.Value(0)).current;
 
@@ -63,19 +62,22 @@ const BankBalanceScreen = () => {
     ]).start();
   };
 
-  // console.log(route.params.balance);
-
   useEffect(() => {
     if (route.params?.selectedBank) {
       const bank = route.params.selectedBank;
-
-      const logoUrl = `${IMAGE_BASE_URL}${bank.bank.logo}`;
+      const logoUrl = `${IMAGE_BASE_URL}${bank.bank?.logo || ''}`;
 
       setSelectedBank({
         ...bank,
         logo: logoUrl,
         accountNumber: `${bank.account_number}`,
-        type: bank.account_type || 'saving',
+        type: bank.account_type || 'Saving',
+        accountHolderName: bank.account_holder_name || '—',
+        branch_name: bank.ifsc_detail?.branch_name || '—',
+        branch_address: bank.ifsc_detail?.branch_address || '—',
+        city: bank.ifsc_detail?.city || '—',
+        state: bank.ifsc_detail?.state || '—',
+        ifsc_code: bank.ifsc_detail?.ifsc_code || '—',
       });
     }
     animateCard();
@@ -85,9 +87,12 @@ const BankBalanceScreen = () => {
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
-      {/* {console.log(route.params.selectedBank.bank.logo)} */}
       <Header
-        title={I18n.t('bank_balance_title')}
+        title={
+          linked_account
+            ? I18n.t('bank_details_title') || 'Bank Details'
+            : I18n.t('bank_balance_title') || 'Bank Balance'
+        }
         onBack={() => navigation.goBack()}
       />
 
@@ -95,37 +100,118 @@ const BankBalanceScreen = () => {
         <Animated.View
           style={{ transform: [{ scale: cardScale }], opacity: cardOpacity }}
         >
-          <LinearGradient
-            colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
-            style={styles.cardGradient}
-          >
-            <Text style={styles.balanceLabel}>
-              {I18n.t('bank_balance_title')}
-            </Text>
-
-            <View style={styles.balanceRow}>
-              <Text style={styles.balance}>₹ {route.params.balance}</Text>
-            </View>
-
-            <View style={styles.divider} />
-
-            <View style={styles.bankRow}>
-              <View style={styles.bankLogoContainer}>
+          {linked_account ? (
+            // ----------- BANK DETAILS CARD ------------
+            <LinearGradient
+              colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
+              style={styles.detailsCard}
+            >
+              <View style={styles.detailsHeader}>
                 <Image
                   source={{ uri: selectedBank.logo }}
-                  style={styles.bankLogo}
-                  resizeMode="contain"
+                  style={styles.detailsLogo}
                 />
+                <Text style={styles.detailsBankName}>
+                  {selectedBank.bank?.name || selectedBank.name}
+                </Text>
               </View>
-              <View style={styles.bankInfo}>
-                <Text style={styles.bankName}>{selectedBank.bank.name}</Text>
-                <Text style={styles.bankDetails}>
+
+              {/* Account Holder Name */}
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>
+                  {I18n.t('account_holder_name')}:
+                </Text>
+                <Text style={styles.detailValue}>
+                  {selectedBank.accountHolderName}
+                </Text>
+              </View>
+
+              {/* Account Number */}
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>
+                  {I18n.t('account_number')}:
+                </Text>
+                <Text style={styles.detailValue}>
                   {selectedBank.accountNumber}
                 </Text>
-                <Text style={styles.bankDetails}>{selectedBank.type}</Text>
               </View>
-            </View>
-          </LinearGradient>
+
+              {/* IFSC Code */}
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{I18n.t('ifsc_code')}:</Text>
+                <Text style={styles.detailValue}>{selectedBank.ifsc_code}</Text>
+              </View>
+
+              {/* Account Type */}
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>
+                  {I18n.t('account_type')}:
+                </Text>
+                <Text style={styles.detailValue}>
+                  {selectedBank.type?.toUpperCase()}
+                </Text>
+              </View>
+
+              {/* Branch Name */}
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>
+                  {I18n.t('branch_name') || 'Branch Name'}:
+                </Text>
+                <Text style={styles.detailValue}>
+                  {selectedBank.branch_name}
+                </Text>
+              </View>
+
+              {/* Branch Address */}
+              <View style={[styles.detailRow, { alignItems: 'flex-start' }]}>
+                <Text style={styles.detailLabel}>
+                  {I18n.t('branch_address') || 'Branch Address'}:
+                </Text>
+                <Text
+                  style={[styles.detailValue, styles.detailAddress]}
+                  numberOfLines={0}
+                >
+                  {selectedBank.branch_address}, {selectedBank.city},{' '}
+                  {selectedBank.state}
+                </Text>
+              </View>
+            </LinearGradient>
+          ) : (
+            // ----------- BANK BALANCE CARD ------------
+            <LinearGradient
+              colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
+              style={styles.cardGradient}
+            >
+              <Text style={styles.balanceLabel}>
+                {I18n.t('bank_balance_title')}
+              </Text>
+
+              <View style={styles.balanceRow}>
+                <Text style={styles.balance}>₹ {route.params.balance}</Text>
+              </View>
+
+              <View style={styles.divider} />
+
+              <View style={styles.bankRow}>
+                <View style={styles.bankLogoContainer}>
+                  <Image
+                    source={{ uri: selectedBank.logo }}
+                    style={styles.bankLogo}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={styles.bankInfo}>
+                  <Text style={styles.bankName}>
+                    {selectedBank.bank?.name || selectedBank.name}
+                  </Text>
+                  <Text style={styles.bankDetails}>
+                    {selectedBank.accountNumber}
+                  </Text>
+                  <Text style={styles.bankDetails}>{selectedBank.type}</Text>
+                </View>
+              </View>
+            </LinearGradient>
+          )}
         </Animated.View>
       </ScrollView>
     </SafeAreaView>
@@ -135,6 +221,7 @@ const BankBalanceScreen = () => {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scrollContainer: { padding: scaleUtils.scaleWidth(16) },
+
   cardGradient: {
     borderRadius: scaleUtils.scaleWidth(16),
     padding: scaleUtils.scaleWidth(16),
@@ -167,7 +254,6 @@ const styles = StyleSheet.create({
     width: scaleUtils.scaleWidth(35),
     height: scaleUtils.scaleWidth(35),
     borderRadius: scaleUtils.scaleWidth(22),
-    resizeMode: 'contain',
   },
   bankLogoContainer: {
     width: scaleUtils.scaleWidth(36),
@@ -175,7 +261,6 @@ const styles = StyleSheet.create({
     marginRight: scaleUtils.scaleWidth(14),
     borderRadius: scaleUtils.scaleWidth(24),
     backgroundColor: Colors.white,
-    resizeMode: 'contain',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -189,6 +274,55 @@ const styles = StyleSheet.create({
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
     color: Colors.white,
+  },
+
+  detailsCard: {
+    borderRadius: scaleUtils.scaleWidth(20),
+    padding: scaleUtils.scaleWidth(20),
+    marginBottom: scaleUtils.scaleHeight(20),
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  detailsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: scaleUtils.scaleHeight(16),
+  },
+  detailsLogo: {
+    width: scaleUtils.scaleWidth(35),
+    height: scaleUtils.scaleWidth(34),
+    borderRadius: scaleUtils.scaleWidth(25),
+    backgroundColor: Colors.white,
+    marginRight: scaleUtils.scaleWidth(12),
+  },
+  detailsBankName: {
+    fontSize: scaleUtils.scaleFont(16),
+    fontFamily: 'Poppins-Bold',
+    color: Colors.white,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: scaleUtils.scaleHeight(8),
+  },
+  detailLabel: {
+    fontSize: scaleUtils.scaleFont(13),
+    fontFamily: 'Poppins-Medium',
+    color: 'rgba(255,255,255,0.85)',
+  },
+  detailValue: {
+    fontSize: scaleUtils.scaleFont(13),
+    fontFamily: 'Poppins-Regular',
+    color: Colors.white,
+    width: '50%',
+    flexWrap: 'wrap',
+    textAlign: 'right',
+  },
+  detailAddress: {
+    textAlign: 'right',
   },
 });
 

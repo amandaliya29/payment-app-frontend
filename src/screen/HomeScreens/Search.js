@@ -1,3 +1,4 @@
+// ✅ Full Updated Search.js
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -14,7 +15,7 @@ import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import Input from '../../component/Input';
 import I18n from '../../utils/language/i18n';
-import { searchUser } from '../../utils/apiHelper/Axios'; // 👈 API call
+import { searchUser, getResentTransfer } from '../../utils/apiHelper/Axios'; // 👈 added getResentTransfer
 import { useNavigation } from '@react-navigation/native';
 
 const Search = () => {
@@ -33,6 +34,7 @@ const Search = () => {
   const [recentSearches, setRecentSearches] = useState([]);
   const [filteredPeople, setFilteredPeople] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [recentLoading, setRecentLoading] = useState(false);
 
   // Auto-focus input
   useEffect(() => {
@@ -40,6 +42,27 @@ const Search = () => {
       inputRef.current?.focus();
     }, 500);
     return () => clearTimeout(timer);
+  }, []);
+
+  // ✅ Fetch recent transfers from API
+  useEffect(() => {
+    const fetchRecentTransfers = async () => {
+      try {
+        setRecentLoading(true);
+        const res = await getResentTransfer();
+        if (res.data?.status && Array.isArray(res.data?.data)) {
+          setRecentSearches(res.data.data);
+        } else {
+          setRecentSearches([]);
+        }
+      } catch (error) {
+        setRecentSearches([]);
+      } finally {
+        setRecentLoading(false);
+      }
+    };
+
+    fetchRecentTransfers();
   }, []);
 
   // Debounced search API call
@@ -75,12 +98,6 @@ const Search = () => {
   }, [searchText]);
 
   const handleSelectPerson = person => {
-    const updatedRecent = [
-      person,
-      ...recentSearches.filter(p => p.id !== person.id),
-    ].slice(0, 5);
-    setRecentSearches(updatedRecent);
-
     navigation.navigate('EnterAmountScreen', {
       user: { id: person.id },
     });
@@ -97,7 +114,7 @@ const Search = () => {
       <View style={styles.peopleInfo}>
         <View style={styles.peopleCircle}>
           <Text style={styles.initial}>
-            {item.name.charAt(0).toUpperCase()}
+            {item.name?.charAt(0)?.toUpperCase() || '?'}
           </Text>
         </View>
         <View>
@@ -105,10 +122,10 @@ const Search = () => {
             style={[styles.peopleName, { color: themeColors.text }]}
             numberOfLines={1}
           >
-            {item.name}
+            {item.name || 'Unknown'}
           </Text>
           <Text style={[styles.peopleNumber, { color: Colors.grey }]}>
-            {item.phone}
+            {item.phone || ''}
           </Text>
         </View>
       </View>
@@ -137,7 +154,14 @@ const Search = () => {
             <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
               {I18n.t('recent_searches')}
             </Text>
-            {recentSearches.length > 0 ? (
+
+            {recentLoading ? (
+              <ActivityIndicator
+                size="large"
+                color={Colors.gradientSecondary}
+                style={{ marginTop: 20 }}
+              />
+            ) : recentSearches.length > 0 ? (
               <FlatList
                 data={recentSearches}
                 renderItem={renderPersonItem}
@@ -152,7 +176,7 @@ const Search = () => {
                   { color: Colors.grey, textAlign: 'center' },
                 ]}
               >
-                No recent searches
+                No recent transactions
               </Text>
             )}
           </>
@@ -161,6 +185,7 @@ const Search = () => {
             <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
               {I18n.t('people')}
             </Text>
+
             {loading ? (
               <ActivityIndicator
                 size="large"

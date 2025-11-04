@@ -22,9 +22,9 @@ const SelectBankScreen = () => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
 
-  const banks = route.params?.banks || [];
+  const { banks, linked_account } = route?.params;
 
-  // console.log(banks);
+  // console.log(banks, linked_account);
 
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
@@ -34,21 +34,22 @@ const SelectBankScreen = () => {
     divider: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
   };
 
-  const handleBankSelect = bank => {
+  const handleBankSelect = (bank, linked_account) => {
     navigation.navigate('EnterPinScreen', {
       banks: bank,
+      linked_account: linked_account,
     });
   };
 
   useEffect(() => {
-    if (banks.length === 1) handleBankSelect(banks[0]);
+    if (banks.length === 1) handleBankSelect(banks[0], linked_account);
   }, [banks]);
 
   const renderItem = ({ item, index }) => (
     <>
       <TouchableOpacity
         style={styles.bankRow}
-        onPress={() => handleBankSelect(item)}
+        onPress={() => handleBankSelect(item, linked_account)}
       >
         <Image
           source={{ uri: `${IMAGE_BASE_URL}${item.bank.logo}` }}
