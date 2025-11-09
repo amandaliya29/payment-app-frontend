@@ -45,6 +45,7 @@ import TransactionSuccessScreen from '../screen/user/TransactionSuccessScreen';
 import TransactionPinScreen from '../screen/HomeScreens/TransactionPinScreen';
 import PaymentSuccessScreen from '../screen/HomeScreens/PaymentSuccessScreen';
 import TransactionHistoryScreen from '../screen/HomeScreens/TransactionHistoryScreen';
+import SelfTransferEnterAmount from '../screen/HomeScreens/SelfTransferEnterAmount';
 
 const Stack = createStackNavigator();
 
@@ -159,6 +160,10 @@ const StackNavigation = ({ notificationScreen }) => {
         <Stack.Screen
           name="TransactionHistoryScreen"
           component={TransactionHistoryScreen}
+        />
+        <Stack.Screen
+          name="SelfTransferEnterAmount"
+          component={SelfTransferEnterAmount}
         />
       </Stack.Navigator>
     </>
