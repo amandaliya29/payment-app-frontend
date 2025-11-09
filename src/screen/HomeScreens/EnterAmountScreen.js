@@ -21,8 +21,13 @@ import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
 import { Toast } from '../../utils/Toast';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { getUser, getBankAccountList } from '../../utils/apiHelper/Axios';
+import {
+  getUser,
+  getBankAccountList,
+  CreditUpiBankList,
+} from '../../utils/apiHelper/Axios';
 import Button from '../../component/Button';
+import moment from 'moment';
 
 const EnterAmountScreen = () => {
   const navigation = useNavigation();
@@ -39,7 +44,8 @@ const EnterAmountScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [banks, setBanks] = useState([]);
   const [selectedBank, setSelectedBank] = useState(null);
-
+  const [selectedTab, setSelectedTab] = useState('bank');
+  const [bankAccounts, setBankAccounts] = useState([]);
   const amountRef = useRef(null);
   const route = useRoute();
   const { id } = route?.params?.user || {};
@@ -55,6 +61,8 @@ const EnterAmountScreen = () => {
     selectedBankColor: isDark ? Colors.grey : Colors.cardGrey,
   };
 
+  const IMAGE_BASE_URL = 'https://cyapay.ddns.net/';
+
   const showToast = message => {
     setToastMessage(message);
     setToastVisible(true);
@@ -67,9 +75,18 @@ const EnterAmountScreen = () => {
         return match ? decodeURIComponent(match[1]) : null;
       }
       return null;
-    } catch (error) {
+    } catch {
       return null;
     }
+  };
+
+  const isPrimaryValue = v =>
+    v === true || v === 1 || v === '1' || v === 'true';
+
+  const getDefaultFromList = list => {
+    if (!Array.isArray(list) || list.length === 0) return null;
+    const primary = list.find(item => isPrimaryValue(item.is_primary));
+    return primary || list[0];
   };
 
   useEffect(() => {
@@ -106,17 +123,18 @@ const EnterAmountScreen = () => {
         const res = await getBankAccountList();
         if (res?.data?.status && res?.data?.data?.length > 0) {
           const bankData = res.data.data.map(account => ({
-            id: account.id,
+            id: (account.id ?? '').toString(),
             name: account.account_holder_name,
             upiId: account.upi_id,
             logo: account.bank?.logo
-              ? { uri: `https://cyapay.ddns.net/${account.bank.logo}` }
+              ? { uri: `${IMAGE_BASE_URL}${account.bank.logo}` }
               : require('../../assets/image/bankIcon/sbi.png'),
             bankName: account.bank?.name || '',
             is_primary: account.is_primary,
             pin_code_length: account.pin_code_length,
+            source: 'bank',
+            original: account,
           }));
-          console.log(bankData);
 
           setBanks(bankData);
           setSelectedBank(bankData.find(item => !!item.is_primary));
@@ -130,8 +148,69 @@ const EnterAmountScreen = () => {
       }
     };
 
+    const fetchCreditUpiBanks = async () => {
+      try {
+        setLoading(true);
+        const res = await CreditUpiBankList();
+        if (res.data?.status && Array.isArray(res.data?.data)) {
+          const formattedData = res.data.data
+            .map(item => {
+              const upi = item.bank_credit_upi;
+              if (!upi) return null;
+
+              const isActive = String(upi.status).toLowerCase() === 'active';
+              if (!isActive) return null;
+
+              const creditLimit = parseFloat(upi.credit_limit) || 0;
+              const availableCredit = parseFloat(upi.available_credit) || 0;
+              const usedCredit = creditLimit - availableCredit;
+
+              return {
+                id: (item.id ?? '').toString(),
+                bankLogo: item.bank?.logo
+                  ? { uri: `${IMAGE_BASE_URL}${item.bank.logo}` }
+                  : require('../../assets/image/bankIcon/sbi.png'),
+                bankName: item.bank?.name || '',
+                account: item.account_number,
+                limit: `₹${creditLimit.toLocaleString('en-IN')}`,
+                available: `₹${availableCredit.toLocaleString('en-IN')}`,
+                used: `₹${usedCredit.toLocaleString('en-IN')}`,
+                lastUsed: upi.updated_at
+                  ? moment(upi.updated_at).fromNow()
+                  : '',
+                status: upi.status,
+                is_primary: upi.is_primary,
+                bank_credit_upi: upi,
+                source: 'creditUpi',
+                original: item,
+              };
+            })
+            .filter(Boolean);
+
+          if (formattedData.length > 0) {
+            const defaultSelected = getDefaultFromList(formattedData);
+            setBankAccounts(formattedData);
+            setSelectedBank(prev => prev || defaultSelected);
+          } else {
+            showToast('No active Credit/UPI accounts found');
+            setBankAccounts([]);
+          }
+        } else {
+          showToast('Failed to load Credit/UPI list');
+        }
+      } catch (error) {
+        showToast(
+          error.response?.data?.messages ||
+            'Something went wrong while fetching Credit/UPI list',
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchUser();
     fetchBanks();
+    fetchCreditUpiBanks();
 
     const timeout = setTimeout(() => {
       amountRef.current?.focus();
@@ -140,9 +219,27 @@ const EnterAmountScreen = () => {
     return () => clearTimeout(timeout);
   }, [id, code]);
 
+  const handleTabChange = tab => {
+    setSelectedTab(tab);
+    if (tab === 'bank') {
+      const defaultBank = getDefaultFromList(banks);
+      setSelectedBank(defaultBank);
+    } else if (tab === 'creditUpi') {
+      const defaultCredit = getDefaultFromList(bankAccounts);
+      setSelectedBank(defaultCredit);
+    }
+  };
+
   const handleAmountChange = text => {
     const numeric = text.replace(/[^0-9.]/g, '');
-    setAmount(numeric);
+    const value = parseFloat(numeric) || 0;
+
+    if (value > 500000) {
+      showToast('Maximum limit is ₹500000');
+      setAmount('500000');
+    } else {
+      setAmount(numeric);
+    }
   };
 
   const handleProceed = () => {
@@ -150,8 +247,14 @@ const EnterAmountScreen = () => {
       showToast(I18n.t('enter_valid_amount'));
       return;
     }
+
+    if (parseFloat(amount) > 500000) {
+      showToast('Maximum limit is ₹500000');
+      return;
+    }
+
     Keyboard.dismiss();
-    setModalVisible(true); // Open bottom modal instead of navigating
+    setModalVisible(true);
   };
 
   const handlePay = () => {
@@ -166,13 +269,9 @@ const EnterAmountScreen = () => {
       user: userData,
       isViaUPI,
       note,
+      creditUpiId: selectedBank?.bank_credit_upi?.upi_id || null, // ✅ Pass correct CreditUPI ID
     });
   };
-
-  // console.log(
-  //   'userData?.bank_account?.id,',
-  //   banks.filter(item => item.id !== userData?.bank_account?.id),
-  // );
 
   if (userLoading || userError || !userData) {
     return (
@@ -188,6 +287,11 @@ const EnterAmountScreen = () => {
       </SafeAreaView>
     );
   }
+
+  const isItemSelected = item =>
+    selectedBank &&
+    selectedBank.id?.toString() === item.id?.toString() &&
+    selectedBank.source === (item.source || 'bank');
 
   return (
     <SafeAreaView
@@ -285,61 +389,173 @@ const EnterAmountScreen = () => {
         </View>
       </KeyboardAvoidingView>
 
-      {/* 🔹 Bottom Modal */}
-      <Modal visible={modalVisible} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View
+      {/* Modal */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPressOut={() => setModalVisible(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
             style={[
               styles.modalContainer,
-              {
-                backgroundColor: themeColors.background,
-                maxHeight: '50%',
-              },
+              { backgroundColor: themeColors.background, maxHeight: '60%' },
             ]}
           >
-            <Text style={[styles.modalTitle, { color: themeColors.text }]}>
-              {I18n.t('select_bank')}
-            </Text>
-            <FlatList
-              data={banks.filter(
-                item => item.id !== userData?.bank_account?.id,
-              )}
-              showsVerticalScrollIndicator={false}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[
-                    styles.modalItem,
-                    {
-                      backgroundColor:
-                        selectedBank?.id === item.id
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+                marginBottom: scaleUtils.scaleHeight(10),
+                paddingBottom: 5,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => handleTabChange('bank')}
+                style={{
+                  borderBottomWidth: selectedTab === 'bank' ? 2 : 0,
+                  borderBottomColor:
+                    selectedTab === 'bank' ? Colors.primary : 'transparent',
+                  paddingVertical: 5,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: scaleUtils.scaleFont(16),
+                    fontFamily: 'Poppins-SemiBold',
+                    color:
+                      selectedTab === 'bank'
+                        ? Colors.primary
+                        : themeColors.subText,
+                  }}
+                >
+                  Bank
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => handleTabChange('creditUpi')}
+                style={{
+                  borderBottomWidth: selectedTab === 'creditUpi' ? 2 : 0,
+                  borderBottomColor:
+                    selectedTab === 'creditUpi'
+                      ? Colors.primary
+                      : 'transparent',
+                  paddingVertical: 5,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: scaleUtils.scaleFont(16),
+                    fontFamily: 'Poppins-SemiBold',
+                    color:
+                      selectedTab === 'creditUpi'
+                        ? Colors.primary
+                        : themeColors.subText,
+                  }}
+                >
+                  Credit UPI
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {selectedTab === 'bank' ? (
+              <FlatList
+                data={banks.filter(item => item.upiId !== code)}
+                showsVerticalScrollIndicator={false}
+                keyExtractor={item => item.id.toString()}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.modalItem,
+                      {
+                        backgroundColor: isItemSelected(item)
                           ? themeColors.selectedBankColor
                           : 'transparent',
-                    },
-                  ]}
-                  onPress={() => setSelectedBank(item)}
-                >
-                  <Image source={item.logo} style={styles.modalIcon} />
-                  <Text style={[styles.modalText, { color: themeColors.text }]}>
-                    {item.bankName}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-            {/* <View style={styles.modalBottom}>
-              <Text style={[styles.amountText, { color: themeColors.text }]}>
-                ₹ {amount}
-              </Text>
-              <TouchableOpacity style={styles.payButton} onPress={handlePay}>
-                <Text style={styles.payButtonText}>{I18n.t('pay')}</Text>
-              </TouchableOpacity>
-            </View> */}
+                      },
+                    ]}
+                    onPress={() =>
+                      setSelectedBank({
+                        ...item,
+                        id: item.id?.toString(),
+                        source: item.source || 'bank',
+                      })
+                    }
+                  >
+                    <Image source={item.logo} style={styles.modalIcon} />
+                    <Text
+                      style={[styles.modalText, { color: themeColors.text }]}
+                    >
+                      {item.bankName}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+            ) : (
+              <FlatList
+                data={bankAccounts.filter(
+                  item => item?.id !== userData?.bank_account?.id,
+                )}
+                showsVerticalScrollIndicator={false}
+                keyExtractor={item => item.id}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[
+                      styles.modalItem,
+                      {
+                        backgroundColor: isItemSelected(item)
+                          ? themeColors.selectedBankColor
+                          : 'transparent',
+                      },
+                    ]}
+                    onPress={() =>
+                      setSelectedBank({
+                        ...item,
+                        id: item.id?.toString(),
+                        source: item.source || 'creditUpi',
+                        bank_credit_upi: item.bank_credit_upi, // ✅ ensures correct upi_id passed
+                      })
+                    }
+                  >
+                    <Image source={item.bankLogo} style={styles.modalIcon} />
+                    <View>
+                      <Text
+                        style={[styles.modalText, { color: themeColors.text }]}
+                      >
+                        {item.bankName}
+                      </Text>
+                      {item.bank_credit_upi?.upi_id && (
+                        <Text
+                          style={[
+                            styles.modalText,
+                            {
+                              fontSize: scaleUtils.scaleFont(12),
+                              color: themeColors.text,
+                              marginTop: scaleUtils.scaleHeight(-4),
+                            },
+                          ]}
+                        >
+                          {item.bank_credit_upi.upi_id}
+                        </Text>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                )}
+              />
+            )}
+
             <Button
               onPress={handlePay}
               title={` ₹ ${amount} ${I18n.t('pay')}`}
             />
-          </View>
-        </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
       </Modal>
 
       <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
@@ -452,26 +668,5 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Regular',
-  },
-  modalBottom: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: scaleUtils.scaleHeight(10),
-  },
-  amountText: {
-    fontSize: scaleUtils.scaleFont(18),
-    fontFamily: 'Poppins-Bold',
-  },
-  payButton: {
-    backgroundColor: Colors.gradientSecondary,
-    paddingHorizontal: scaleUtils.scaleWidth(20),
-    paddingVertical: scaleUtils.scaleHeight(10),
-    borderRadius: scaleUtils.scaleWidth(12),
-  },
-  payButtonText: {
-    color: Colors.white,
-    fontSize: scaleUtils.scaleFont(16),
-    fontFamily: 'Poppins-Medium',
   },
 });

@@ -406,5 +406,25 @@
   "branch_name": "शाखा का नाम",
   "branch_address": "शाखा का पता",
   "city": "शहर",
-  "state": "राज्य"
+  "state": "राज्य",
+
+  "no_bank_accounts": "કોઈ બેંક એકાઉન્ટ મળ્યું નથી",
+  "failed_fetch_banks": "બેંકો લાવવા નિષ્ફળતા",
+  "select_credit_upi": "ક્રેડિટ/UPI પસંદ કરો",
+  "pay": "ચુકવણી કરો",
+  "select_bank_to_pay": "કૃપા કરી ચૂકવવા માટે બેંક પસંદ કરો",
+
+  "bank_tab": "બેંક",
+  "credit_upi_tab": "ક્રેડિટ યુપીઆઈ",
+
+  "select_bank_account_from": "બેંક એકાઉન્ટ પસંદ કરો (થી)",
+  "select_bank_account_to": "બેંક એકાઉન્ટ પસંદ કરો (સુધી)",
+  "navigating_add_bank": "બેંક એકાઉન્ટ ઉમેરવા જઈ રહ્યા છે...",
+  "please_select_both_accounts": "કૃપા કરીને બન્ને બેંક એકાઉન્ટ પસંદ કરો.",
+  "something_went_wrong": "કંઈક ખોટું થયું છે. કૃપા કરીને ફરી પ્રયત્ન કરો.",
+  "next": "આગળ",
+  "change": "બદલો",
+
+  "paying": "ચુકવણી કરતા",
+  "banking_name": "બેંકનું નામ"
 }

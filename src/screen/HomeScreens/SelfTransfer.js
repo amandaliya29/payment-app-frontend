@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,8 @@ import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
 import { getBankAccountList } from '../../utils/apiHelper/Axios';
-import { Toast } from '../../utils/Toast'; // ✅ Import your custom toast
+import { Toast } from '../../utils/Toast';
+import Button from '../../component/Button';
 import { useNavigation } from '@react-navigation/native';
 
 const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
@@ -24,17 +25,24 @@ const SelfTransfer = () => {
   const navigation = useNavigation();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const scrollRef = useRef(null);
 
   const [bankAccounts, setBankAccounts] = useState([]);
+  const [selectedFromBank, setSelectedFromBank] = useState(null);
+  const [selectedToBank, setSelectedToBank] = useState(null);
   const [loading, setLoading] = useState(true);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  const [showFromList, setShowFromList] = useState(true);
+  const [showToList, setShowToList] = useState(false);
 
   const showToast = message => {
     setToastVisible(false);
     setToastMessage(message);
     setTimeout(() => setToastVisible(true), 50);
   };
+
   const themeColors = {
     background: isDark ? Colors.bg : Colors.white,
     text: isDark ? Colors.white : Colors.black,
@@ -49,7 +57,6 @@ const SelfTransfer = () => {
     const fetchAccounts = async () => {
       try {
         const response = await getBankAccountList();
-
         if (response.data?.status && Array.isArray(response.data?.data)) {
           setBankAccounts(response.data.data);
         } else {
@@ -65,9 +72,39 @@ const SelfTransfer = () => {
         setLoading(false);
       }
     };
-
     fetchAccounts();
   }, []);
+
+  const handleFromSelect = bank => {
+    setSelectedFromBank(bank);
+    setShowFromList(false);
+    setShowToList(true);
+    setTimeout(() => {
+      scrollRef.current?.scrollToEnd({ animated: true });
+    }, 300);
+  };
+
+  const handleToSelect = bank => {
+    setSelectedToBank(bank);
+    setShowToList(false);
+  };
+
+  const handleNext = () => {
+    if (!selectedFromBank || !selectedToBank) {
+      showToast(I18n.t('please_select_both_accounts'));
+      return;
+    }
+
+    navigation.navigate('SelfTransferEnterAmount', {
+      fromBank: selectedFromBank,
+      toBank: selectedToBank,
+    });
+  };
+
+  const isSameBankSelected =
+    selectedFromBank &&
+    selectedToBank &&
+    selectedFromBank.id === selectedToBank.id;
 
   if (loading) {
     return (
@@ -76,6 +113,38 @@ const SelfTransfer = () => {
       </View>
     );
   }
+
+  const renderSelectedCard = (bank, onChange) => (
+    <View
+      style={[styles.selectedCard, { backgroundColor: themeColors.iconBox }]}
+    >
+      <View style={styles.bankInfoRow}>
+        <View
+          style={[styles.bankIconBox, { backgroundColor: themeColors.iconBox }]}
+        >
+          <Image
+            source={{ uri: `${IMAGE_BASE_URL}${bank.bank.logo}` }}
+            style={styles.bankLogo}
+          />
+        </View>
+        <View style={styles.bankInfo}>
+          <Text style={[styles.bankName, { color: themeColors.text }]}>
+            {bank.bank.name}
+          </Text>
+          <Text
+            style={[styles.bankDetails, { color: themeColors.placeholder }]}
+          >
+            {bank.account_number} {bank.account_type}
+          </Text>
+        </View>
+        <TouchableOpacity onPress={onChange}>
+          <Text style={[styles.changeText, { color: Colors.primary }]}>
+            {I18n.t('change') || 'Change'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   return (
     <SafeAreaView
@@ -86,29 +155,22 @@ const SelfTransfer = () => {
         onBack={() => navigation.goBack()}
       />
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
+        {/* ====== FROM SECTION ====== */}
         <Text style={[styles.sectionTitle, { color: themeColors.text }]}>
-          {I18n.t('manage_money')}
+          {I18n.t('select_bank_account_from')}
         </Text>
 
-        <View style={styles.bankSection}>
-          {bankAccounts.length > 0 ? (
-            bankAccounts.map(bank => (
+        {selectedFromBank && !showFromList
+          ? renderSelectedCard(selectedFromBank, () => setShowFromList(true))
+          : bankAccounts.map(bank => (
               <TouchableOpacity
-                key={bank.id}
+                key={`from-${bank.id}`}
                 style={[styles.bankCard]}
-                onPress={() => {
-                  console.log('bank', bank.upi_id);
-                  navigation.navigate('EnterAmountScreen', {
-                    user: { code: bank.upi_id },
-                  });
-
-                  // showToast(
-                  //   `${bank.bank.name} ${I18n.t('selected_successfully')}`,
-                  // );
-                }}
+                onPress={() => handleFromSelect(bank)}
               >
                 <View
                   style={[
@@ -121,6 +183,7 @@ const SelfTransfer = () => {
                     style={styles.bankLogo}
                   />
                 </View>
+
                 <View style={styles.bankInfo}>
                   <Text style={[styles.bankName, { color: themeColors.text }]}>
                     {bank.bank.name}
@@ -131,55 +194,122 @@ const SelfTransfer = () => {
                       { color: themeColors.placeholder },
                     ]}
                   >
-                    {bank.account_number}
-                    {' • ' + bank.account_type}
+                    {bank.account_number} {bank.account_type}
                   </Text>
                 </View>
-              </TouchableOpacity>
-            ))
-          ) : (
-            <Text
-              style={[styles.noAccountText, { color: themeColors.placeholder }]}
-            >
-              {I18n.t('no_linked_account')}
-            </Text>
-          )}
 
-          <TouchableOpacity
-            style={[
-              styles.paymentOption,
-              { marginTop: scaleUtils.scaleHeight(10) },
-            ]}
-            onPress={() => {
-              showToast(I18n.t('navigating_add_bank'));
-              navigation.navigate('BankLinkScreen');
-            }}
-          >
-            <View
+                <View style={styles.radioOuter}>
+                  {selectedFromBank?.id === bank.id && (
+                    <View style={styles.radioInner} />
+                  )}
+                </View>
+              </TouchableOpacity>
+            ))}
+
+        {/* ====== TO SECTION (only show after from selected) ====== */}
+        {selectedFromBank && (
+          <>
+            <Text
               style={[
-                styles.dottedContainer,
+                styles.sectionTitle,
                 {
-                  borderColor: themeColors.border,
-                  backgroundColor: themeColors.iconBox,
+                  color: themeColors.text,
+                  marginTop: scaleUtils.scaleHeight(10),
                 },
               ]}
             >
-              <Image
-                source={require('../../assets/image/appIcon/add.png')}
-                style={[
-                  styles.paymentIcon,
-                  { tintColor: themeColors.bankIcon },
-                ]}
-              />
-            </View>
-            <Text style={[styles.paymentText, { color: themeColors.text }]}>
-              {I18n.t('add_bank_account')}
+              {I18n.t('select_bank_account_to')}
             </Text>
-          </TouchableOpacity>
+
+            {selectedToBank && !showToList
+              ? renderSelectedCard(selectedToBank, () => setShowToList(true))
+              : bankAccounts.map(bank => (
+                  <TouchableOpacity
+                    key={`to-${bank.id}`}
+                    style={[styles.bankCard]}
+                    onPress={() => handleToSelect(bank)}
+                    disabled={selectedFromBank?.id === bank.id}
+                  >
+                    <View
+                      style={[
+                        styles.bankIconBox,
+                        { backgroundColor: themeColors.iconBox },
+                      ]}
+                    >
+                      <Image
+                        source={{ uri: `${IMAGE_BASE_URL}${bank.bank.logo}` }}
+                        style={styles.bankLogo}
+                      />
+                    </View>
+
+                    <View style={styles.bankInfo}>
+                      <Text
+                        style={[styles.bankName, { color: themeColors.text }]}
+                      >
+                        {bank.bank.name}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.bankDetails,
+                          { color: themeColors.placeholder },
+                        ]}
+                      >
+                        {bank.account_number} {bank.account_type}
+                      </Text>
+                    </View>
+
+                    <View style={styles.radioOuter}>
+                      {selectedToBank?.id === bank.id && (
+                        <View style={styles.radioInner} />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                ))}
+          </>
+        )}
+
+        {/* ====== ADD BANK OPTION ====== */}
+        <TouchableOpacity
+          style={[
+            styles.paymentOption,
+            { marginTop: scaleUtils.scaleHeight(15) },
+          ]}
+          onPress={() => {
+            showToast(I18n.t('navigating_add_bank'));
+            navigation.navigate('BankLinkScreen');
+          }}
+        >
+          <View
+            style={[
+              styles.dottedContainer,
+              {
+                borderColor: themeColors.border,
+                backgroundColor: themeColors.iconBox,
+              },
+            ]}
+          >
+            <Image
+              source={require('../../assets/image/appIcon/add.png')}
+              style={[styles.paymentIcon, { tintColor: themeColors.bankIcon }]}
+            />
+          </View>
+          <Text style={[styles.paymentText, { color: themeColors.text }]}>
+            {I18n.t('add_bank_account')}
+          </Text>
+        </TouchableOpacity>
+
+        {/* ====== NEXT BUTTON ====== */}
+        <View style={{ marginTop: scaleUtils.scaleHeight(20) }}>
+          <Button
+            title={I18n.t('next')}
+            onPress={handleNext}
+            disabled={
+              !selectedFromBank || !selectedToBank || isSameBankSelected
+            }
+          />
         </View>
       </ScrollView>
 
-      {/* ✅ Custom Toast Component */}
       <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
@@ -196,14 +326,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: Colors.bg,
   },
-  bankSection: {
-    marginBottom: scaleUtils.scaleHeight(20),
-  },
   sectionTitle: {
     fontSize: scaleUtils.scaleFont(14),
-    fontFamily: 'Poppins-Regular',
-    marginBottom: scaleUtils.scaleHeight(26),
-    alignSelf: 'center',
+    fontFamily: 'Poppins-Medium',
+    marginBottom: scaleUtils.scaleHeight(10),
   },
   bankCard: {
     flexDirection: 'row',
@@ -223,7 +349,7 @@ const styles = StyleSheet.create({
     height: scaleUtils.scaleWidth(24),
     resizeMode: 'contain',
   },
-  bankInfo: { marginLeft: scaleUtils.scaleWidth(16) },
+  bankInfo: { flex: 1, marginLeft: scaleUtils.scaleWidth(16) },
   bankName: {
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Medium',
@@ -232,10 +358,20 @@ const styles = StyleSheet.create({
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-Regular',
   },
-  noAccountText: {
-    fontSize: scaleUtils.scaleFont(13),
-    textAlign: 'center',
-    marginTop: scaleUtils.scaleHeight(10),
+  radioOuter: {
+    width: scaleUtils.scaleWidth(20),
+    height: scaleUtils.scaleWidth(20),
+    borderRadius: scaleUtils.scaleWidth(10),
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioInner: {
+    width: scaleUtils.scaleWidth(10),
+    height: scaleUtils.scaleWidth(10),
+    borderRadius: scaleUtils.scaleWidth(5),
+    backgroundColor: Colors.primary,
   },
   paymentOption: {
     flexDirection: 'row',
@@ -257,7 +393,19 @@ const styles = StyleSheet.create({
   },
   paymentText: {
     fontSize: scaleUtils.scaleFont(12),
-    textAlign: 'center',
     fontFamily: 'Poppins-Regular',
+  },
+  selectedCard: {
+    borderRadius: scaleUtils.scaleWidth(10),
+    padding: scaleUtils.scaleWidth(12),
+    marginBottom: scaleUtils.scaleHeight(10),
+  },
+  bankInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  changeText: {
+    fontSize: scaleUtils.scaleFont(12),
+    fontFamily: 'Poppins-Medium',
   },
 });

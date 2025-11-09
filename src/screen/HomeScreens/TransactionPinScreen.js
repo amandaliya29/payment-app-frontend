@@ -30,6 +30,7 @@ const TransactionPinScreen = () => {
     user = {},
     isViaUPI = false,
     note = '',
+    creditUpiId = null,
   } = route.params || {};
 
   console.log(
@@ -43,6 +44,8 @@ const TransactionPinScreen = () => {
     isViaUPI,
     'note',
     note,
+    'creditUpiId',
+    creditUpiId,
   );
 
   const [pin, setPin] = useState('');
@@ -75,10 +78,15 @@ const TransactionPinScreen = () => {
       // ✅ Build API payload dynamically
       const payload = {
         amount: amount,
-        from_bank_account: bank.id,
         description: note,
         pin_code: pin,
       };
+
+      if (creditUpiId) {
+        payload.credit_upi = creditUpiId;
+      } else {
+        payload.from_bank_account = bank.id;
+      }
 
       if (isViaUPI) {
         payload.upi_id = user?.bank_account?.upi_id;
@@ -87,6 +95,7 @@ const TransactionPinScreen = () => {
       }
 
       const response = await getPay(payload);
+      console.log('payload', payload);
 
       if (!response?.data?.status) {
         showToast(response?.data?.messages || 'Transaction failed!');

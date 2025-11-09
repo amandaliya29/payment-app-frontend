@@ -396,5 +396,25 @@
   "branch_name": "Branch Name",
   "branch_address": "Branch Address",
   "city": "City",
-  "state": "State"
+  "state": "State",
+
+  "no_bank_accounts": "No bank accounts found",
+  "failed_fetch_banks": "Failed to fetch bank accounts",
+  "select_credit_upi": "Select Credit/UPI",
+  "pay": "Pay",
+  "select_bank_to_pay": "Please select a bank to pay",
+
+  "bank_tab": "Bank",
+  "credit_upi_tab": "Credit UPI",
+
+  "select_bank_account_from": "Select bank account From",
+  "select_bank_account_to": "Select bank account To",
+  "navigating_add_bank": "Navigating to add bank account...",
+  "please_select_both_accounts": "Please select both bank accounts.",
+  "something_went_wrong": "Something went wrong. Please try again.",
+  "next": "Next",
+  "change": "Change",
+
+  "paying": "Paying",
+  "banking_name": "Banking name"
 }

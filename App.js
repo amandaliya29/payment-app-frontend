@@ -60,7 +60,7 @@ const App = () => {
       // ✅ Foreground notification
       messaging().onMessage(async remoteMessage => {
         console.log('Foreground notification:', remoteMessage.data);
-        alert(remoteMessage.notification?.title || 'Notification');
+        // alert(remoteMessage.notification?.title || 'Notification');
       });
 
       // ✅ Background tap

@@ -395,5 +395,25 @@
   "branch_name": "શાખાનું નામ",
   "branch_address": "શાખાનો સરનામું",
   "city": "શહેર",
-  "state": "રાજ્ય"
+  "state": "રાજ્ય",
+
+  "no_bank_accounts": "कोई बैंक खाता नहीं मिला",
+  "failed_fetch_banks": "बैंक खाते लाने में विफल",
+  "select_credit_upi": "क्रेडिट/UPI चुनें",
+  "pay": "भुगतान करें",
+  "select_bank_to_pay": "कृपया भुगतान के लिए बैंक चुनें",
+
+  "bank_tab": "बैंक",
+  "credit_upi_tab": "क्रेडिट यूपीआई",
+
+  "select_bank_account_from": "बैंक खाता चुनें (से)",
+  "select_bank_account_to": "बैंक खाता चुनें (तक)",
+  "navigating_add_bank": "बैंक खाता जोड़ने के लिए जा रहे हैं...",
+  "please_select_both_accounts": "कृपया दोनों बैंक खाते चुनें।",
+  "something_went_wrong": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।",
+  "next": "आगे",
+  "change": "बदलें",
+
+  "paying": "भुगतान कर रहे हैं",
+  "banking_name": "बैंक का नाम"
 }
