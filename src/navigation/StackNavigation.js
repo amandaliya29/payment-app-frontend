@@ -46,6 +46,8 @@ import TransactionPinScreen from '../screen/HomeScreens/TransactionPinScreen';
 import PaymentSuccessScreen from '../screen/HomeScreens/PaymentSuccessScreen';
 import TransactionHistoryScreen from '../screen/HomeScreens/TransactionHistoryScreen';
 import SelfTransferEnterAmount from '../screen/HomeScreens/SelfTransferEnterAmount';
+import NbfcCreditUpiPin from '../screen/hbfcCraditUpi/NbfcCreditUpiPin';
+import NbfcCreditUpiHome from '../screen/hbfcCraditUpi/NbfcCreditUpiHome';
 
 const Stack = createStackNavigator();
 
@@ -165,6 +167,8 @@ const StackNavigation = ({ notificationScreen }) => {
           name="SelfTransferEnterAmount"
           component={SelfTransferEnterAmount}
         />
+        <Stack.Screen name="NbfcCreditUpiPin" component={NbfcCreditUpiPin} />
+        <Stack.Screen name="NbfcCreditUpiHome" component={NbfcCreditUpiHome} />
       </Stack.Navigator>
     </>
   );

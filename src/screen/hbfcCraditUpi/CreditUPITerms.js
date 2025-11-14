@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   useColorScheme,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,14 +15,20 @@ import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import Button from '../../component/Button';
-import { useNavigation } from '@react-navigation/native';
 import Checkbox from '../../component/Checkbox';
+import { getUserData } from '../../utils/async/storage';
+import { Toast } from '../../utils/Toast';
+import auth from '@react-native-firebase/auth';
+import { useNavigation } from '@react-navigation/native';
 
 const CreditUPITerms = () => {
   const navigation = useNavigation();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
   const [agree, setAgree] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [toast, setToast] = useState({ visible: false, message: '' });
+  const [loading, setLoading] = useState(false); // ✅ Added loading state
 
   const themeColors = {
     bg: isDark ? Colors.bg : Colors.lightBg,
@@ -38,6 +45,45 @@ const CreditUPITerms = () => {
     I18n.t('credit_upi_terms_5'),
   ];
 
+  const getStorageUserData = async () => {
+    try {
+      const userData = await getUserData();
+      setPhone(userData?.user?.phone || '');
+    } catch {
+      setPhone('');
+    }
+  };
+
+  useEffect(() => {
+    getStorageUserData();
+  }, []);
+
+  const sendOtpToFirebase = async () => {
+    if (!phone) {
+      setToast({ visible: true, message: 'Phone number not found!' });
+      return;
+    }
+
+    setLoading(true); // ✅ Start loading
+    try {
+      const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
+      const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
+
+      setToast({ visible: true, message: 'OTP sent successfully' });
+      navigation.navigate('HbfCreditUpiVerification', {
+        verificationId: confirmation.verificationId,
+        phone: formattedPhone,
+      });
+    } catch (error) {
+      setToast({
+        visible: true,
+        message: 'Failed to send OTP. Please try again.',
+      });
+    } finally {
+      setLoading(false); // ✅ Stop loading
+    }
+  };
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: themeColors.bg }]}
@@ -49,14 +95,18 @@ const CreditUPITerms = () => {
           {I18n.t('credit_upi_terms_title')}
         </Text>
 
-        {/* Gradient Card */}
         <LinearGradient
           colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
           style={styles.cardGradient}
         >
           {terms.map((item, index) => (
             <View key={index} style={styles.termRow}>
-              <View style={styles.iconWrapper}>
+              <View
+                style={[
+                  styles.iconWrapper,
+                  { backgroundColor: Colors.cardGrey },
+                ]}
+              >
                 <Image
                   source={require('../../assets/image/appIcon/check.png')}
                   style={styles.checkIcon}
@@ -70,7 +120,6 @@ const CreditUPITerms = () => {
           ))}
         </LinearGradient>
 
-        {/* Checkbox Section */}
         <Checkbox
           checked={agree}
           onChange={setAgree}
@@ -82,21 +131,27 @@ const CreditUPITerms = () => {
           }
         />
 
-        {/* Button */}
         <View style={styles.buttonWrapper}>
           <Button
-            title={I18n.t('agree_continue')}
+            title={
+              loading ? (
+                <ActivityIndicator color={Colors.white} size="small" />
+              ) : (
+                I18n.t('agree_continue')
+              )
+            }
             textStyle={{ color: themeColors.buttonText }}
-            disabled={!agree}
-            onPress={() => navigation.navigate('MobileHbfc')}
+            disabled={!agree || loading}
+            onPress={sendOtpToFirebase}
           />
         </View>
       </ScrollView>
 
-      {/* Footer */}
       <Text style={[styles.footer, { color: themeColors.subText }]}>
         {I18n.t('credit_upi_footer')}
       </Text>
+
+      <Toast visible={toast.visible} message={toast.message} isDark={isDark} />
     </SafeAreaView>
   );
 };
@@ -129,13 +184,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     columnGap: scaleUtils.scaleWidth(12),
-    // marginBottom: scaleUtils.scaleHeight(12),
   },
   iconWrapper: {
     width: scaleUtils.scaleWidth(22),
     height: scaleUtils.scaleWidth(22),
     borderRadius: scaleUtils.scaleWidth(11),
-    backgroundColor: Colors.cardGrey,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 2,

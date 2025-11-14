@@ -15,11 +15,13 @@ import I18n from '../../utils/language/i18n';
 import Button from '../../component/Button';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
+import { useSelector } from 'react-redux';
 
 const HbfcCreditLimitActivate = () => {
   const navigation = useNavigation();
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+  const nbfcUpi = useSelector(state => state.user.NbfcUpi);
 
   // Theme Colors
   const themeColors = {
@@ -73,7 +75,7 @@ const HbfcCreditLimitActivate = () => {
             {I18n.t('hbfc_credit_limit')}
           </Text>
           <Text style={[styles.limitAmount, { color: themeColors.text }]}>
-            ₹50,000
+            ₹{nbfcUpi?.data?.credit_limit?.toLocaleString('en-IN')}
           </Text>
           <Text
             style={[styles.limitDescription, { color: themeColors.subText }]}
@@ -85,12 +87,7 @@ const HbfcCreditLimitActivate = () => {
         {/* Activate Button */}
         <Button
           title={I18n.t('hbfc_verify_activate')}
-          onPress={() =>
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'HomePage' }],
-            })
-          }
+          onPress={() => navigation.navigate('NbfcCreditUpiPin')}
         />
 
         {/* Terms & Conditions */}

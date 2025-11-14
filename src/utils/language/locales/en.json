@@ -416,5 +416,8 @@
   "change": "Change",
 
   "paying": "Paying",
-  "banking_name": "Banking name"
+  "banking_name": "Banking name",
+
+  "nbfc_credit_upi": "NBFC Credit UPI",
+  "enter_pin_activate": "Enter PIN to Activate Credit UPI"
 }
