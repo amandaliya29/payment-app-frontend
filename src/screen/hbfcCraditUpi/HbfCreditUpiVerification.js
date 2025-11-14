@@ -6,6 +6,7 @@ import {
   useColorScheme,
   Image,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors } from '../../themes/Colors';
@@ -13,15 +14,33 @@ import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import I18n from '../../utils/language/i18n';
 import OTPInput from '../../component/OTPInput';
-import { useNavigation } from '@react-navigation/native';
 import Button from '../../component/Button';
+import { Toast } from '../../utils/Toast';
+import auth from '@react-native-firebase/auth';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { NBFCActive } from '../../utils/apiHelper/Axios';
+import { useDispatch } from 'react-redux';
+import { setNbfcUpi } from '../../utils/redux/UserSlice';
 
 const HbfCreditUpiVerification = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+  const { verificationId, phone } = route.params || {};
+  const dispatch = useDispatch();
+
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(45);
+  const [loading, setLoading] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
+
+  const showToast = message => {
+    setToastMessage(message);
+    setToastVisible(true);
+  };
 
   // Theme colors
   const themeColors = {
@@ -39,10 +58,56 @@ const HbfCreditUpiVerification = () => {
     return () => clearInterval(interval);
   }, [timer]);
 
-  const handleResend = useCallback(() => {
-    setTimer(45);
-    // Resend OTP API call here
-  }, []);
+  // Resend OTP
+  const handleResend = useCallback(async () => {
+    try {
+      setTimer(45);
+      const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
+      await auth().signInWithPhoneNumber(formattedPhone);
+      showToast('OTP resent successfully');
+    } catch (error) {
+      showToast('Failed to resend OTP');
+    }
+  }, [phone]);
+
+  const handleVerify = async () => {
+    if (otp.length !== 6) {
+      showToast('Please enter a valid 6-digit OTP');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // ✅ Step 1: Verify OTP with Firebase
+      const credential = auth.PhoneAuthProvider.credential(verificationId, otp);
+      await auth().signInWithCredential(credential);
+
+      // ✅ Step 2: Get Firebase Token
+      const currentUser = auth().currentUser;
+      if (!currentUser) {
+        throw new Error('User not found after OTP verification.');
+      }
+      const token = await currentUser.getIdToken();
+
+      // ✅ Step 3: Call NBFC Activation API
+      const response = await NBFCActive({ token });
+
+      // ✅ Step 4: Handle API Response
+      if (response?.data) {
+        console.log('NBFC Activation Response:', response.data);
+        dispatch(setNbfcUpi(response.data));
+        showToast(response?.data?.message || 'Activation successful!');
+        navigation.navigate('HbfcCrditLoadingScreen');
+      } else {
+        showToast('Activation failed. Please try again.');
+      }
+    } catch (error) {
+      console.log('Activation error:', error?.response || error);
+      showToast('Invalid OTP or activation failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView
@@ -104,18 +169,27 @@ const HbfCreditUpiVerification = () => {
 
         {/* Verify Button */}
         <Button
-          title={I18n.t('hbfc_verify_activate')}
-          disabled={otp.length !== 6}
-          onPress={() => navigation.navigate('HbfcCrditLoadingScreen')}
+          title={
+            loading ? (
+              <ActivityIndicator color={Colors.white} size="small" />
+            ) : (
+              I18n.t('hbfc_verify_activate')
+            )
+          }
+          disabled={otp.length !== 6 || loading}
+          onPress={handleVerify}
         />
 
-        {/* Terms & Conditions at Bottom */}
+        {/* Terms & Conditions */}
         <View style={styles.bottomContainer}>
           <Text style={[styles.bottomText, { color: themeColors.subText }]}>
             {I18n.t('hbfc_terms_condition')}
           </Text>
         </View>
       </ScrollView>
+
+      {/* Toast Message */}
+      <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
     </SafeAreaView>
   );
 };
@@ -162,7 +236,7 @@ const styles = StyleSheet.create({
   },
   resendContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
     marginVertical: scaleUtils.scaleHeight(10),
     marginBottom: scaleUtils.scaleHeight(30),

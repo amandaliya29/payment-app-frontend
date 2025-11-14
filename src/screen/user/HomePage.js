@@ -17,7 +17,7 @@ import i18n from '../../utils/language/i18n';
 import Input from '../../component/Input';
 import { useNavigation } from '@react-navigation/native';
 import { LanguageContext } from '../../utils/language/LanguageContext';
-import { getBankAccountList } from '../../utils/apiHelper/Axios';
+import { getBankAccountList, getNBFCDetail } from '../../utils/apiHelper/Axios';
 import { Toast } from '../../utils/Toast'; // 🔹 Import custom Toast
 import { navigationRef } from '../../../App';
 import { getMessaging } from '@react-native-firebase/messaging';
@@ -84,6 +84,22 @@ const HomeScreen = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleNBFCPress = async () => {
+    try {
+      const res = await getNBFCDetail(); // wrapper function
+
+      if (res?.data && Object.keys(res.data).length > 0) {
+        navigation.navigate('NbfcCreditUpiHome', res.data.data);
+      } else {
+        navigation.navigate('HbfcCraditUpi');
+        console.log('not work res');
+      }
+    } catch (error) {
+      console.log('res', error);
+      navigation.navigate('HbfcCraditUpi');
     }
   };
 
@@ -235,10 +251,7 @@ const HomeScreen = () => {
         </View>
 
         {/* 🏦 Banner */}
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => navigation.navigate('HbfcCraditUpi')}
-        >
+        <TouchableOpacity activeOpacity={0.8} onPress={handleNBFCPress}>
           <LinearGradient
             colors={[Colors.gradientPrimary, Colors.gradientSecondary]}
             style={styles.banner}

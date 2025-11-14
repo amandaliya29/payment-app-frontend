@@ -415,5 +415,8 @@
   "change": "बदलें",
 
   "paying": "भुगतान कर रहे हैं",
-  "banking_name": "बैंक का नाम"
+  "banking_name": "बैंक का नाम",
+
+  "nbfc_credit_upi": "NBFC क्रेडिट UPI",
+  "enter_pin_activate": "क्रेडिट UPI सक्रिय करने के लिए PIN दर्ज करें"
 }

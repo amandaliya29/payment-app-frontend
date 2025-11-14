@@ -426,5 +426,8 @@
   "change": "બદલો",
 
   "paying": "ચુકવણી કરતા",
-  "banking_name": "બેંકનું નામ"
+  "banking_name": "બેંકનું નામ",
+
+  "nbfc_credit_upi": "NBFC ક્રેડિટ UPI",
+  "enter_pin_activate": "ક્રેડિટ UPI સક્રિય કરવા PIN દાખલ કરો"
 }

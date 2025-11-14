@@ -80,3 +80,12 @@ export const getBankDetail = async payload =>
   await axios.post(`/bank/account/get`, payload);
 
 export const getSearchIfsc = async () => await axios.get(`/bank/ifsc/search`);
+
+export const getNBFCDetail = async () =>
+  await axios.get(`/credit-upi/npci/details`);
+
+export const NBFCActive = async payload =>
+  await axios.post(`/credit-upi/npci-activate`, payload);
+
+export const NBFCSetPin = async payload =>
+  await axios.post(`/credit-upi/npci/save/pin`, payload);
