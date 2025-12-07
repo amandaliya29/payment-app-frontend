@@ -15,6 +15,7 @@ import { Colors } from '../../themes/Colors';
 import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import I18n from '../../utils/language/i18n';
+import CustomAlert from '../../component/CustomAlert';
 
 const formatIndian = num => {
   if (!num) return '0';
@@ -25,7 +26,8 @@ const NbfcCreditUpiHome = () => {
   const navigation = useNavigation();
   const route = useRoute();
 
-  const { upi_id, credit_limit, available_credit, status } = route.params || {};
+  const { upi_id, credit_limit, available_credit, status, npci_id, pin_code_length } = route.params || {};
+  const [alertVisible, setAlertVisible] = React.useState(false);
 
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
@@ -101,10 +103,6 @@ const NbfcCreditUpiHome = () => {
           ) : (
             <View style={styles.buttonRow}>
               <TouchableOpacity style={styles.actionButton}>
-                <Text style={styles.actionText}>{I18n.t('pay_now')}</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.actionButton}>
                 <Text style={styles.actionText}>
                   {I18n.t('view_transactions')}
                 </Text>
@@ -113,6 +111,38 @@ const NbfcCreditUpiHome = () => {
           )}
         </LinearGradient>
       </ScrollView>
+
+      {/* Reset PIN Button */}
+      <TouchableOpacity
+        style={[
+          styles.resetPinButton,
+          { backgroundColor: Colors.primary },
+        ]}
+        onPress={() => setAlertVisible(true)}
+      >
+        <Text style={styles.resetPinText}>{I18n.t('reset_pin')}</Text>
+      </TouchableOpacity>
+
+      <CustomAlert
+        visible={alertVisible}
+        title={I18n.t('reset_pin')}
+        message={I18n.t('reset_pin_confirmation')}
+        onCancel={() => setAlertVisible(false)}
+        onConfirm={() => {
+          setAlertVisible(false);
+          navigation.navigate('ResetPinScreen', {
+            bank: {
+              npci_id: npci_id,
+              pin_code_length: pin_code_length || 4,
+            },
+            old_pin_code: '',
+            isCredit: false,
+            isNbfc: true,
+          });
+        }}
+        confirmText={I18n.t('yes')}
+        cancelText={I18n.t('no')}
+      />
     </SafeAreaView>
   );
 };
@@ -177,12 +207,12 @@ const styles = StyleSheet.create({
     marginTop: scaleUtils.scaleHeight(10),
   },
   actionButton: {
-    width: '46%',
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: scaleUtils.scaleWidth(6),
     height: scaleUtils.scaleHeight(35),
-    borderWidth: 0.5,
+    borderWidth: 0.8,
     borderColor: Colors.white,
     marginTop: scaleUtils.scaleHeight(10),
   },
@@ -204,5 +234,18 @@ const styles = StyleSheet.create({
   activateText: {
     fontSize: scaleUtils.scaleFont(12),
     fontFamily: 'Poppins-SemiBold',
+  },
+  resetPinButton: {
+    marginBottom: scaleUtils.scaleHeight(10),
+    paddingVertical: scaleUtils.scaleHeight(8),
+    marginHorizontal: scaleUtils.scaleWidth(16),
+    borderRadius: scaleUtils.scaleWidth(8),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resetPinText: {
+    fontSize: scaleUtils.scaleFont(12),
+    color: Colors.white,
+    fontFamily: 'Poppins-Medium',
   },
 });

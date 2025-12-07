@@ -22,7 +22,6 @@ import I18n from '../../utils/language/i18n';
 import { Toast } from '../../utils/Toast';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import {
-  getUser,
   getBankAccountList,
   CreditUpiBankList,
   getNBFCDetail,
@@ -30,8 +29,9 @@ import {
 import Button from '../../component/Button';
 import moment from 'moment';
 
-const EnterAmountScreen = () => {
+const BankPayAmountScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [inputHeight, setInputHeight] = useState(0);
@@ -39,9 +39,6 @@ const EnterAmountScreen = () => {
   const [loading, setLoading] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [userData, setUserData] = useState(null);
-  const [userLoading, setUserLoading] = useState(true);
-  const [userError, setUserError] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [banks, setBanks] = useState([]);
   const [selectedBank, setSelectedBank] = useState(null);
@@ -49,10 +46,9 @@ const EnterAmountScreen = () => {
   const [bankAccounts, setBankAccounts] = useState([]);
   const [nbfcUpi, setNbfcUpi] = useState({});
   const amountRef = useRef(null);
-  const route = useRoute();
-  const { id } = route?.params?.user || {};
-  const { code } = route?.params?.user || {};
-  const [isViaUPI, setIsViaUPI] = useState(false);
+  const { bankDetail } = route.params || {};
+
+  console.log('bankDetail', bankDetail);
 
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
@@ -82,18 +78,6 @@ const EnterAmountScreen = () => {
     getNBFCDetails();
   }, []);
 
-  const extractUpiId = qrString => {
-    try {
-      if (qrString && qrString.startsWith('upi://pay')) {
-        const match = qrString.match(/pa=([^&]+)/);
-        return match ? decodeURIComponent(match[1]) : null;
-      }
-      return null;
-    } catch {
-      return null;
-    }
-  };
-
   const isPrimaryValue = v =>
     v === true || v === 1 || v === '1' || v === 'true';
 
@@ -104,34 +88,6 @@ const EnterAmountScreen = () => {
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      let identifier = id;
-      if (!id && code) {
-        const upiId = extractUpiId(code);
-        identifier = upiId || code;
-        setIsViaUPI(true);
-      }
-
-      try {
-        const res = await getUser(identifier);
-        if (res?.data?.status) {
-          setUserData(res.data.data);
-        } else {
-          setUserError(true);
-          showToast(res.data?.messages || 'Failed to fetch user');
-          setTimeout(() => navigation.goBack(), 2000);
-        }
-      } catch (error) {
-        setUserError(true);
-        showToast(
-          error.response?.data?.messages || 'User not found or network error',
-        );
-        setTimeout(() => navigation.goBack(), 2000);
-      } finally {
-        setUserLoading(false);
-      }
-    };
-
     const fetchBanks = async () => {
       try {
         const res = await getBankAccountList();
@@ -202,27 +158,33 @@ const EnterAmountScreen = () => {
             .filter(Boolean);
 
           if (formattedData.length > 0) {
-            const defaultSelected = getDefaultFromList(formattedData);
-            setBankAccounts(formattedData);
+            // Filter out banks that match the current bankDetail bank name
+            const filteredCreditUpiBanks = formattedData.filter(
+              creditUpiBank => {
+                if (!bankDetail?.bankName) return true;
+                return creditUpiBank.bankName !== bankDetail.bankName;
+              },
+            );
+
+            const defaultSelected = getDefaultFromList(filteredCreditUpiBanks);
+            setBankAccounts(filteredCreditUpiBanks);
             setSelectedBank(prev => prev || defaultSelected);
           } else {
-            showToast('No active Credit/UPI accounts found');
+            showToast(I18n.t('no_active_credit_upi_accounts'));
             setBankAccounts([]);
           }
         } else {
-          showToast('Failed to load Credit/UPI list');
+          showToast(I18n.t('failed_load_credit_upi_list'));
         }
       } catch (error) {
         showToast(
-          error.response?.data?.messages ||
-            'Something went wrong while fetching Credit/UPI list',
+          error.response?.data?.messages || I18n.t('error_fetching_credit_upi'),
         );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
     fetchBanks();
     fetchCreditUpiBanks();
 
@@ -231,7 +193,7 @@ const EnterAmountScreen = () => {
     }, 400);
 
     return () => clearTimeout(timeout);
-  }, [id, code]);
+  }, [bankDetail]);
 
   const handleTabChange = tab => {
     setSelectedTab(tab);
@@ -249,7 +211,7 @@ const EnterAmountScreen = () => {
     const value = parseFloat(numeric) || 0;
 
     if (value > 500000) {
-      showToast('Maximum limit is ₹500000');
+      showToast(I18n.t('maximum_limit_500000'));
       setAmount('500000');
     } else {
       setAmount(numeric);
@@ -263,7 +225,7 @@ const EnterAmountScreen = () => {
     }
 
     if (parseFloat(amount) > 500000) {
-      showToast('Maximum limit is ₹500000');
+      showToast(I18n.t('maximum_limit_500000'));
       return;
     }
 
@@ -277,30 +239,16 @@ const EnterAmountScreen = () => {
       return;
     }
     setModalVisible(false);
+
     navigation.navigate('TransactionPinScreen', {
+      isBankPay: true,
       amount,
       bank: selectedBank,
-      user: userData,
-      isViaUPI,
       note,
-      creditUpiId: selectedBank?.bank_credit_upi?.upi_id || null, // ✅ Pass correct CreditUPI ID
+      creditUpiId: selectedBank?.bank_credit_upi?.upi_id || null,
+      bank_id: bankDetail.bank_id,
     });
   };
-
-  if (userLoading || userError || !userData) {
-    return (
-      <SafeAreaView
-        style={[styles.container, { backgroundColor: themeColors.background }]}
-      >
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        >
-          <ActivityIndicator size="large" color={Colors.primary} />
-        </View>
-        <Toast visible={toastVisible} message={toastMessage} isDark={isDark} />
-      </SafeAreaView>
-    );
-  }
 
   const isItemSelected = item =>
     selectedBank &&
@@ -312,7 +260,7 @@ const EnterAmountScreen = () => {
       style={[styles.container, { backgroundColor: themeColors.background }]}
     >
       <Header
-        title={I18n.t('enter_amount')}
+        title={I18n.t('pay_to_bank')}
         onBack={() => navigation.goBack()}
       />
 
@@ -328,18 +276,18 @@ const EnterAmountScreen = () => {
         >
           <View style={styles.userInfoContainer}>
             <View style={styles.circle}>
-              <Text style={styles.initial}>
-                {userData.name?.charAt(0).toUpperCase()}
-              </Text>
+              <Image
+                source={{
+                  uri: bankDetail?.bankLogo?.uri || selectedBank?.logo?.uri,
+                }}
+                style={styles.transferImage}
+              />
             </View>
             <Text style={[styles.userName, { color: themeColors.text }]}>
-              Paying {userData.name}
+              {I18n.t('pay_to_bank')}
             </Text>
-            <Text style={[styles.userBank, { color: themeColors.text }]}>
-              Banking name : {userData.bank_account?.account_holder_name}
-            </Text>
-            <Text style={[styles.userPhone, { color: themeColors.text }]}>
-              {userData.phone}
+            <Text style={[styles.userBank, { color: themeColors.subText }]}>
+              {bankDetail?.bankName || selectedBank?.bankName}
             </Text>
           </View>
 
@@ -403,7 +351,6 @@ const EnterAmountScreen = () => {
         </View>
       </KeyboardAvoidingView>
 
-      {/* Modal */}
       <Modal
         visible={modalVisible}
         animationType="slide"
@@ -449,7 +396,7 @@ const EnterAmountScreen = () => {
                         : themeColors.subText,
                   }}
                 >
-                  Bank
+                  {I18n.t('bank')}
                 </Text>
               </TouchableOpacity>
 
@@ -474,14 +421,14 @@ const EnterAmountScreen = () => {
                         : themeColors.subText,
                   }}
                 >
-                  Credit UPI
+                  {I18n.t('credit_upi')}
                 </Text>
               </TouchableOpacity>
             </View>
 
             {selectedTab === 'bank' ? (
               <FlatList
-                data={banks.filter(item => item.upiId !== code)}
+                data={banks}
                 showsVerticalScrollIndicator={false}
                 keyExtractor={item => item.id.toString()}
                 renderItem={({ item }) => (
@@ -513,9 +460,7 @@ const EnterAmountScreen = () => {
               />
             ) : (
               <FlatList
-                data={bankAccounts.filter(
-                  item => item?.id !== userData?.bank_account?.id,
-                )}
+                data={bankAccounts}
                 showsVerticalScrollIndicator={false}
                 keyExtractor={item => item.id}
                 ListHeaderComponent={() => (
@@ -547,7 +492,7 @@ const EnterAmountScreen = () => {
                       <Text
                         style={[styles.modalText, { color: themeColors.text }]}
                       >
-                        NBFC Credit UPI
+                        {I18n.t('nbfc_credit_upi')}
                       </Text>
 
                       {nbfcUpi?.upi_id && (
@@ -582,7 +527,7 @@ const EnterAmountScreen = () => {
                         ...item,
                         id: item.id?.toString(),
                         source: item.source || 'creditUpi',
-                        bank_credit_upi: item.bank_credit_upi, // ✅ ensures correct upi_id passed
+                        bank_credit_upi: item.bank_credit_upi,
                       })
                     }
                   >
@@ -626,7 +571,7 @@ const EnterAmountScreen = () => {
   );
 };
 
-export default EnterAmountScreen;
+export default BankPayAmountScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -639,9 +584,10 @@ const styles = StyleSheet.create({
     width: scaleUtils.scaleWidth(50),
     height: scaleUtils.scaleWidth(50),
     borderRadius: scaleUtils.scaleWidth(50),
-    backgroundColor: Colors.gradientSecondary,
+    backgroundColor: Colors.white,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: scaleUtils.scaleHeight(6),
   },
   initial: {
     color: Colors.white,
@@ -654,10 +600,6 @@ const styles = StyleSheet.create({
     marginTop: scaleUtils.scaleHeight(8),
   },
   userBank: {
-    fontSize: scaleUtils.scaleFont(14),
-    fontFamily: 'Poppins-Regular',
-  },
-  userPhone: {
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Regular',
   },
@@ -731,5 +673,10 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: scaleUtils.scaleFont(14),
     fontFamily: 'Poppins-Regular',
+  },
+  transferImage: {
+    width: scaleUtils.scaleWidth(30),
+    height: scaleUtils.scaleWidth(30),
+    resizeMode: 'contain',
   },
 });

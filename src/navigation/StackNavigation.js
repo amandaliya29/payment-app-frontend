@@ -48,6 +48,12 @@ import TransactionHistoryScreen from '../screen/HomeScreens/TransactionHistorySc
 import SelfTransferEnterAmount from '../screen/HomeScreens/SelfTransferEnterAmount';
 import NbfcCreditUpiPin from '../screen/hbfcCraditUpi/NbfcCreditUpiPin';
 import NbfcCreditUpiHome from '../screen/hbfcCraditUpi/NbfcCreditUpiHome';
+import BankPayAmountScreen from '../screen/user/BankPayAmountScreen';
+import ResetPinSetup from '../screen/bankLinking/ResetPinSetupScreen';
+import ForgotPasswordPhoneScreen from '../screen/auth/ForgotPasswordPhoneScreen';
+import ForgotPasswordOtpScreen from '../screen/auth/ForgotPasswordOtpScreen';
+import SetPinScreen from '../screen/auth/SetPinScreen';
+import ResetPinScreen from '../screen/bankLinking/ResetPinScreen';
 
 const Stack = createStackNavigator();
 
@@ -169,6 +175,22 @@ const StackNavigation = ({ notificationScreen }) => {
         />
         <Stack.Screen name="NbfcCreditUpiPin" component={NbfcCreditUpiPin} />
         <Stack.Screen name="NbfcCreditUpiHome" component={NbfcCreditUpiHome} />
+        <Stack.Screen
+          name="BankPayAmountScreen"
+          component={BankPayAmountScreen}
+        />
+        <Stack.Screen name="ResetPinSetup" component={ResetPinSetup} />
+        <Stack.Screen
+          name="ForgotPasswordPhoneScreen"
+          component={ForgotPasswordPhoneScreen}
+        />
+        <Stack.Screen
+          name="ForgotPasswordOtpScreen"
+          component={ForgotPasswordOtpScreen}
+        />
+        <Stack.Screen name="SetPinScreen" component={SetPinScreen} />
+        <Stack.Screen name="ResetPinSetupScreen" component={ResetPinSetup} />
+        <Stack.Screen name="ResetPinScreen" component={ResetPinScreen} />
       </Stack.Navigator>
     </>
   );

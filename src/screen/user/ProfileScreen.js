@@ -20,6 +20,7 @@ import { logoutUser, getUserProfile } from '../../utils/apiHelper/Axios';
 import LanguageModal from '../../component/LanguageModal';
 import { useNavigation } from '@react-navigation/native';
 import { Toast } from '../../utils/Toast'; // ✅ Import your custom Toast
+import CustomAlert from '../../component/CustomAlert';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -48,6 +49,7 @@ const ProfileScreen = () => {
   // ✅ Toast state
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [logoutAlertVisible, setLogoutAlertVisible] = useState(false);
 
   const showToast = message => {
     setToastMessage(message);
@@ -95,42 +97,44 @@ const ProfileScreen = () => {
   const getInitial = name => name?.charAt(0)?.toUpperCase() || '';
 
   const handleLogout = () => {
-    Alert.alert(
-      I18n.t('logout'),
-      I18n.t('are_you_sure_logout'),
-      [
-        { text: I18n.t('no'), style: 'cancel' },
-        {
-          text: I18n.t('yes'),
-          onPress: async () => {
-            try {
-              await logoutUser();
-              showToast(I18n.t('logout_successful'));
-              setTimeout(() => {
-                navigation.replace('MobileNumberEntry');
-              }, 1200);
-            } catch (error) {
-              showToast(
-                error.response?.data?.messages || I18n.t('logout_failed'),
-              );
-            }
-          },
-        },
-      ],
-      { cancelable: true },
-    );
+    setLogoutAlertVisible(true);
+  };
+
+  const confirmLogout = async () => {
+    setLogoutAlertVisible(false);
+    try {
+      await logoutUser();
+      showToast(I18n.t('logout_successful'));
+      setTimeout(() => {
+        navigation.replace('MobileNumberEntry');
+      }, 1200);
+    } catch (error) {
+      showToast(
+        error.response?.data?.messages || I18n.t('logout_failed'),
+      );
+    }
+  };
+
+  const cancelLogout = () => {
+    setLogoutAlertVisible(false);
   };
 
   const handleMenuPress = item => {
     if (item.logout) return handleLogout();
     if (item.action === 'language') {
       setLanguageModalVisible(true);
-      showToast(I18n.t('language_settings_opened'));
       return;
     }
     if (item.id === 1) {
       navigation.navigate('ReceiveMoneyScreen');
-      showToast(I18n.t('opening_qr_code'));
+    }
+    if (item.id === 8) {
+      // Navigate to SelectBankScreen to choose bank for password reset
+      navigation.navigate('SelectBankScreen', {
+        banks: bankAccounts,
+        linked_account: null,
+        fromProfile: true,
+      });
     }
   };
 
@@ -162,11 +166,17 @@ const ProfileScreen = () => {
       action: 'language',
     },
     {
+      id: 8,
+      title: I18n.t('forgot_password'),
+      icon: require('../../assets/image/appIcon/security.png'),
+    },
+    {
       id: 7,
       title: I18n.t('logout'),
       icon: require('../../assets/image/appIcon/logout.png'),
       logout: true,
     },
+    
   ];
 
   if (loading) {
@@ -220,7 +230,6 @@ const ProfileScreen = () => {
                 style={styles.qrBadge}
                 onPress={() => {
                   navigation.navigate('ReceiveMoneyScreen');
-                  showToast(I18n.t('opening_qr_code'));
                 }}
               >
                 <Image
@@ -355,6 +364,16 @@ const ProfileScreen = () => {
         message={toastMessage}
         duration={2000}
         isDark={isDark}
+      />
+
+      <CustomAlert
+        visible={logoutAlertVisible}
+        title={I18n.t('logout')}
+        message={I18n.t('are_you_sure_logout')}
+        onCancel={cancelLogout}
+        onConfirm={confirmLogout}
+        confirmText={I18n.t('yes')}
+        cancelText={I18n.t('no')}
       />
     </SafeAreaView>
   );

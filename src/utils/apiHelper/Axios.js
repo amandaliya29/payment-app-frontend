@@ -19,7 +19,19 @@ export const logoutUser = async () => {
 };
 
 export const updateFcmToken = async fcm_token =>
-  await axios.post('/user/fcm/update', { fcm_token });
+{
+  console.log("🔔 updateFcmToken api call");
+  console.log("🔔 FCM Token:", fcm_token);
+  
+  try {
+    const response = await axios.post('/user/fcm/update', { fcm_token });
+    console.log("✅ FCM token updated successfully:", response.data);
+    return response;
+  } catch (error) {
+    console.log("❌ FCM token update failed:", error.response?.data || error.message);
+    throw error;
+  }
+}
 
 export const BankList = async () => await axios.get('/bank/list');
 
@@ -89,3 +101,15 @@ export const NBFCActive = async payload =>
 
 export const NBFCSetPin = async payload =>
   await axios.post(`/credit-upi/npci/save/pin`, payload);
+
+export const PayToBank = async payload =>
+  await axios.post('/pay-bank', payload);
+
+export const updatePin = async payload =>
+  await axios.post('/bank/save/pin', payload);
+
+export const updateCreditUpiPin = async payload =>
+  await axios.post('/credit-upi/update/pin', payload);
+
+export const updateNbfcPincode = async payload =>
+  await axios.post('/credit-upi/npci/update/pin', payload);

@@ -16,9 +16,14 @@ axiosInstance.interceptors.request.use(
     try {
       // Wait for async storage value
       const userData = await getUserData();
+      console.log('🔍 Interceptor - userData:', userData);
+      console.log('🔍 Interceptor - token:', userData?.token);
 
       if (userData?.token) {
         config.headers.Authorization = `Bearer ${userData.token}`;
+        console.log('✅ Authorization header set:', config.headers.Authorization);
+      } else {
+        console.log('❌ No token found in userData');
       }
     } catch (e) {
       console.log('Error getting token:', e);
@@ -38,6 +43,7 @@ axiosInstance.interceptors.response.use(
       removeUserData();
     }
     console.log('API Error:', error.response?.data || error.message);
+    console.log('axios error:',error.response);
     return Promise.reject(error);
   },
 );

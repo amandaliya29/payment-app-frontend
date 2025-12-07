@@ -15,6 +15,8 @@ import scaleUtils from '../../utils/Responsive';
 import Header from '../../component/Header';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import I18n from '../../utils/language/i18n';
+import LineButton from '../../component/LineButton';
+import CustomAlert from '../../component/CustomAlert';
 
 const BankBalanceScreen = () => {
   const navigation = useNavigation();
@@ -22,6 +24,8 @@ const BankBalanceScreen = () => {
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
   const { linked_account } = route?.params || {};
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertType, setAlertType] = useState(null); // "remove" or "reset"
 
   const IMAGE_BASE_URL = 'https://cyapay.ddns.net';
 
@@ -62,6 +66,23 @@ const BankBalanceScreen = () => {
     ]).start();
   };
 
+  const handleConfirm = () => {
+    if (alertType === 'remove') {
+      console.log('Remove account confirmed');
+      // your remove API call here
+    } else if (alertType === 'reset') {
+      console.log('Reset PIN confirmed');
+      navigation.navigate('ResetPinScreen', {
+        bank: selectedBank,
+        old_pin_code: '',
+        isCredit: false,
+        isNbfc: false,
+      });
+    }
+
+    setAlertVisible(false);
+  };
+
   useEffect(() => {
     if (route.params?.selectedBank) {
       const bank = route.params.selectedBank;
@@ -90,8 +111,8 @@ const BankBalanceScreen = () => {
       <Header
         title={
           linked_account
-            ? I18n.t('bank_details_title') || 'Bank Details'
-            : I18n.t('bank_balance_title') || 'Bank Balance'
+            ? I18n.t('bank_details_title')
+            : I18n.t('bank_balance_title')
         }
         onBack={() => navigation.goBack()}
       />
@@ -214,6 +235,48 @@ const BankBalanceScreen = () => {
           )}
         </Animated.View>
       </ScrollView>
+
+      {linked_account && (
+        <View style={styles.bottomButtons}>
+          <View style={{ flex: 1 }}>
+            <LineButton
+              title={I18n.t('reset_pin')}
+              onPress={() => {
+                setAlertType('reset');
+                setAlertVisible(true);
+              }}
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <LineButton
+              title={I18n.t('remove_account')}
+              onPress={() => {
+                setAlertType('remove');
+                setAlertVisible(true);
+              }}
+              style={{ borderColor: Colors.error }}
+              textStyle={{ color: Colors.error }}
+            />
+          </View>
+        </View>
+      )}
+      <CustomAlert
+        visible={alertVisible}
+        title={
+          alertType === 'remove'
+            ? I18n.t('remove_account')
+            : I18n.t('reset_pin')
+        }
+        message={
+          alertType === 'remove'
+            ? I18n.t('remove_account_message')
+            : I18n.t('reset_pin_message')
+        }
+        cancelText={I18n.t('cancel')}
+        confirmText={I18n.t('yes')}
+        onCancel={() => setAlertVisible(false)}
+        onConfirm={handleConfirm}
+      />
     </SafeAreaView>
   );
 };
@@ -323,6 +386,17 @@ const styles = StyleSheet.create({
   },
   detailAddress: {
     textAlign: 'right',
+  },
+  bottomButtons: {
+    position: 'absolute',
+    bottom: scaleUtils.scaleHeight(6),
+    left: scaleUtils.scaleWidth(16),
+    right: scaleUtils.scaleWidth(16),
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: scaleUtils.scaleHeight(10),
+    backgroundColor: 'transparent',
+    columnGap: scaleUtils.scaleWidth(10),
   },
 });
 
