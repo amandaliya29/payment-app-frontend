@@ -17,7 +17,8 @@ import I18n from '../../utils/language/i18n';
 import Button from '../../component/Button';
 import OTPInput from '../../component/OTPInput';
 import { Toast } from '../../utils/Toast';
-import { getPay } from '../../utils/apiHelper/Axios';
+import { getPay, PayToBank } from '../../utils/apiHelper/Axios';
+import ToBank from './ToBank';
 
 const TransactionPinScreen = () => {
   const navigation = useNavigation();
@@ -31,6 +32,8 @@ const TransactionPinScreen = () => {
     isViaUPI = false,
     note = '',
     creditUpiId = null,
+    isBankPay = false, // Add isBank parameter
+    bank_id = null,
   } = route.params || {};
 
   console.log(
@@ -46,6 +49,10 @@ const TransactionPinScreen = () => {
     note,
     'creditUpiId',
     creditUpiId,
+    'isBank',
+    isBankPay, // Add isBank parameter
+    'bank_id',
+    bank_id,
   );
 
   const [pin, setPin] = useState('');
@@ -88,14 +95,20 @@ const TransactionPinScreen = () => {
         payload.from_bank_account = bank.id;
       }
 
-      if (isViaUPI) {
-        payload.upi_id = user?.bank_account?.upi_id;
+      if (isBankPay) {
+        payload.to_bank_credit_upi = bank_id;
       } else {
-        payload.to_bank_account = user?.bank_account?.id;
+        if (isViaUPI) {
+          payload.upi_id = user?.bank_account?.upi_id;
+        } else {
+          payload.to_bank_account = user?.bank_account?.id;
+        }
       }
 
-      const response = await getPay(payload);
       console.log('payload', payload);
+      const response = isBankPay
+        ? await PayToBank(payload)
+        : await getPay(payload);
 
       if (!response?.data?.status) {
         showToast(response?.data?.messages || 'Transaction failed!');

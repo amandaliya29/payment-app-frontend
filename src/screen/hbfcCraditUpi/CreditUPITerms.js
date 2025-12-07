@@ -69,6 +69,9 @@ const CreditUPITerms = () => {
       const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
       const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
 
+      console.log("formattedPhone",formattedPhone);
+      
+
       setToast({ visible: true, message: 'OTP sent successfully' });
       navigation.navigate('HbfCreditUpiVerification', {
         verificationId: confirmation.verificationId,

@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   actionBtn3: {
-    width: '30%',
+    width: '30.5%',
     height: scaleUtils.scaleHeight(120),
     paddingVertical: scaleUtils.scaleHeight(16),
     borderRadius: scaleUtils.scaleWidth(12),

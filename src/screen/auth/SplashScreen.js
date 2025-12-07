@@ -1,5 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Animated, StyleSheet, useColorScheme } from 'react-native';
+import {
+  View,
+  Animated,
+  StyleSheet,
+  useColorScheme,
+  PermissionsAndroid,
+  Platform,
+} from 'react-native';
 import {
   CommonActions,
   useNavigation,
@@ -19,7 +26,31 @@ const SplashScreen = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.5)).current;
 
+  // 🔰 Ask all permissions (Camera, Audio, Notification)
+  const requestPermissions = async () => {
+    try {
+      const permissions = [
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+      ];
+
+      // Only Android 13+ needs POST_NOTIFICATIONS
+      if (Platform.Version >= 33) {
+        permissions.push(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+      }
+
+      const granted = await PermissionsAndroid.requestMultiple(permissions);
+
+      console.log('Permissions:', granted);
+    } catch (error) {
+      console.log('Permission error:', error);
+    }
+  };
+
   useEffect(() => {
+    // Ask app permissions first
+    requestPermissions();
+
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -57,7 +88,7 @@ const SplashScreen = () => {
       } else {
         navigation.replace('HomePage');
       }
-    }, 1200);
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, [navigation, notificationScreen]);

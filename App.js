@@ -55,7 +55,12 @@ const App = () => {
 
       const token = await getFCMToken();
       const userData = await getUserData();
-      if (token && userData?.user?.id) await updateFcmToken(token);
+      console.log('📱 App Init - userData:', userData);
+      console.log('📱 App Init - userData JSON:', JSON.stringify(userData));
+      
+      // Note: FCM token is already sent during login (OtpVerification.js line 67)
+      // We don't need to update it here on app start to avoid race conditions
+      // The token refresh handler below will handle FCM token updates
 
       // ✅ Foreground notification
       messaging().onMessage(async remoteMessage => {
@@ -89,7 +94,15 @@ const App = () => {
 
       // 🔹 Token refresh
       messaging().onTokenRefresh(async newToken => {
-        if (userData?.user?.id) await updateFcmToken(newToken);
+        console.log("Token refresh");
+        const currentUserData = await getUserData();
+        if (currentUserData?.token && currentUserData?.user?.id) {
+          try {
+            await updateFcmToken(newToken);
+          } catch (error) {
+            console.log('Failed to update FCM token on refresh:', error.message);
+          }
+        }
       });
 
       setFcmReady(true);

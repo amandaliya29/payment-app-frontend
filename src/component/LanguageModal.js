@@ -13,6 +13,8 @@ const LanguageModal = ({ visible, onClose }) => {
     { code: 'en', label: 'English' },
     { code: 'hi', label: 'हिन्दी' },
     { code: 'gu', label: 'ગુજરાતી' },
+    { code: 'mr', label: 'मराठी' },
+    { code: 'te', label: 'తెలుగు' },
   ];
 
   const selectLanguage = langCode => {

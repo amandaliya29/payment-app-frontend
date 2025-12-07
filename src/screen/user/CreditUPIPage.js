@@ -72,6 +72,7 @@ const CreditUPIPage = () => {
             const availableCredit = hasCreditUpi
               ? parseFloat(item.bank_credit_upi.available_credit)
               : 0;
+            const bank_id = item.bank_id;
             const usedCredit = creditLimit - availableCredit;
 
             return {
@@ -93,6 +94,7 @@ const CreditUPIPage = () => {
                 : null,
               status: isActive ? 'active' : isInactive ? 'inactive' : 'no_upi',
               bank_credit_upi: item.bank_credit_upi || null,
+              bank_id: bank_id,
             };
           });
 
@@ -229,6 +231,7 @@ const BankCard = memo(
     themeColors,
     bank_credit_upi,
     showToast,
+    bank_id,
   }) => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
@@ -249,6 +252,8 @@ const BankCard = memo(
           lastUsed,
           status,
           bankCreditUpiId: bank_credit_upi?.upi_id,
+          bank_id: bank_credit_upi?.id,
+          id,
         });
       } else {
         showToast('Bank is not active, cannot open details');

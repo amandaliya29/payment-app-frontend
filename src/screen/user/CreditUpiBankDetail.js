@@ -16,6 +16,7 @@ import scaleUtils from '../../utils/Responsive';
 import I18n from '../../utils/language/i18n';
 import Header from '../../component/Header';
 import * as Progress from 'react-native-progress';
+import CustomAlert from '../../component/CustomAlert';
 
 const CreditUpiBankDetail = () => {
   const navigation = useNavigation();
@@ -30,7 +31,14 @@ const CreditUpiBankDetail = () => {
     lastUsed,
     status,
     bankCreditUpiId,
+    bank_id,
+    credit_upi_id,
+    pin_code_length,
+    id,
+
   } = route.params || {};
+
+  const [alertVisible, setAlertVisible] = React.useState(false);
 
   const scheme = useColorScheme();
   const isDark = scheme === 'dark';
@@ -102,7 +110,17 @@ const CreditUpiBankDetail = () => {
 
           <View style={styles.buttonRow}>
             {['pay_now', 'view_transactions'].map(key => (
-              <TouchableOpacity key={key} style={styles.actionButton}>
+              <TouchableOpacity
+                key={key}
+                onPress={() => {
+                  key === 'pay_now'
+                    ? navigation.navigate('BankPayAmountScreen', {
+                        bankDetail: { bankLogo, bankName, bank_id },
+                      })
+                    : null;
+                }}
+                style={styles.actionButton}
+              >
                 <Text style={styles.actionText}>{I18n.t(key)}</Text>
               </TouchableOpacity>
             ))}
@@ -162,7 +180,43 @@ const CreditUpiBankDetail = () => {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* Reset PIN Button */}
       </ScrollView>
+
+      <CustomAlert
+        visible={alertVisible}
+        title={I18n.t('reset_pin')}
+        message={I18n.t('reset_pin_confirmation')}
+        onCancel={() => setAlertVisible(false)}
+        onConfirm={() => {
+          setAlertVisible(false);
+          console.log("bankCreditUpiId",id,);
+          
+          navigation.navigate('ResetPinScreen', {
+            bank: {
+              credit_upi_id: id,
+              pin_code_length: pin_code_length || 4,
+              bank_id: bank_id,
+            },
+            old_pin_code: '',
+            isCredit: true,
+            isNbfc: false,
+          });
+
+        }}
+        confirmText={I18n.t('yes')}
+        cancelText={I18n.t('no')}
+      />
+          <TouchableOpacity
+            style={[
+              styles.resetPinButton,
+              { backgroundColor: Colors.primary },
+            ]}
+            onPress={() => setAlertVisible(true)}
+          >
+            <Text style={styles.resetPinText}>{I18n.t('reset_pin')}</Text>
+          </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -324,5 +378,18 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  resetPinButton: {
+    marginBottom: scaleUtils.scaleHeight(10),
+    paddingVertical: scaleUtils.scaleHeight(8),
+    marginHorizontal: scaleUtils.scaleWidth(16),
+    borderRadius: scaleUtils.scaleWidth(8),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resetPinText: {
+    fontSize: scaleUtils.scaleFont(12),
+    color: Colors.white,
+    fontFamily: 'Poppins-Medium',
   },
 });
